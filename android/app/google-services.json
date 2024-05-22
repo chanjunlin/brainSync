@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "669544143843",
+    "project_id": "brainsync6325",
+    "storage_bucket": "brainsync6325.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:669544143843:android:b776510edddf65fa8f9ed6",
+        "android_client_info": {
+          "package_name": "com.example.brainsync"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA3hUG8AWkjXxlknxy3RRAej7xqkASsHsQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
