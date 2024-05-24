@@ -61,21 +61,33 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Widget _submitButton() {
-    return ElevatedButton(
+    return SizedBox(
+      width: 250,
+      child: FilledButton(
+        style: FilledButton.styleFrom(
+          backgroundColor: Colors.cyan,
+          foregroundColor: Colors.white,
+        ),
         onPressed:
           isLogin ? signInWithEmailAndPassword : createUserWithEmailAndPassword,
         child: Text(isLogin ? 'Login' : 'Register'),
+    ),
     );
   }
 
   Widget _loginOrRegisterButton() {
-    return ElevatedButton(
+    return TextButton(
       onPressed: () {
         setState(() {
           isLogin = !isLogin;
         });
       },
-      child: Text(isLogin ? 'Register' : 'Login'),
+      child: Text(isLogin ? 'Register here' : 'Login',
+      style: const TextStyle(
+        decoration: TextDecoration.underline,
+        color: Colors.cyan,
+      ),
+      ),
     );
   }
 
@@ -91,29 +103,31 @@ class _LoginPageState extends State<LoginPage> {
         centerTitle: true,
       ),
       body: Container(
-        height: double.infinity,
         width: double.infinity,
+        height: double.infinity,
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget> [
+              Image.asset("assets/img/study.png", alignment: Alignment.topCenter,),
+
             const Text("Log in to continue", style: TextStyle(
               fontSize: 30,
             ),),
             _entryField('email', _controllerEmail),
             _entryField('password', _controllerPassword),
             _errorMessage(),
+            const SizedBox(height: 150,),
+            _submitButton(),
             Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _submitButton(),
-              const SizedBox(width: 50,),
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+              const Text("Don't have an account?"),
               _loginOrRegisterButton(),
-            ],
+              ],
             ),
-            const Text("Don't have an account? Register instead"),
           ],
         ),
       ),
