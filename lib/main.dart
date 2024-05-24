@@ -1,4 +1,5 @@
 import 'package:brainsync/pages/login.dart';
+import 'package:brainsync/services/auth_service.dart';
 import 'package:brainsync/services/navigation_service.dart';
 import 'package:brainsync/utils.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -25,11 +26,14 @@ Future<void> setup() async {
 }
 
 class MyApp extends StatelessWidget {
+
   final GetIt _getIt = GetIt.instance;
   late NavigationService _navigationService;
+  late AuthService _authService;
 
   MyApp({super.key}) {
     _navigationService = _getIt.get<NavigationService>();
+    _authService = _getIt.get<AuthService>();
   }
 
   @override
@@ -43,7 +47,7 @@ class MyApp extends StatelessWidget {
         ),
         textTheme: GoogleFonts.montserratTextTheme(),
       ),
-      initialRoute: "/login",
+      initialRoute:_authService.user != null ? "/home" : "/login",
       routes: _navigationService.routes,
     );
   }

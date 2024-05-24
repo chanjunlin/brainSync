@@ -1,13 +1,14 @@
 import 'package:brainsync/pages/login.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:brainsync/pages/home.dart';
 
 class NavigationService {
   late GlobalKey<NavigatorState> _navigatorKey;
 
   final Map<String, Widget Function(BuildContext)> _routes = {
     "/login": (context) => LoginPage(),
-    // "/home": (context) => Home(),
+    "/home": (context) => Home(),
   };
 
   Map<String, Widget Function(BuildContext)> get routes {
