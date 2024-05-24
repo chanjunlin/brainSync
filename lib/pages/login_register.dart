@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:brainsync/auth.dart';
+import 'package:flutter/widgets.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key : key);
@@ -43,10 +44,6 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  Widget _title() {
-    return const Text('Firebase Auth');
-  }
-
   Widget _entryField(
     String title,
     TextEditingController controller,
@@ -72,13 +69,13 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Widget _loginOrRegisterButton() {
-    return TextButton(
+    return ElevatedButton(
       onPressed: () {
         setState(() {
           isLogin = !isLogin;
         });
       },
-      child: Text(isLogin ? 'Register instead' : 'Login instead'),
+      child: Text(isLogin ? 'Register' : 'Login'),
     );
   }
 
@@ -86,7 +83,12 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: _title(),
+        title: const Text("Welcome To BrainSync!", style: TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+        ),),
+        backgroundColor: const Color.fromARGB(255, 46, 108, 139),
+        centerTitle: true,
       ),
       body: Container(
         height: double.infinity,
@@ -96,11 +98,22 @@ class _LoginPageState extends State<LoginPage> {
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget> [
+            const Text("Log in to continue", style: TextStyle(
+              fontSize: 30,
+            ),),
             _entryField('email', _controllerEmail),
             _entryField('password', _controllerPassword),
             _errorMessage(),
-            _submitButton(),
-            _loginOrRegisterButton(),
+            Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _submitButton(),
+              const SizedBox(width: 50,),
+              _loginOrRegisterButton(),
+            ],
+            ),
+            const Text("Don't have an account? Register instead"),
           ],
         ),
       ),
