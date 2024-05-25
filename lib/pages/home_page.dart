@@ -12,7 +12,7 @@ class HomePage extends StatelessWidget {
   }
 
   Widget _title() {
-    return const Text('Firebase Authentication');
+    return const Text('homepage');
   }
 
   Widget _userUid() {
