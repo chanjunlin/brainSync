@@ -1,7 +1,10 @@
-import 'package:brainsync/pages/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:brainsync/auth.dart';
+import 'package:get_it/get_it.dart';
+
+import '../services/auth_service.dart';
+import '../services/navigation_service.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -12,7 +15,20 @@ class RegisterPage extends StatefulWidget {
 
 class _RegisterPageState extends State<RegisterPage> {
 
+  late AuthService _authService;
+  late NavigationService _navigationService;
+
+  final GetIt _getIt = GetIt.instance;
+
+  @override
+  void initState() {
+    super.initState();
+    _authService = _getIt.get<AuthService>();
+    _navigationService = _getIt.get<NavigationService>();
+  }
+
   String? errorMessage = '';
+
   final TextEditingController _controllerEmail = TextEditingController();
   final TextEditingController _controllerPassword = TextEditingController();
   final TextEditingController _controllerConfirmPassword = TextEditingController();
@@ -30,10 +46,7 @@ class _RegisterPageState extends State<RegisterPage> {
         email: _controllerEmail.text,
         password: _controllerPassword.text,
       );
-      Navigator.pushReplacement(
-        context, 
-        MaterialPageRoute(builder:(context) => HomePage()),
-      );
+      _navigationService.pushReplacementNamed("/login");
     } on FirebaseAuthException catch (e) {
       setState(() {
         errorMessage = 'Invalid email or password';
@@ -100,7 +113,7 @@ class _RegisterPageState extends State<RegisterPage> {
             children: [
               Image.asset("assets/img/study.png", alignment: Alignment.topCenter),
               const SizedBox(height: 20),
-              const Text("Hello! Register To Get Started", style: TextStyle(
+              const Text("Hello! Register an account!", style: TextStyle(
                 fontSize: 30
               ),
               ),

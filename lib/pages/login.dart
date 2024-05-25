@@ -15,6 +15,8 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   String? email, password;
+  String? errorMessage = '';
+  bool isLogin = true;
 
   final GetIt _getIt = GetIt.instance;
   final GlobalKey<FormState> _loginFormKey = GlobalKey();
@@ -32,26 +34,38 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // appBar: AppBar(
+      //   title: const Text(
+      //     "Welcome To BrainSync!",
+      //     style: TextStyle(
+      //       color: Colors.white,
+      //       fontWeight: FontWeight.bold,
+      //     ),
+      //   ),
+      //   backgroundColor: const Color.fromARGB(255, 46, 108, 139),
+      //   centerTitle: true,
+      // ),
       resizeToAvoidBottomInset: false,
       body: _buildUI(),
+
     );
   }
 
   Widget _buildUI() {
     return SafeArea(
-        child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 15.0,
-              vertical: 20.0,
-            ),
-          child: Column(
-            children: [
-              _headerText(),
-              _loginForm(),
-              _createAnAccount(),
-            ],
-          ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: 15.0,
+          vertical: 20.0,
         ),
+        child: Column(
+          children: [
+            _headerText(),
+            _loginForm(),
+            _createAnAccount(),
+          ],
+        ),
+      ),
     );
   }
 
@@ -63,21 +77,14 @@ class _LoginPageState extends State<LoginPage> {
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            "Hello",
+          const Text(
+            "Log in to continue",
             style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w800,
+              fontSize: 30,
             ),
           ),
-          Text(
-            "You've been missed",
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w500,
-              color: Colors.grey,
-            ),
-          ),
+          const SizedBox(height: 20),
+          Image.asset("assets/img/study.png", alignment: Alignment.topCenter),
         ],
       ),
     );
@@ -127,16 +134,14 @@ class _LoginPageState extends State<LoginPage> {
   Widget _loginButton() {
     return SizedBox(
       width: MediaQuery.sizeOf(context).width,
-      child: MaterialButton (
+      child: MaterialButton(
         onPressed: () async {
           if (_loginFormKey.currentState?.validate() ?? false) {
             _loginFormKey.currentState?.save();
             bool result = await _authService.login(email!, password!);
             if (result) {
               _navigationService.pushReplacementNamed("/home");
-            } else {
-
-            }
+            } else {}
           }
         },
         color: Theme.of(context).colorScheme.primary,
@@ -152,22 +157,33 @@ class _LoginPageState extends State<LoginPage> {
 
   Widget _createAnAccount() {
     return Expanded(
-        child: Row(
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            const Text("Don't have an account? "),
-            Text(
+      child: Row(
+        mainAxisSize: MainAxisSize.max,
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text('Don\'t have an account?'),
+          TextButton(
+            child: Text(
               "Sign Up",
               style: TextStyle(
                 fontWeight: FontWeight.w800,
               ),
-            )
-          ],
-        ),
+            ),
+            onPressed: () async {
+              _navigationService.pushNamed("/register");
+            },
+          )
+        ],
+      ),
     );
   }
+
+  Widget _errorMessage() {
+    return Text(errorMessage == '' ? '' : '$errorMessage',
+        style: const TextStyle(
+          color: Colors.red,
+          fontWeight: FontWeight.bold,
+        ));
+  }
 }
-
-

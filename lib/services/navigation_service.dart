@@ -1,4 +1,5 @@
 import 'package:brainsync/pages/login.dart';
+import 'package:brainsync/pages/register.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -7,7 +8,8 @@ class NavigationService {
 
   final Map<String, Widget Function(BuildContext)> _routes = {
     "/login": (context) => LoginPage(),
-    // "/home": (context) => Home(),
+    "/register": (context) => RegisterPage(),
+    // "/home": (context) => HomePage(),
   };
 
   Map<String, Widget Function(BuildContext)> get routes {
