@@ -16,6 +16,7 @@ class CustomFormField extends StatelessWidget {
     this.obscureText = false,
   });
 
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(

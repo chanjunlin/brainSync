@@ -5,9 +5,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:brainsync/navBar.dart';
 import 'package:flutter/services.dart';
+import 'package:get_it/get_it.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:http/http.dart' as http;
 import 'dart:core';
+
+import '../services/navigation_service.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -17,20 +20,37 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  int _selectedIndex = 0;
 
   final User? user = AuthService().currentUser;
-  List _items =[];
 
-  Future<void> getMods() async {
-    var url = await http.get(Uri.https("api.nusmods.com", "v2/2018-2019/modules/CS2040.json"));
-    var jsonData = await jsonDecode(url.body);
-    for (var mods in jsonData)
-      print(mods);
+  late AuthService _authService;
+  late NavigationService _navigationService;
+
+  final GetIt _getIt = GetIt.instance;
+
+  @override
+  void initState() {
+    super.initState();
+    // _authService = _getIt.get<AuthService>();
+    if (mounted) {
+      _navigationService = _getIt.get<NavigationService>();
+    }
   }
+
+  List _items = [];
+
+  // Future<void> getMods() async {
+  //   var url = await http.get(
+  //       Uri.https("api.nusmods.com", "v2/2018-2019/modules/CS2040.json"));
+  //   var jsonData = await jsonDecode(url.body);
+  //   for (var mods in jsonData)
+  //     print(mods);
+  // }
 
   @override
   Widget build(BuildContext context) {
-    getMods();
+    // getMods();
 
     return Scaffold(
       drawer: NavBar(),
@@ -71,8 +91,6 @@ class _HomeState extends State<Home> {
           Container(),
           Divider(),
           Container(),
-
-
         ],
       ),
       bottomNavigationBar: Container(
@@ -88,15 +106,32 @@ class _HomeState extends State<Home> {
             color: Colors.white,
             activeColor: Colors.white,
             gap: 8,
-            onTabChange: (index) {
-              print(index);
-            },
             tabs: [
-              GButton(icon: Icons.home, text: "Home"),
-              GButton(icon: Icons.chat, text: "Chats"),
-              GButton(icon: Icons.qr_code, text: "QR"),
-              GButton(icon: Icons.person_2, text: "Profile"),
+              GButton(
+                icon: Icons.home,
+                text: "Home",
+              ),
+              GButton(
+                icon: Icons.chat,
+                text: "Chats",
+                onPressed: () async {
+                  _navigationService.pushNamed("/home");
+                },),
+              GButton(
+                icon: Icons.qr_code,
+                text: "QR",
+                onPressed: () async {
+                  _navigationService.pushNamed("/profile");
+                },),
+              GButton(
+                icon: Icons.person_2,
+                text: "Profile",
+                onPressed: () async {
+                  _navigationService.pushNamed("/profile");
+                },
+              ),
             ],
+            selectedIndex: 0,
           ),
         ),
       ),
