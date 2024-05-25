@@ -1,7 +1,8 @@
+import 'package:brainsync/pages/register_page.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:brainsync/auth.dart';
-import 'package:flutter/widgets.dart';
+//import 'package:flutter/widgets.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key : key);
@@ -25,7 +26,7 @@ class _LoginPageState extends State<LoginPage> {
       );
     } on FirebaseAuthException catch (e) {
       setState(() {
-        errorMessage = e.message;
+        errorMessage = 'Invalid email or password';
       });
     }
 
@@ -39,7 +40,7 @@ class _LoginPageState extends State<LoginPage> {
       );
     } on FirebaseAuthException catch (e) {
       setState(() {
-        errorMessage = e.message;
+        errorMessage = 'Invalid email or password';
       });
     }
   }
@@ -47,17 +48,22 @@ class _LoginPageState extends State<LoginPage> {
   Widget _entryField(
     String title,
     TextEditingController controller,
+    {IconData? prefixIcon}
   ) {
     return TextField (
       controller: controller,
       decoration: InputDecoration(
         labelText: title,
+        prefixIcon: prefixIcon != null ? Icon(prefixIcon) : null,
       )
     );
   }
 
   Widget _errorMessage() {
-    return Text(errorMessage == '' ? '' : 'Humm ? $errorMessage');
+    return Text(errorMessage == '' ? '' :  '$errorMessage', style: const TextStyle(
+      color: Colors.red,
+      fontWeight: FontWeight.bold,
+    ));
   }
 
   Widget _submitButton() {
@@ -78,9 +84,10 @@ class _LoginPageState extends State<LoginPage> {
   Widget _loginOrRegisterButton() {
     return TextButton(
       onPressed: () {
-        setState(() {
-          isLogin = !isLogin;
-        });
+        Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const RegisterPage()),
+        );
       },
       child: Text(isLogin ? 'Register here' : 'Login',
       style: const TextStyle(
@@ -91,46 +98,55 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Welcome To BrainSync!", style: TextStyle(
+@override
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(
+      title: const Text(
+        "Welcome To BrainSync!",
+        style: TextStyle(
           color: Colors.white,
           fontWeight: FontWeight.bold,
-        ),),
-        backgroundColor: const Color.fromARGB(255, 46, 108, 139),
-        centerTitle: true,
+        ),
       ),
-      body: Container(
+      backgroundColor: const Color.fromARGB(255, 46, 108, 139),
+      centerTitle: true,
+    ),
+    body: SingleChildScrollView(
+      child: Container(
         width: double.infinity,
-        height: double.infinity,
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget> [
-              Image.asset("assets/img/study.png", alignment: Alignment.topCenter,),
-
-            const Text("Log in to continue", style: TextStyle(
-              fontSize: 30,
-            ),),
-            _entryField('email', _controllerEmail),
-            _entryField('password', _controllerPassword),
+          children: <Widget>[
+            Image.asset("assets/img/study.png", alignment: Alignment.topCenter),
+            const SizedBox(height: 20),
+            const Text(
+              "Log in to continue",
+              style: TextStyle(
+                fontSize: 30,
+              ),
+            ),
+            _entryField('email', _controllerEmail, prefixIcon: Icons.email),
+            _entryField('password', _controllerPassword, prefixIcon: Icons.lock),
             _errorMessage(),
-            const SizedBox(height: 150,),
+            const SizedBox(height: 60),
             _submitButton(),
+            const SizedBox(height: 20),
+            const SizedBox(height: 100,),
             Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-              const Text("Don't have an account?"),
-              _loginOrRegisterButton(),
+                const Text("Don't have an account?"),
+                _loginOrRegisterButton(),
               ],
             ),
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }
