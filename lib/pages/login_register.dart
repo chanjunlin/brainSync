@@ -1,6 +1,8 @@
+import 'package:brainsync/pages/register.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:brainsync/auth.dart';
+//import 'package:flutter/widgets.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key : key);
@@ -24,7 +26,7 @@ class _LoginPageState extends State<LoginPage> {
       );
     } on FirebaseAuthException catch (e) {
       setState(() {
-        errorMessage = e.message;
+        errorMessage = 'Invalid email or password';
       });
     }
 
@@ -38,72 +40,113 @@ class _LoginPageState extends State<LoginPage> {
       );
     } on FirebaseAuthException catch (e) {
       setState(() {
-        errorMessage = e.message;
+        errorMessage = 'Invalid email or password';
       });
     }
-  }
-
-  Widget _title() {
-    return const Text('Firebase Auth');
   }
 
   Widget _entryField(
     String title,
     TextEditingController controller,
+    {IconData? prefixIcon}
   ) {
     return TextField (
       controller: controller,
       decoration: InputDecoration(
         labelText: title,
+        prefixIcon: prefixIcon != null ? Icon(prefixIcon) : null,
       )
     );
   }
 
   Widget _errorMessage() {
-    return Text(errorMessage == '' ? '' : 'Humm ? $errorMessage');
+    return Text(errorMessage == '' ? '' :  '$errorMessage', style: const TextStyle(
+      color: Colors.red,
+      fontWeight: FontWeight.bold,
+    ));
   }
 
   Widget _submitButton() {
-    return ElevatedButton(
+    return SizedBox(
+      width: 250,
+      child: FilledButton(
+        style: FilledButton.styleFrom(
+          backgroundColor: Colors.cyan,
+          foregroundColor: Colors.white,
+        ),
         onPressed:
           isLogin ? signInWithEmailAndPassword : createUserWithEmailAndPassword,
         child: Text(isLogin ? 'Login' : 'Register'),
+    ),
     );
   }
 
   Widget _loginOrRegisterButton() {
     return TextButton(
       onPressed: () {
-        setState(() {
-          isLogin = !isLogin;
-        });
+        Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const RegisterPage()),
+        );
       },
-      child: Text(isLogin ? 'Register instead' : 'Login instead'),
+      child: Text(isLogin ? 'Register here' : 'Login',
+      style: const TextStyle(
+        decoration: TextDecoration.underline,
+        color: Colors.cyan,
+      ),
+      ),
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: _title(),
+@override
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(
+      title: const Text(
+        "Welcome To BrainSync!",
+        style: TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+        ),
       ),
-      body: Container(
-        height: double.infinity,
+      backgroundColor: const Color.fromARGB(255, 46, 108, 139),
+      centerTitle: true,
+    ),
+    body: SingleChildScrollView(
+      child: Container(
         width: double.infinity,
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget> [
-            _entryField('email', _controllerEmail),
-            _entryField('password', _controllerPassword),
+          children: <Widget>[
+            Image.asset("assets/img/study.png", alignment: Alignment.topCenter),
+            const SizedBox(height: 20),
+            const Text(
+              "Log in to continue",
+              style: TextStyle(
+                fontSize: 30,
+              ),
+            ),
+            _entryField('email', _controllerEmail, prefixIcon: Icons.email),
+            _entryField('password', _controllerPassword, prefixIcon: Icons.lock),
             _errorMessage(),
+            const SizedBox(height: 60),
             _submitButton(),
-            _loginOrRegisterButton(),
+            const SizedBox(height: 20),
+            const SizedBox(height: 100,),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text("Don't have an account?"),
+                _loginOrRegisterButton(),
+              ],
+            ),
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }

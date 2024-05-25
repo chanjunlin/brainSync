@@ -7,7 +7,6 @@ import 'package:get_it/get_it.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'firebase_options.dart';
 import 'package:flutter/material.dart';
-import 'package:brainsync/widget_tree.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 
 Future<void> main() async {
