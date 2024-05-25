@@ -2,7 +2,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
-import 'package:dot_navigation_bar/dot_navigation_bar.dart';
 
 import '../pages/home.dart';
 import '../pages/profile.dart';

@@ -141,7 +141,9 @@ class _LoginPageState extends State<LoginPage> {
             bool result = await _authService.login(email!, password!);
             if (result) {
               _navigationService.pushReplacementNamed("/home");
-            } else {}
+            } else {
+
+            }
           }
         },
         color: Theme.of(context).colorScheme.primary,

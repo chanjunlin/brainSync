@@ -45,7 +45,8 @@ class AuthService{
     }
   }
 
-  Future<void> createUserWithEmailAndPassword({
+  Future<void> createUser({
+    required String name,
     required String email,
     required String password,
   }) async {
@@ -54,4 +55,15 @@ class AuthService{
         password: password
     );
   }
+
+  Future<void> register(String name, String password, String email) async {
+    try {
+      UserCredential result = await _firebaseAuth.createUserWithEmailAndPassword(email: email, password: password);
+      User? user = result.user;
+      user?.updateDisplayName(name); //added this line
+    } catch(e) {
+      print("??");
+    }
+  }
+
 }

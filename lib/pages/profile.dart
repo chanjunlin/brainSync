@@ -59,7 +59,7 @@ class _ProfileState extends State<Profile> {
                 icon: Icons.home,
                 text: "Home",
                 onPressed: () async {
-                  _navigationService.pushNamed("/home");
+                  _navigationService.pushName("/home");
                 },
               ),
               GButton(

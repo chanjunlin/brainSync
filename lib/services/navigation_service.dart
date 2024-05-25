@@ -40,5 +40,25 @@ class NavigationService {
     _navigatorKey.currentState?.pop();
   }
 
+  Future<void> pushName(String routeName) async {
+    await _navigatorKey.currentState?.push(
+      PageRouteBuilder(
+        pageBuilder: (BuildContext context,
+            Animation<double> animation1,
+            Animation<double> animation2) {
+          // Use the route name to retrieve the corresponding widget builder
+          final pageBuilder = routes[routeName];
+          if (pageBuilder != null) {
+            return pageBuilder(context); // Call the builder function to get the widget
+          } else {
+            // Handle if the route name is not found in routes map
+            throw Exception('Route "$routeName" not found');
+          }
+        },
+        transitionDuration: Duration.zero,
+        reverseTransitionDuration: Duration.zero,
+      ),
+    );
+  }
 
 }

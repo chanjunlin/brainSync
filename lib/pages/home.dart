@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:brainsync/services/auth_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +9,7 @@ import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:http/http.dart' as http;
 import 'dart:core';
 
+import 'package:brainsync/pages/profile.dart';
 import '../services/navigation_service.dart';
 
 class Home extends StatefulWidget {
@@ -115,19 +115,23 @@ class _HomeState extends State<Home> {
                 icon: Icons.chat,
                 text: "Chats",
                 onPressed: () async {
-                  _navigationService.pushNamed("/home");
-                },),
+                  _navigationService.pushNamed(
+                    "/home",
+                  );
+                },
+              ),
               GButton(
                 icon: Icons.qr_code,
                 text: "QR",
                 onPressed: () async {
-                  _navigationService.pushNamed("/profile");
-                },),
+                  // _navigationService.pushNamed("/profile");
+                },
+              ),
               GButton(
                 icon: Icons.person_2,
                 text: "Profile",
                 onPressed: () async {
-                  _navigationService.pushNamed("/profile");
+                  _navigationService.pushName("/profile");
                 },
               ),
             ],
