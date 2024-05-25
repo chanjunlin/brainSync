@@ -42,7 +42,9 @@ class AuthService{
       _user = user;
     } else {
       _user = null;
-   
+    }
+  }
+
   Future<void> createUserWithEmailAndPassword({
     required String email,
     required String password,
