@@ -44,4 +44,14 @@ class AuthService{
       _user = null;
     }
   }
+
+  Future<void> createUserWithEmailAndPassword({
+    required String email,
+    required String password,
+  }) async {
+    await _firebaseAuth.createUserWithEmailAndPassword(
+        email: email,
+        password: password
+    );
+  }
 }
