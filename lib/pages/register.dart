@@ -1,7 +1,11 @@
+import 'dart:io';
+
 import 'package:brainsync/pages/form/form_header.dart';
+import 'package:brainsync/services/media_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
+import '../const.dart';
 import '../services/auth_service.dart';
 import '../services/navigation_service.dart';
 import 'package:brainsync/pages/form/signup_form.dart';
@@ -21,17 +25,21 @@ class _RegisterPageState extends State<RegisterPage> {
 
   late AuthService _authService;
   late NavigationService _navigationService;
+  late MediaService _mediaService;
+
+  File? selectedImage;
 
   @override
   void initState() {
     super.initState();
     _authService = _getIt.get<AuthService>();
     _navigationService = _getIt.get<NavigationService>();
+    _mediaService = _getIt.get<MediaService>();
   }
 
 
   String? errorMessage = '';
-
+  bool isLoading = false;
   @override
   Widget build(BuildContext context) {
 
@@ -91,4 +99,5 @@ class _RegisterPageState extends State<RegisterPage> {
       )),
     );
   }
+
 }

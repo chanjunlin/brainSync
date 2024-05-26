@@ -1,8 +1,9 @@
 import 'package:brainsync/auth.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-class AuthService{
+import 'alert_service.dart';
 
+class AuthService {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   User? _user;
 
@@ -17,24 +18,28 @@ class AuthService{
   AuthService() {}
 
   Future<bool> login(String email, String password) async {
-    try{
+    try {
       final credential = await _firebaseAuth.signInWithEmailAndPassword(
-          email: email,
-          password: password
-      );
+          email: email, password: password);
       if (credential.user != null) {
         _user = credential.user;
         print(_user);
         return true;
       }
-    } catch(e) {
+    } catch (e) {
       print(e);
     }
     return false;
   }
 
-  Future<void> signOut() async {
-    await _firebaseAuth.signOut();
+  Future<bool> signOut() async {
+    try {
+      await _firebaseAuth.signOut();
+      return true;
+    } catch (e) {
+
+    }
+    return false;
   }
 
   void authChangeStreamListener(User? user) {
@@ -51,19 +56,21 @@ class AuthService{
     required String password,
   }) async {
     await _firebaseAuth.createUserWithEmailAndPassword(
-        email: email,
-        password: password
-    );
+        email: email, password: password);
   }
 
-  Future<void> register(String name, String password, String email) async {
+  Future<String> register(String name, String password, String email) async {
     try {
-      UserCredential result = await _firebaseAuth.createUserWithEmailAndPassword(email: email, password: password);
-      User? user = result.user;
-      user?.updateDisplayName(name); //added this line
-    } catch(e) {
-      print("??");
+      UserCredential result = await _firebaseAuth
+          .createUserWithEmailAndPassword(email: email, password: password);
+      if (result.user != null) {
+        _user = result.user;
+        user?.updateDisplayName(name);
+        return "true";
+      }
+    } catch (e) {
+      return e.toString();
     }
+    return "false";
   }
-
 }

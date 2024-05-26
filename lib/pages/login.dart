@@ -1,7 +1,8 @@
 import 'package:brainsync/const.dart';
+import 'package:brainsync/services/alert_service.dart';
 import 'package:brainsync/services/auth_service.dart';
 import 'package:brainsync/services/navigation_service.dart';
-import 'package:brainsync/widgets/custom_form_field.dart';
+import 'package:brainsync/common_widgets/custom_form_field.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get_it/get_it.dart';
@@ -23,12 +24,14 @@ class _LoginPageState extends State<LoginPage> {
 
   late AuthService _authService;
   late NavigationService _navigationService;
+  late AlertService _alertService;
 
   @override
   void initState() {
     super.initState();
     _authService = _getIt.get<AuthService>();
     _navigationService = _getIt.get<NavigationService>();
+    _alertService = _getIt.get<AlertService>();
   }
 
   @override
@@ -47,7 +50,6 @@ class _LoginPageState extends State<LoginPage> {
       // ),
       resizeToAvoidBottomInset: false,
       body: _buildUI(),
-
     );
   }
 
@@ -104,7 +106,8 @@ class _LoginPageState extends State<LoginPage> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             CustomFormField(
-              hintText: "Email",
+              labelText: "Email",
+              hintText: "Enter a valid email",
               height: MediaQuery.sizeOf(context).height * 0.1,
               validationRegEx: EMAIL_VALIDATION_REGEX,
               onSaved: (value) {
@@ -114,7 +117,8 @@ class _LoginPageState extends State<LoginPage> {
               },
             ),
             CustomFormField(
-              hintText: "Password",
+              labelText: "Password",
+              hintText: "Enter a valid password",
               obscureText: true,
               height: MediaQuery.sizeOf(context).height * 0.1,
               validationRegEx: PASSWORD_VALIDATION_REGEX,
@@ -142,7 +146,10 @@ class _LoginPageState extends State<LoginPage> {
             if (result) {
               _navigationService.pushReplacementNamed("/home");
             } else {
-
+              _alertService.showToast(
+                text: "Invalid email or password!",
+                icon: Icons.error_outline_rounded ,
+              );
             }
           }
         },
@@ -164,16 +171,17 @@ class _LoginPageState extends State<LoginPage> {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text('Don\'t have an account?'),
-          TextButton(
+          Text('Don\'t have an account? '),
+          GestureDetector(
             child: Text(
               "Sign Up",
               style: TextStyle(
                 fontWeight: FontWeight.w800,
+                color: Colors.blue
               ),
             ),
-            onPressed: () async {
-              _navigationService.pushNamed("/register");
+            onTap: () async {
+              _navigationService.pushName("/register");
             },
           )
         ],

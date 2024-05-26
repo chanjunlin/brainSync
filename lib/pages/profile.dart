@@ -1,10 +1,19 @@
-import 'package:brainsync/widgets/bottomBar.dart';
+import 'dart:io';
+import 'dart:typed_data';
+
+import 'package:brainsync/common_widgets/bottomBar.dart';
+import 'package:brainsync/services/alert_service.dart';
+import 'package:brainsync/services/database_service.dart';
+import 'package:brainsync/services/media_service.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 
+import '../const.dart';
 import '../services/auth_service.dart';
 import '../services/navigation_service.dart';
+import '../services/storage_service.dart';
 
 class Profile extends StatefulWidget {
   const Profile({super.key});
@@ -17,9 +26,15 @@ class _ProfileState extends State<Profile> {
   final GetIt _getIt = GetIt.instance;
 
   int _selectedIndex = 0;
+  Uint8List? pickedImage;
+  File? selectedImage;
 
   late AuthService _authService;
   late NavigationService _navigationService;
+  late AlertService _alertService;
+  late MediaService _mediaService;
+  late StorageService _storageService;
+  late DatabaseService _databaseService;
 
   final double coverHeight = 280;
   final double profileHeight = 144;
@@ -29,6 +44,10 @@ class _ProfileState extends State<Profile> {
     super.initState();
     _authService = _getIt.get<AuthService>();
     _navigationService = _getIt.get<NavigationService>();
+    _alertService = _getIt.get<AlertService>();
+    _storageService = _getIt.get<StorageService>();
+    _mediaService = _getIt.get<MediaService>();
+    _databaseService = _getIt.get<DatabaseService>();
   }
 
   @override
@@ -122,9 +141,21 @@ class _ProfileState extends State<Profile> {
   }
 
   Widget buildProfileImage() {
-    return CircleAvatar(
-      radius: profileHeight / 2,
-      backgroundColor: Colors.grey,
+    return GestureDetector(
+      onTap: () async {
+        File? file = await _mediaService.pickImage();
+        if (file != null) {
+          setState(() {
+            selectedImage = file;
+          });
+        }
+      },
+      child: CircleAvatar(
+        radius: profileHeight / 2,
+        backgroundColor: Colors.grey,
+        backgroundImage:
+          UserProfile.pfpURL
+      ),
     );
   }
 
@@ -138,7 +169,31 @@ class _ProfileState extends State<Profile> {
         const SizedBox(height: 16),
         Divider(),
         const SizedBox(height: 16),
+        IconButton(
+            onPressed: () async {
+              bool result = await _authService.signOut();
+              if (result) {
+                _alertService.showToast(
+                  text: "Successfully logged out!",
+                  icon: Icons.check,
+                );
+                _navigationService.pushReplacementName("/login");
+              }
+            },
+            icon: Icon(Icons.logout),
+        ),
+        const SizedBox(height: 16),
+        IconButton(
+          onPressed: () async {
+            String? pfpURl = await _storageService.uploadUserProfile(
+                file: selectedImage!,
+                uid: _authService.user!.uid,
+            );
+          },
+          icon: Icon(Icons.save_alt),
+        ),
       ],
     );
   }
+
 }
