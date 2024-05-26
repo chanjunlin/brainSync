@@ -4,6 +4,7 @@ import 'package:brainsync/common_widgets/bottomBar.dart';
 import 'package:brainsync/pages/register.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import '../pages/chat.dart';
 import '../pages/profile.dart';
 
 class NavigationService {
@@ -14,6 +15,7 @@ class NavigationService {
     "/home": (context) => Home(),
     "/profile": (context) => Profile(),
     "/register": (context) => RegisterPage(),
+    "/chat": (context) => ChatPage(),
   };
 
   Map<String, Widget Function(BuildContext)> get routes {

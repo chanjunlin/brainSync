@@ -115,8 +115,8 @@ class _HomeState extends State<Home> {
                 icon: Icons.chat,
                 text: "Chats",
                 onPressed: () async {
-                  _navigationService.pushNamed(
-                    "/home",
+                  _navigationService.pushName(
+                    "/chat",
                   );
                 },
               ),

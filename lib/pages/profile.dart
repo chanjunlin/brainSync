@@ -85,7 +85,7 @@ class _ProfileState extends State<Profile> {
                 icon: Icons.chat,
                 text: "Chats",
                 onPressed: () async {
-                  _navigationService.pushNamed("/profile");
+                  _navigationService.pushName("/chat");
                 },
               ),
               GButton(
@@ -153,8 +153,9 @@ class _ProfileState extends State<Profile> {
       child: CircleAvatar(
         radius: profileHeight / 2,
         backgroundColor: Colors.grey,
-        backgroundImage:
-          UserProfile.pfpURL
+        backgroundImage: selectedImage != null
+        ? FileImage(selectedImage!)
+        : NetworkImage(PLACEHOLDER_PFP) as ImageProvider,
       ),
     );
   }

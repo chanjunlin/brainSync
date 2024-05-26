@@ -1,14 +1,22 @@
+import 'package:brainsync/auth.dart';
 import 'package:brainsync/model/user_profile.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
+
+import 'auth_service.dart';
 
 class DatabaseService {
   final FirebaseFirestore _firebaseFirestore = FirebaseFirestore.instance;
+  final GetIt _getIt = GetIt.instance;
 
   CollectionReference<UserProfile>? _usersCollection;
 
+  late AuthService _authService;
+
   DatabaseService() {
     setUpCollectionReferences();
+    _authService = _getIt.get<AuthService>();
   }
 
   void setUpCollectionReferences() {
@@ -26,5 +34,11 @@ class DatabaseService {
     } catch (e) {
       print('Error creating user profile: $e');
     }
+  }
+
+  Stream<QuerySnapshot<UserProfile>> getUserProfiles() {
+    return _usersCollection
+        ?.where("uid", isNotEqualTo: _authService.user!.uid)
+        .snapshots() as Stream<QuerySnapshot<UserProfile>>;
   }
 }
