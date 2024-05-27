@@ -18,7 +18,7 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
-  String? name,email,password;
+  String? name, email, password;
 
   final GetIt _getIt = GetIt.instance;
   final GlobalKey<FormState> _signupFormKey = GlobalKey();
@@ -37,12 +37,11 @@ class _RegisterPageState extends State<RegisterPage> {
     _mediaService = _getIt.get<MediaService>();
   }
 
-
   String? errorMessage = '';
   bool isLoading = false;
+
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -99,5 +98,4 @@ class _RegisterPageState extends State<RegisterPage> {
       )),
     );
   }
-
 }

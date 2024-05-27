@@ -11,6 +11,7 @@ class AlertService {
   final GetIt _getIt = GetIt.instance;
 
   late NavigationService _navigationService;
+
   AlertService() {
     _navigationService = _getIt.get<NavigationService>();
   }

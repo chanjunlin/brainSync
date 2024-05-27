@@ -30,14 +30,6 @@ class NavigationService {
     _navigatorKey = GlobalKey<NavigatorState>();
   }
 
-  void pushNamed(String routeName) {
-    _navigatorKey.currentState?.pushNamed(routeName);
-  }
-
-  void pushReplacementNamed(String routeName) {
-    _navigatorKey.currentState?.pushReplacementNamed(routeName);
-  }
-
   void goBack() {
     _navigatorKey.currentState?.pop();
   }
@@ -45,15 +37,12 @@ class NavigationService {
   Future<void> pushName(String routeName) async {
     await _navigatorKey.currentState?.push(
       PageRouteBuilder(
-        pageBuilder: (BuildContext context,
-            Animation<double> animation1,
+        pageBuilder: (BuildContext context, Animation<double> animation1,
             Animation<double> animation2) {
-          // Use the route name to retrieve the corresponding widget builder
           final pageBuilder = routes[routeName];
           if (pageBuilder != null) {
-            return pageBuilder(context); // Call the builder function to get the widget
+            return pageBuilder(context);
           } else {
-            // Handle if the route name is not found in routes map
             throw Exception('Route "$routeName" not found');
           }
         },
@@ -66,15 +55,12 @@ class NavigationService {
   Future<void> pushReplacementName(String routeName) async {
     await _navigatorKey.currentState?.pushReplacement(
       PageRouteBuilder(
-        pageBuilder: (BuildContext context,
-            Animation<double> animation1,
+        pageBuilder: (BuildContext context, Animation<double> animation1,
             Animation<double> animation2) {
-          // Use the route name to retrieve the corresponding widget builder
           final pageBuilder = routes[routeName];
           if (pageBuilder != null) {
-            return pageBuilder(context); // Call the builder function to get the widget
+            return pageBuilder(context);
           } else {
-            // Handle if the route name is not found in routes map
             throw Exception('Route "$routeName" not found');
           }
         },

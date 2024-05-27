@@ -26,5 +26,4 @@ class MediaService {
       print('No image selected.');
     }
   }
-
 }

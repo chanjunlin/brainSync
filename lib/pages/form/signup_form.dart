@@ -129,7 +129,7 @@ class _signUpFormState extends State<signUpForm> {
                             text: "Registered successfully!",
                             icon: Icons.check,
                           );
-                          _navigationService.pushReplacementNamed("/login");
+                          _navigationService.pushReplacementName("/login");
                         } else {
                           throw Exception("Unable to register user");
                         }

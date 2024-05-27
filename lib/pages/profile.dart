@@ -5,12 +5,15 @@ import 'package:brainsync/common_widgets/bottomBar.dart';
 import 'package:brainsync/services/alert_service.dart';
 import 'package:brainsync/services/database_service.dart';
 import 'package:brainsync/services/media_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 
 import '../const.dart';
+import '../model/user_profile.dart';
 import '../services/auth_service.dart';
 import '../services/navigation_service.dart';
 import '../services/storage_service.dart';
@@ -28,6 +31,7 @@ class _ProfileState extends State<Profile> {
   int _selectedIndex = 0;
   Uint8List? pickedImage;
   File? selectedImage;
+  String? userProfilePfp, name;
 
   late AuthService _authService;
   late NavigationService _navigationService;
@@ -48,7 +52,9 @@ class _ProfileState extends State<Profile> {
     _storageService = _getIt.get<StorageService>();
     _mediaService = _getIt.get<MediaService>();
     _databaseService = _getIt.get<DatabaseService>();
+    loadProfile();
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -92,7 +98,7 @@ class _ProfileState extends State<Profile> {
                 icon: Icons.qr_code,
                 text: "QR",
                 onPressed: () async {
-                  _navigationService.pushNamed("/profile");
+                  _navigationService.pushName("/profile");
                 },
               ),
               GButton(
@@ -155,7 +161,7 @@ class _ProfileState extends State<Profile> {
         backgroundColor: Colors.grey,
         backgroundImage: selectedImage != null
         ? FileImage(selectedImage!)
-        : NetworkImage(PLACEHOLDER_PFP) as ImageProvider,
+        : NetworkImage(userProfilePfp ?? PLACEHOLDER_PFP) as ImageProvider,
       ),
     );
   }
@@ -163,11 +169,18 @@ class _ProfileState extends State<Profile> {
   Widget buildContent() {
     return Column(
       children: [
-        const SizedBox(height: 8),
-        Text('Name'),
-        const SizedBox(height: 8),
+        const SizedBox(height: 10),
+        Text.rich(
+          TextSpan(
+            children: [
+              TextSpan(text: "Name: "),
+              TextSpan(text: "${name}"),
+            ],
+          ),
+        ),
+        const SizedBox(height: 10),
         Text('What Year'),
-        const SizedBox(height: 16),
+        const SizedBox(height: 10),
         Divider(),
         const SizedBox(height: 16),
         IconButton(
@@ -186,15 +199,32 @@ class _ProfileState extends State<Profile> {
         const SizedBox(height: 16),
         IconButton(
           onPressed: () async {
-            String? pfpURl = await _storageService.uploadUserProfile(
+            String? pfpURl = await _storageService.saveData(
                 file: selectedImage!,
                 uid: _authService.user!.uid,
             );
+            print("saved");
           },
           icon: Icon(Icons.save_alt),
         ),
       ],
     );
+  }
+
+  void loadProfile() async {
+    try {
+      DocumentSnapshot? userProfile = await _databaseService.fetchUser();
+      if (userProfile != null && userProfile.exists) {
+        setState(() {
+          userProfilePfp = userProfile.get('pfpURL') ?? PLACEHOLDER_PFP;
+          name = userProfile.get('name') ?? 'Name'; // Example field
+        });
+      } else {
+        print('User profile not found');
+      }
+    } catch (e) {
+      print('Error loading profile: $e');
+    }
   }
 
 }

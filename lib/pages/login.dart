@@ -144,7 +144,7 @@ class _LoginPageState extends State<LoginPage> {
             _loginFormKey.currentState?.save();
             bool result = await _authService.login(email!, password!);
             if (result) {
-              _navigationService.pushReplacementNamed("/home");
+              _navigationService.pushReplacementName("/home");
             } else {
               _alertService.showToast(
                 text: "Invalid email or password!",
