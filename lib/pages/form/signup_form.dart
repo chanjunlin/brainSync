@@ -122,7 +122,10 @@ class _signUpFormState extends State<signUpForm> {
                               userProfile: UserProfile(
                                   uid: _authService.user!.uid,
                                   name: name,
-                                  pfpURL: PLACEHOLDER_PFP),
+                                  pfpURL: PLACEHOLDER_PFP,
+                                  friendList: [],
+                                  friendReqList: [],
+                              ),
                           );
                           print("doggi");
                           _alertService.showToast(

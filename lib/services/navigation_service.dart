@@ -4,7 +4,7 @@ import 'package:brainsync/common_widgets/bottomBar.dart';
 import 'package:brainsync/pages/register.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import '../pages/chat.dart';
+import '../pages/chat_home.dart';
 import '../pages/profile.dart';
 
 class NavigationService {
@@ -15,7 +15,7 @@ class NavigationService {
     "/home": (context) => Home(),
     "/profile": (context) => Profile(),
     "/register": (context) => RegisterPage(),
-    "/chat": (context) => ChatPage(),
+    "/chat": (context) => ChatHomePage(),
   };
 
   Map<String, Widget Function(BuildContext)> get routes {
@@ -69,4 +69,18 @@ class NavigationService {
       ),
     );
   }
+
+  void push(MaterialPageRoute route) {
+    _navigatorKey.currentState?.push(
+      PageRouteBuilder(
+        pageBuilder: (BuildContext context, Animation<double> animation1,
+            Animation<double> animation2) {
+          return route.builder(context);
+        },
+        transitionDuration: Duration.zero,
+        reverseTransitionDuration: Duration.zero,
+      ),
+    );
+  }
+
 }
