@@ -45,6 +45,12 @@ class _ChatHomePageState extends State<ChatHomePage> {
         actions: [
           IconButton(
             onPressed: () {
+              _navigationService.pushName("/addFriends");
+            },
+            icon: Icon(Icons.add),
+          ),
+          IconButton(
+            onPressed: () {
               showSearch(
                 context: context,
                 delegate: CustomSearch(),

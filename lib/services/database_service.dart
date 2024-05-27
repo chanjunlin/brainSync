@@ -75,14 +75,12 @@ class DatabaseService {
   Future<void> createNewChat(String uid1, String uid2) async {
     String chatID = generateChatID(uid1: uid1, uid2: uid2);
     final docRef = _chatCollection!.doc(chatID);
-    final chat = Chat(
-        id: chatID,
-        participants: [uid1, uid2],
-        messages: []);
+    final chat = Chat(id: chatID, participants: [uid1, uid2], messages: []);
     await docRef.set(chat);
   }
 
-  Future<void> sendChatMessage(String uid1, String uid2, Message message) async {
+  Future<void> sendChatMessage(
+      String uid1, String uid2, Message message) async {
     String chatID = generateChatID(uid1: uid1, uid2: uid2);
     final docRef = _chatCollection!.doc(chatID);
     await docRef.update({
@@ -96,5 +94,21 @@ class DatabaseService {
     String chatID = generateChatID(uid1: uid1, uid2: uid2);
     final docRef = _chatCollection!.doc(chatID);
     return docRef.snapshots() as Stream<DocumentSnapshot<Chat>>;
+  }
+
+  Future<void> sendFriendRequest(String senderUid, String receiverUid) async {
+    await _firebaseFirestore.collection('users').doc(receiverUid).update({
+      'friendList': FieldValue.arrayUnion([senderUid]),
+      'friendReqList': FieldValue.arrayRemove([senderUid])
+    });
+    await _firebaseFirestore.collection('users').doc(senderUid).update({
+      'friendList': FieldValue.arrayUnion([receiverUid])
+    });
+  }
+
+  Future<void> rejectFriendRequest(String receiverUid, String senderUid) async {
+    await _firebaseFirestore.collection('users').doc(receiverUid).update({
+      'friendReqList': FieldValue.arrayRemove([senderUid])
+    });
   }
 }

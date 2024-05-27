@@ -29,3 +29,4 @@ class UserProfile {
     return data;
   }
 }
+

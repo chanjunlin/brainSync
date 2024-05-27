@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:brainsync/model/chat.dart';
 import 'package:brainsync/model/message.dart';
+import 'package:brainsync/pages/visiting_profile.dart';
 import 'package:brainsync/services/database_service.dart';
 import 'package:brainsync/services/storage_service.dart';
 import 'package:brainsync/utils.dart';
@@ -18,7 +19,7 @@ import 'dart:core';
 import '../services/media_service.dart';
 
 class ChatPage extends StatefulWidget {
-  final UserProfile chatUser; //user im talking to;
+  final UserProfile chatUser;
 
   const ChatPage({
     super.key,
@@ -37,7 +38,8 @@ class _ChatPageState extends State<ChatPage> {
   late MediaService _mediaService;
   late StorageService _storageService;
 
-  ChatUser? currentUser, otherUser;
+  late UserProfile otherUser;
+  ChatUser? currentUser, otherChatUser;
 
   @override
   void initState() {
@@ -51,20 +53,41 @@ class _ChatPageState extends State<ChatPage> {
       id: _authService.user!.uid,
       firstName: _authService.user!.displayName,
     );
-    otherUser = ChatUser(
-      id: widget.chatUser.uid!,
-      firstName: widget.chatUser.name,
-      profileImage: widget.chatUser.pfpURL,
-    );
+    otherUser = widget.chatUser;
+    otherChatUser = ChatUser(id: otherUser.uid!);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.chatUser.name!),
+        title: header(),
       ),
       body: _buildUI(),
+    );
+  }
+
+  Widget header() {
+    return Row(
+      children: [
+        GestureDetector(
+          child: CircleAvatar(
+            radius: 24, // adjust the size to fit your needs
+            backgroundImage: NetworkImage(widget.chatUser.pfpURL!),
+          ),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => VisitingProfile(
+                    userId: otherUser),
+              ),
+            );
+          },
+        ),
+        SizedBox(width: 16), // add some space between the avatar and the text
+        Text(widget.chatUser.name!),
+      ],
     );
   }
 
@@ -72,7 +95,7 @@ class _ChatPageState extends State<ChatPage> {
     return StreamBuilder(
         stream: _databaseService.getChatData(
           currentUser!.id,
-          otherUser!.id,
+          otherUser.uid!,
         ),
         builder: (context, snapshot) {
           Chat? chat = snapshot.data?.data();
@@ -110,7 +133,7 @@ class _ChatPageState extends State<ChatPage> {
           sentAt: Timestamp.fromDate(chatMessage.createdAt),
         );
         await _databaseService.sendChatMessage(
-            currentUser!.id, otherUser!.id, message);
+            currentUser!.id, otherUser.uid!, message);
       }
     } else {
       Message message = Message(
@@ -122,7 +145,7 @@ class _ChatPageState extends State<ChatPage> {
           ));
       await _databaseService.sendChatMessage(
         currentUser!.id,
-        otherUser!.id,
+        otherUser.uid!,
         message,
       );
     }
@@ -132,7 +155,7 @@ class _ChatPageState extends State<ChatPage> {
     List<ChatMessage> chatMessages = messages.map((m) {
       if (m.messageType == MessageType.Image) {
         return ChatMessage(
-          user: m.senderID == currentUser!.id ? currentUser! : otherUser!,
+          user: m.senderID == currentUser!.id ? currentUser! : otherChatUser!,
           createdAt: m.sentAt!.toDate(),
           medias: [
             ChatMedia(
@@ -145,7 +168,7 @@ class _ChatPageState extends State<ChatPage> {
       } else {
         return ChatMessage(
           text: m.content!,
-          user: m.senderID == currentUser!.id ? currentUser! : otherUser!,
+          user: m.senderID == currentUser!.id ? currentUser! : otherChatUser!,
           createdAt: m.sentAt!.toDate(),
         );
       }
@@ -163,7 +186,7 @@ class _ChatPageState extends State<ChatPage> {
         if (file != null) {
           String chatID = generateChatID(
             uid1: currentUser!.id,
-            uid2: otherUser!.id,
+            uid2: otherUser.uid!,
           );
           String? downloadURL = await _storageService.uploadImageToChat(
             file: file,
