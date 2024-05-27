@@ -109,7 +109,7 @@ Widget build(BuildContext context) {
           fontWeight: FontWeight.bold,
         ),
       ),
-      backgroundColor: const Color.fromARGB(255, 46, 108, 139),
+      backgroundColor: Theme.of(context).colorScheme.primary,
       centerTitle: true,
     ),
     body: SingleChildScrollView(

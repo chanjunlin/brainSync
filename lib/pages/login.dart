@@ -1,8 +1,12 @@
 import 'package:brainsync/const.dart';
+import 'package:brainsync/pages/forget_password.dart';
 import 'package:brainsync/services/auth_service.dart';
 import 'package:brainsync/services/navigation_service.dart';
 import 'package:brainsync/widgets/custom_form_field.dart';
+import 'package:dot_navigation_bar/dot_navigation_bar.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get_it/get_it.dart';
 
@@ -74,17 +78,20 @@ class _LoginPageState extends State<LoginPage> {
       width: MediaQuery.sizeOf(context).width,
       child: Column(
         mainAxisSize: MainAxisSize.max,
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           const Text(
-            "Log in to continue",
+            "Welcome Back!",
             style: TextStyle(
-              fontSize: 30,
+              fontSize: 30, 
+              fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 20),
-          Image.asset("assets/img/study.png", alignment: Alignment.topCenter),
+          const Text("Please sign in to continue", style: TextStyle(
+            color: Color.fromARGB(255, 77, 76, 76),
+          ),),
+          Image.asset("assets/img/study.png", alignment: Alignment.topCenter, ),
         ],
       ),
     );
@@ -125,11 +132,37 @@ class _LoginPageState extends State<LoginPage> {
               },
             ),
             _loginButton(),
+            _forgetPassword(),
           ],
         ),
       ),
     );
   }
+
+  Widget _forgetPassword() {
+    return Expanded(
+      child: Row(
+        mainAxisSize: MainAxisSize.max,
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          TextButton(
+            child: const Text("Forget Your Password?", style: TextStyle(
+              decoration: TextDecoration.underline,
+            ),),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ForgetPassword()),
+              );
+            },
+          )
+        ]
+      ),
+    );
+  }
+
+
 
   Widget _loginButton() {
     return SizedBox(
@@ -162,9 +195,9 @@ class _LoginPageState extends State<LoginPage> {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text('Don\'t have an account?'),
+          const Text('Don\'t have an account?'),
           TextButton(
-            child: Text(
+            child: const Text(
               "Sign Up",
               style: TextStyle(
                 fontWeight: FontWeight.w800,

@@ -14,6 +14,7 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
+  
 
   late AuthService _authService;
   late NavigationService _navigationService;
@@ -79,17 +80,22 @@ class _RegisterPageState extends State<RegisterPage> {
 
   Widget _submitButton() {
     return SizedBox(
-      width: 250,
+      width: MediaQuery.sizeOf(context).width,
       child: FilledButton(
         style: FilledButton.styleFrom(
-          backgroundColor: Colors.cyan,
+          backgroundColor: Theme.of(context).colorScheme.primary,
           foregroundColor: Colors.white,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.zero
+          )
         ),
         onPressed: createUserWithEmailAndPassword,
         child: const Text('Register'),
       ),
     );
   }
+
+  
 
   @override
   Widget build(BuildContext context) {
@@ -100,7 +106,7 @@ class _RegisterPageState extends State<RegisterPage> {
           fontWeight: FontWeight.bold,
         ),
       ),
-      backgroundColor: const Color.fromARGB(255, 46, 108, 139),
+      backgroundColor: Theme.of(context).colorScheme.primary,
       centerTitle: true,
       ),
       body: SingleChildScrollView(
@@ -111,12 +117,17 @@ class _RegisterPageState extends State<RegisterPage> {
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Image.asset("assets/img/study.png", alignment: Alignment.topCenter),
+              const Text("Register an account", style: TextStyle(
+                fontSize: 30,
+                fontWeight: FontWeight.bold,
+              ),
+              ),
+              const Text("create your account here", style: TextStyle(
+                color: Color.fromARGB(255, 77, 76, 76),
+              ),
+              ),
               const SizedBox(height: 20),
-              const Text("Hello! Register an account!", style: TextStyle(
-                fontSize: 30
-              ),
-              ),
+              Image.asset("assets/img/study.png", alignment: Alignment.topCenter),
               _entryField('email', _controllerEmail),
               _entryField('Password', _controllerPassword, obscureText: true),
               _entryField('Confirm Password', _controllerConfirmPassword, obscureText: true),
