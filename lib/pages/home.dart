@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'package:brainsync/services/auth_service.dart';
+import 'package:brainsync/services/database_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:brainsync/navBar.dart';
@@ -24,8 +26,11 @@ class _HomeState extends State<Home> {
 
   final User? user = AuthService().currentUser;
 
+  String? name;
+
   late AuthService _authService;
   late NavigationService _navigationService;
+  late DatabaseService _databaseService;
 
   final GetIt _getIt = GetIt.instance;
 
@@ -33,9 +38,9 @@ class _HomeState extends State<Home> {
   void initState() {
     super.initState();
     // _authService = _getIt.get<AuthService>();
-    if (mounted) {
-      _navigationService = _getIt.get<NavigationService>();
-    }
+    _navigationService = _getIt.get<NavigationService>();
+    _databaseService = _getIt.get<DatabaseService>();
+    loadProfile();
   }
 
   List _items = [];
@@ -75,7 +80,7 @@ class _HomeState extends State<Home> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text("Hi, ${user?.email}!"),
+                      Text("Hi, ${user?.displayName}!"),
                       SizedBox(height: 10),
                       Text("Welcome Back!"),
                     ],
@@ -140,5 +145,21 @@ class _HomeState extends State<Home> {
         ),
       ),
     );
+  }
+
+  void loadProfile() async {
+    try {
+      DocumentSnapshot? userProfile = await _databaseService.fetchUser();
+      if (userProfile != null && userProfile.exists) {
+        setState(() {
+          // userProfilePfp = userProfile.get('pfpURL') ?? PLACEHOLDER_PFP;
+          name = userProfile.get('name') ?? 'Name'; // Example field
+        });
+      } else {
+        print('User profile not found');
+      }
+    } catch (e) {
+      print('Error loading profile: $e');
+    }
   }
 }

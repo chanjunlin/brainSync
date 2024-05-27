@@ -1,14 +1,29 @@
-import 'package:brainsync/common_widgets/chat_tile.dart';
+import 'dart:io';
+
+import 'package:brainsync/model/chat.dart';
+import 'package:brainsync/model/message.dart';
 import 'package:brainsync/services/database_service.dart';
+import 'package:brainsync/services/storage_service.dart';
+import 'package:brainsync/utils.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:dash_chat_2/dash_chat_2.dart';
 import 'package:get_it/get_it.dart';
-import 'package:google_nav_bar/google_nav_bar.dart';
 
 import '../model/user_profile.dart';
-import '../services/navigation_service.dart';
+import '../services/auth_service.dart';
+
+import 'dart:core';
+
+import '../services/media_service.dart';
 
 class ChatPage extends StatefulWidget {
-  const ChatPage({super.key});
+  final UserProfile chatUser; //user im talking to;
+
+  const ChatPage({
+    super.key,
+    required this.chatUser,
+  });
 
   @override
   State<ChatPage> createState() => _ChatPageState();
@@ -17,111 +32,159 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> {
   final GetIt _getIt = GetIt.instance;
 
-  late NavigationService _navigationService;
+  late AuthService _authService;
   late DatabaseService _databaseService;
+  late MediaService _mediaService;
+  late StorageService _storageService;
+
+  ChatUser? currentUser, otherUser;
 
   @override
   void initState() {
     super.initState();
-    _navigationService = _getIt.get<NavigationService>();
+    _authService = _getIt.get<AuthService>();
     _databaseService = _getIt.get<DatabaseService>();
+    _mediaService = _getIt.get<MediaService>();
+    _storageService = _getIt.get<StorageService>();
+
+    currentUser = ChatUser(
+      id: _authService.user!.uid,
+      firstName: _authService.user!.displayName,
+    );
+    otherUser = ChatUser(
+      id: widget.chatUser.uid!,
+      firstName: widget.chatUser.name,
+      profileImage: widget.chatUser.pfpURL,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _buildUI(),
-      bottomNavigationBar: Container(
-        color: Colors.black,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 15,
-            vertical: 20,
-          ),
-          child: GNav(
-            backgroundColor: Colors.black,
-            tabBackgroundColor: Colors.grey,
-            color: Colors.white,
-            activeColor: Colors.white,
-            gap: 8,
-            tabs: [
-              GButton(
-                icon: Icons.home,
-                text: "Home",
-                onPressed: () async {
-                  _navigationService.pushName(
-                    "/home",
-                  );
-                },
-              ),
-              GButton(
-                icon: Icons.chat,
-                text: "Chats",
-              ),
-              GButton(
-                icon: Icons.qr_code,
-                text: "QR",
-                onPressed: () async {
-                  // _navigationService.pushNamed("/profile");
-                },
-              ),
-              GButton(
-                icon: Icons.person_2,
-                text: "Profile",
-                onPressed: () async {
-                  _navigationService.pushName("/profile");
-                },
-              ),
-            ],
-            selectedIndex: 1,
-          ),
-        ),
+      appBar: AppBar(
+        title: Text(widget.chatUser.name!),
       ),
+      body: _buildUI(),
     );
   }
 
   Widget _buildUI() {
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 15.0,
-          vertical: 20.0,
+    return StreamBuilder(
+        stream: _databaseService.getChatData(
+          currentUser!.id,
+          otherUser!.id,
         ),
-        child: _chatList(),
-      ),
-    );
+        builder: (context, snapshot) {
+          Chat? chat = snapshot.data?.data();
+          List<ChatMessage> messages = [];
+          if (chat != null && chat.messages != null) {
+            messages = _generateChatMessagesList(
+              chat.messages!,
+            );
+          }
+          return DashChat(
+            messageOptions: const MessageOptions(
+              showOtherUsersAvatar: true,
+              showTime: true,
+            ),
+            inputOptions: InputOptions(
+              alwaysShowSend: true,
+              trailing: [
+                mediaMessageButton(),
+              ],
+            ),
+            currentUser: currentUser!,
+            onSend: _sendMessage,
+            messages: messages,
+          );
+        });
   }
 
-  Widget _chatList() {
-    return StreamBuilder(
-      stream: _databaseService.getUserProfiles(),
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          return const Center(
-            child: Text("Unable to load data"),
-          );
-        }
-        print(snapshot.data);
-        if (snapshot.hasData && snapshot.data != null) {
-          final users = snapshot.data!.docs;
-          return ListView.builder(
-            itemCount: users.length,
-            itemBuilder: (context, index) {
-              UserProfile user = users[index].data();
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10.0),
-                child: ChatTile(
-                  userProfile: user,
-                  onTap: () {},
-                ),
-              );
-            },
-          );
-        }
-        return Center(
-          child: CircularProgressIndicator(),
+  Future<void> _sendMessage(ChatMessage chatMessage) async {
+    if (chatMessage.medias?.isNotEmpty ?? false) {
+      if (chatMessage.medias!.first.type == MediaType.image) {
+        Message message = Message(
+          senderID: chatMessage.user.id,
+          content: chatMessage.medias!.first.url,
+          messageType: MessageType.Image,
+          sentAt: Timestamp.fromDate(chatMessage.createdAt),
         );
+        await _databaseService.sendChatMessage(
+            currentUser!.id, otherUser!.id, message);
+      }
+    } else {
+      Message message = Message(
+          senderID: currentUser!.id,
+          content: chatMessage.text,
+          messageType: MessageType.Text,
+          sentAt: Timestamp.fromDate(
+            chatMessage.createdAt,
+          ));
+      await _databaseService.sendChatMessage(
+        currentUser!.id,
+        otherUser!.id,
+        message,
+      );
+    }
+  }
+
+  List<ChatMessage> _generateChatMessagesList(List<Message> messages) {
+    List<ChatMessage> chatMessages = messages.map((m) {
+      if (m.messageType == MessageType.Image) {
+        return ChatMessage(
+          user: m.senderID == currentUser!.id ? currentUser! : otherUser!,
+          createdAt: m.sentAt!.toDate(),
+          medias: [
+            ChatMedia(
+              url: m.content!,
+              fileName: "",
+              type: MediaType.image,
+            ),
+          ],
+        );
+      } else {
+        return ChatMessage(
+          text: m.content!,
+          user: m.senderID == currentUser!.id ? currentUser! : otherUser!,
+          createdAt: m.sentAt!.toDate(),
+        );
+      }
+    }).toList();
+    chatMessages.sort((a, b) {
+      return b.createdAt.compareTo(a.createdAt);
+    });
+    return chatMessages;
+  }
+
+  Widget mediaMessageButton() {
+    return IconButton(
+      onPressed: () async {
+        File? file = await _mediaService.getImageFromGallery();
+        if (file != null) {
+          String chatID = generateChatID(
+            uid1: currentUser!.id,
+            uid2: otherUser!.id,
+          );
+          String? downloadURL = await _storageService.uploadImageToChat(
+            file: file,
+            chatID: chatID,
+          );
+          if (downloadURL != null) {
+            ChatMessage chatMessage = ChatMessage(
+                user: currentUser!,
+                createdAt: DateTime.now(),
+                medias: [
+                  ChatMedia(
+                      url: downloadURL, fileName: "", type: MediaType.image),
+                ]);
+            _sendMessage(chatMessage);
+          }
+        }
       },
+      icon: Icon(
+        Icons.image,
+        color: Theme.of(context).colorScheme.primary,
+      ),
     );
   }
 }

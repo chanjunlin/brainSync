@@ -47,6 +47,7 @@ dependencies:
   delightful_toast: ^1.1.0
   image_picker: ^1.1.1
   cloud_firestore: ^4.17.4
+  dash_chat_2: ^0.0.20
 
 dev_dependencies:
   flutter_test:
