@@ -1,10 +1,14 @@
+import 'dart:io';
+
+import 'package:brainsync/pages/form/form_header.dart';
+import 'package:brainsync/services/media_service.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:brainsync/auth.dart';
 import 'package:get_it/get_it.dart';
 
+import '../const.dart';
 import '../services/auth_service.dart';
 import '../services/navigation_service.dart';
+import 'package:brainsync/pages/form/signup_form.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -14,130 +18,85 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
-  
+
+  String? name, email, password;
+
+  final GetIt _getIt = GetIt.instance;
+  final GlobalKey<FormState> _signupFormKey = GlobalKey();
 
   late AuthService _authService;
   late NavigationService _navigationService;
+  late MediaService _mediaService;
 
-  final GetIt _getIt = GetIt.instance;
+  File? selectedImage;
 
   @override
   void initState() {
     super.initState();
     _authService = _getIt.get<AuthService>();
     _navigationService = _getIt.get<NavigationService>();
+    _mediaService = _getIt.get<MediaService>();
   }
 
   String? errorMessage = '';
-
-  final TextEditingController _controllerEmail = TextEditingController();
-  final TextEditingController _controllerPassword = TextEditingController();
-  final TextEditingController _controllerConfirmPassword = TextEditingController();
-
-
-  Future<void> createUserWithEmailAndPassword() async {
-    if (_controllerPassword.text != _controllerConfirmPassword.text) {
-      setState(() {
-        errorMessage = 'Passwords do not match';
-      });
-      return;
-    }
-    try {
-      await Auth().createUserWithEmailAndPassword(
-        email: _controllerEmail.text,
-        password: _controllerPassword.text,
-      );
-      _navigationService.pushReplacementNamed("/login");
-    } on FirebaseAuthException catch (e) {
-      setState(() {
-        errorMessage = 'Invalid email or password';
-      });
-    }
-  }
-
-  Widget _entryField(
-    String title,
-    TextEditingController controller, {bool obscureText = false}
-    ) {
-    return TextField(
-      controller: controller,
-      obscureText: obscureText,
-      decoration: InputDecoration(
-        labelText: title,
-      ),
-    );
-  }
-
-  Widget _errorMessage() {
-    return Text(
-      errorMessage == '' ? '' : '$errorMessage',
-      style: const TextStyle(
-        color: Colors.red,
-        fontWeight: FontWeight.bold,
-      ),
-    );
-  }
-
-  Widget _submitButton() {
-    return SizedBox(
-      width: MediaQuery.sizeOf(context).width,
-      child: FilledButton(
-        style: FilledButton.styleFrom(
-          backgroundColor: Theme.of(context).colorScheme.primary,
-          foregroundColor: Colors.white,
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.zero
-          )
-        ),
-        onPressed: createUserWithEmailAndPassword,
-        child: const Text('Register'),
-      ),
-    );
-  }
-
-  
+  bool isLoading = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Welcome to BrainSync", style: TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      backgroundColor: Theme.of(context).colorScheme.primary,
-      centerTitle: true,
-      ),
-      body: SingleChildScrollView(
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text("Register an account", style: TextStyle(
-                fontSize: 30,
-                fontWeight: FontWeight.bold,
-              ),
-              ),
-              const Text("create your account here", style: TextStyle(
-                color: Color.fromARGB(255, 77, 76, 76),
-              ),
-              ),
-              const SizedBox(height: 20),
-              Image.asset("assets/img/study.png", alignment: Alignment.topCenter),
-              _entryField('email', _controllerEmail),
-              _entryField('Password', _controllerPassword, obscureText: true),
-              _entryField('Confirm Password', _controllerConfirmPassword, obscureText: true),
-              _errorMessage(),
-              const SizedBox(height: 50,),
-              _submitButton(),
-            ],
+        appBar: AppBar(
+          title: const Text(
+            "Welcome to BrainSync!",
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-        )
-      ),
+          backgroundColor: const Color.fromARGB(255, 46, 108, 139),
+          centerTitle: true,
+        ),
+        body: SingleChildScrollView(
+            child: Container(
+              padding: const EdgeInsets.all(30),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  FormHeader(
+                    image: Image.asset("assets/img/study.png"),
+                    title: 'Get on board!',
+                    subTitle: 'Create your profile to start your journey',
+                  ),
+                  signUpForm(),
+                  Column(
+                    children: [
+                      const Text('OR'),
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          onPressed: () {},
+                          icon: Icon(Icons.email),
+                          label: Text("Sign-In with Google"),
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          _navigationService.pushName("/login");
+                        },
+                        child: Text.rich(
+                          TextSpan(
+                            children: [
+                              TextSpan(text: "Already have an account? "),
+                              TextSpan(text: "Login"),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            )),
     );
   }
 }

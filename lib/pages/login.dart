@@ -2,9 +2,12 @@ import 'package:brainsync/const.dart';
 import 'package:brainsync/pages/forget_password.dart';
 import 'package:brainsync/services/auth_service.dart';
 import 'package:brainsync/services/navigation_service.dart';
-import 'package:brainsync/widgets/custom_form_field.dart';
 import 'package:dot_navigation_bar/dot_navigation_bar.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:brainsync/services/alert_service.dart';
+import 'package:brainsync/services/auth_service.dart';
+import 'package:brainsync/services/navigation_service.dart';
+import 'package:brainsync/common_widgets/custom_form_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -27,12 +30,14 @@ class _LoginPageState extends State<LoginPage> {
 
   late AuthService _authService;
   late NavigationService _navigationService;
+  late AlertService _alertService;
 
   @override
   void initState() {
     super.initState();
     _authService = _getIt.get<AuthService>();
     _navigationService = _getIt.get<NavigationService>();
+    _alertService = _getIt.get<AlertService>();
   }
 
   @override
@@ -51,7 +56,6 @@ class _LoginPageState extends State<LoginPage> {
       // ),
       resizeToAvoidBottomInset: false,
       body: _buildUI(),
-
     );
   }
 
@@ -84,14 +88,20 @@ class _LoginPageState extends State<LoginPage> {
           const Text(
             "Welcome Back!",
             style: TextStyle(
-              fontSize: 30, 
+              fontSize: 30,
               fontWeight: FontWeight.bold,
             ),
           ),
-          const Text("Please sign in to continue", style: TextStyle(
-            color: Color.fromARGB(255, 77, 76, 76),
-          ),),
-          Image.asset("assets/img/study.png", alignment: Alignment.topCenter, ),
+          const Text(
+            "Please sign in to continue",
+            style: TextStyle(
+              color: Color.fromARGB(255, 77, 76, 76),
+            ),
+          ),
+          Image.asset(
+            "assets/img/study.png",
+            alignment: Alignment.topCenter,
+          ),
         ],
       ),
     );
@@ -111,7 +121,8 @@ class _LoginPageState extends State<LoginPage> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             CustomFormField(
-              hintText: "Email",
+              labelText: "Email",
+              hintText: "Enter a valid email",
               height: MediaQuery.sizeOf(context).height * 0.1,
               validationRegEx: EMAIL_VALIDATION_REGEX,
               onSaved: (value) {
@@ -121,7 +132,8 @@ class _LoginPageState extends State<LoginPage> {
               },
             ),
             CustomFormField(
-              hintText: "Password",
+              labelText: "Password",
+              hintText: "Enter a valid password",
               obscureText: true,
               height: MediaQuery.sizeOf(context).height * 0.1,
               validationRegEx: PASSWORD_VALIDATION_REGEX,
@@ -142,27 +154,28 @@ class _LoginPageState extends State<LoginPage> {
   Widget _forgetPassword() {
     return Expanded(
       child: Row(
-        mainAxisSize: MainAxisSize.max,
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          TextButton(
-            child: const Text("Forget Your Password?", style: TextStyle(
-              decoration: TextDecoration.underline,
-            ),),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const ForgetPassword()),
-              );
-            },
-          )
-        ]
-      ),
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            TextButton(
+              child: const Text(
+                "Forget Your Password?",
+                style: TextStyle(
+                  decoration: TextDecoration.underline,
+                ),
+              ),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const ForgetPassword()),
+                );
+              },
+            )
+          ]),
     );
   }
-
-
 
   Widget _loginButton() {
     return SizedBox(
@@ -173,8 +186,13 @@ class _LoginPageState extends State<LoginPage> {
             _loginFormKey.currentState?.save();
             bool result = await _authService.login(email!, password!);
             if (result) {
-              _navigationService.pushReplacementNamed("/home");
-            } else {}
+              _navigationService.pushReplacementName("/home");
+            } else {
+              _alertService.showToast(
+                text: "Invalid email or password!",
+                icon: Icons.error_outline_rounded,
+              );
+            }
           }
         },
         color: Theme.of(context).colorScheme.primary,
@@ -195,16 +213,14 @@ class _LoginPageState extends State<LoginPage> {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          const Text('Don\'t have an account?'),
-          TextButton(
-            child: const Text(
+          Text('Don\'t have an account? '),
+          GestureDetector(
+            child: Text(
               "Sign Up",
-              style: TextStyle(
-                fontWeight: FontWeight.w800,
-              ),
+              style: TextStyle(fontWeight: FontWeight.w800, color: Colors.blue),
             ),
-            onPressed: () async {
-              _navigationService.pushNamed("/register");
+            onTap: () async {
+              _navigationService.pushName("/register");
             },
           )
         ],
