@@ -17,6 +17,7 @@ import '../model/user_profile.dart';
 import '../services/auth_service.dart';
 import '../services/navigation_service.dart';
 import '../services/storage_service.dart';
+import 'post.dart';
 
 class Profile extends StatefulWidget {
   const Profile({super.key});
@@ -95,10 +96,13 @@ class _ProfileState extends State<Profile> {
                 },
               ),
               GButton(
-                icon: Icons.qr_code,
-                text: "QR",
-                onPressed: () async {
-                  _navigationService.pushName("/profile");
+                icon: Icons.add,
+                text: "Create",
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => PostsPage()),
+                  );
                 },
               ),
               GButton(

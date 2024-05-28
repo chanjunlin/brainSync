@@ -10,6 +10,8 @@ import '../model/user_profile.dart';
 import '../services/navigation_service.dart';
 import 'package:brainsync/pages/chat.dart';
 
+import 'post.dart';
+
 class ChatHomePage extends StatefulWidget {
   const ChatHomePage({super.key});
 
@@ -89,10 +91,13 @@ class _ChatHomePageState extends State<ChatHomePage> {
                 text: "Chats",
               ),
               GButton(
-                icon: Icons.qr_code,
-                text: "QR",
-                onPressed: () async {
-                  // _navigationService.pushNamed("/profile");
+                icon: Icons.add,
+                text: "Create",
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => PostsPage()),
+                  );
                 },
               ),
               GButton(

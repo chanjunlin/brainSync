@@ -13,6 +13,7 @@ import 'dart:core';
 
 import 'package:brainsync/pages/profile.dart';
 import '../services/navigation_service.dart';
+import 'post.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -126,10 +127,13 @@ class _HomeState extends State<Home> {
                 },
               ),
               GButton(
-                icon: Icons.qr_code,
-                text: "QR",
-                onPressed: () async {
-                  // _navigationService.pushNamed("/profile");
+                icon: Icons.add,
+                text: "Create",
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => PostsPage()),
+                  );
                 },
               ),
               GButton(
