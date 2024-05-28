@@ -40,7 +40,7 @@ class _VisitingProfileState extends State<VisitingProfile> {
     );
     otherUser = ChatUser(
       id: widget.userId.uid!,
-      firstName: widget.userId.name,
+      firstName: widget.userId.firstName!,
       profileImage: widget.userId.pfpURL,
     );
   }
@@ -54,6 +54,7 @@ class _VisitingProfileState extends State<VisitingProfile> {
       body: FutureBuilder<DocumentSnapshot>(
         future: _firestore.collection('users').doc(widget.userId!.uid).get(),
         builder: (context, snapshot) {
+          print("one");
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
           }
@@ -64,7 +65,12 @@ class _VisitingProfileState extends State<VisitingProfile> {
             return Center(child: Text('User not found'));
           }
 
+          print('two');
+          print(currentUser!.id);
+          print(otherUser!.id);
           var userData = snapshot.data!.data() as Map<String, dynamic>;
+          String? pfpURL = userData['pfpURL'];
+          String? firstName = userData['firstName'];
           return Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -76,7 +82,7 @@ class _VisitingProfileState extends State<VisitingProfile> {
                 ),
                 SizedBox(height: 16),
                 Text(
-                  userData['name'],
+                  userData['firstName'],
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
                 SizedBox(height: 16),

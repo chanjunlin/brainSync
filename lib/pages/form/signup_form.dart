@@ -23,6 +23,7 @@ class signUpForm extends StatefulWidget {
 
 class _signUpFormState extends State<signUpForm> {
   String? name,email,password, repassword;
+  List<String>? friendList, friendReqList;
 
   final GetIt _getIt = GetIt.instance;
   final GlobalKey<FormState> _signupFormKey = GlobalKey();
@@ -121,10 +122,11 @@ class _signUpFormState extends State<signUpForm> {
                           await _databaseService.createUserProfile(
                               userProfile: UserProfile(
                                   uid: _authService.user!.uid,
-                                  name: name,
+                                  firstName: name,
+                                  lastName: "doggie",
                                   pfpURL: PLACEHOLDER_PFP,
-                                  friendList: [],
-                                  friendReqList: [],
+                                  friendList: friendList,
+                                  friendReqList: friendReqList,
                               ),
                           );
                           print("doggi");

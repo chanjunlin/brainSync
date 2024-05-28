@@ -153,7 +153,7 @@ class _HomeState extends State<Home> {
       if (userProfile != null && userProfile.exists) {
         setState(() {
           // userProfilePfp = userProfile.get('pfpURL') ?? PLACEHOLDER_PFP;
-          name = userProfile.get('name') ?? 'Name'; // Example field
+          name = userProfile.get('firstName') ?? 'Name'; // Example field
         });
       } else {
         print('User profile not found');

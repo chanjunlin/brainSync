@@ -86,7 +86,7 @@ class _ChatPageState extends State<ChatPage> {
           },
         ),
         SizedBox(width: 16), // add some space between the avatar and the text
-        Text(widget.chatUser.name!),
+        Text(widget.chatUser.firstName!),
       ],
     );
   }

@@ -24,7 +24,7 @@ class ChatTile extends StatelessWidget {
         backgroundImage: NetworkImage(userProfile.pfpURL!),
       ),
       title: Text(
-        userProfile.name!,
+        userProfile.firstName!,
       ),
     );
   }

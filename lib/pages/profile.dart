@@ -32,6 +32,7 @@ class _ProfileState extends State<Profile> {
   Uint8List? pickedImage;
   File? selectedImage;
   String? userProfilePfp, name;
+  List? friendReqList;
 
   late AuthService _authService;
   late NavigationService _navigationService;
@@ -54,7 +55,6 @@ class _ProfileState extends State<Profile> {
     _databaseService = _getIt.get<DatabaseService>();
     loadProfile();
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -160,8 +160,8 @@ class _ProfileState extends State<Profile> {
         radius: profileHeight / 2,
         backgroundColor: Colors.grey,
         backgroundImage: selectedImage != null
-        ? FileImage(selectedImage!)
-        : NetworkImage(userProfilePfp ?? PLACEHOLDER_PFP) as ImageProvider,
+            ? FileImage(selectedImage!)
+            : NetworkImage(userProfilePfp ?? PLACEHOLDER_PFP) as ImageProvider,
       ),
     );
   }
@@ -184,30 +184,78 @@ class _ProfileState extends State<Profile> {
         Divider(),
         const SizedBox(height: 16),
         IconButton(
-            onPressed: () async {
-              bool result = await _authService.signOut();
-              if (result) {
-                _alertService.showToast(
-                  text: "Successfully logged out!",
-                  icon: Icons.check,
-                );
-                _navigationService.pushReplacementName("/login");
-              }
-            },
-            icon: Icon(Icons.logout),
+          onPressed: () async {
+            bool result = await _authService.signOut();
+            if (result) {
+              _alertService.showToast(
+                text: "Successfully logged out!",
+                icon: Icons.check,
+              );
+              _navigationService.pushReplacementName("/login");
+            }
+          },
+          icon: Icon(Icons.logout),
         ),
         const SizedBox(height: 16),
         IconButton(
           onPressed: () async {
             String? pfpURl = await _storageService.saveData(
-                file: selectedImage!,
-                uid: _authService.user!.uid,
+              file: selectedImage!,
+              uid: _authService.user!.uid,
             );
             print("saved");
           },
           icon: Icon(Icons.save_alt),
         ),
+        const SizedBox(height: 10),
+        buildFriendReqSection(),
       ],
+    );
+  }
+
+  Widget buildFriendReqSection() {
+    if (friendReqList == null) {
+      return Container();
+    }
+    return Column(
+      children:
+          friendReqList!.map((uid) => buildFriendRequestTile(uid)).toList(),
+    );
+  }
+
+  Widget buildFriendRequestTile(String uid) {
+    return FutureBuilder<DocumentSnapshot<Object?>>(
+      future: _databaseService.getUserProfile(uid),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return CircularProgressIndicator();
+        }
+        if (snapshot.hasError) {
+          return Text('Error: ${snapshot.error}');
+        }
+        if (!snapshot.hasData || !snapshot.data!.exists) {
+          return Text('User not found');
+        }
+
+        var userData = snapshot.data!.data() as Map<String, dynamic>;
+
+        return ListTile(
+          leading: CircleAvatar(
+            backgroundImage: NetworkImage(userData['pfpURL']),
+          ),
+          title: Text(userData['firstName']),
+          trailing: IconButton(
+            icon: Icon(Icons.check),
+            onPressed: () async {
+              await _databaseService.acceptFriendRequest(
+                  uid, _authService.user!.uid);
+              setState(() {
+                friendReqList!.remove(uid);
+              });
+            },
+          ),
+        );
+      },
     );
   }
 
@@ -217,7 +265,8 @@ class _ProfileState extends State<Profile> {
       if (userProfile != null && userProfile.exists) {
         setState(() {
           userProfilePfp = userProfile.get('pfpURL') ?? PLACEHOLDER_PFP;
-          name = userProfile.get('name') ?? 'Name'; // Example field
+          name = userProfile.get('firstName') ?? 'Name'; // Example field
+          friendReqList = userProfile.get("friendReqList") ?? [];
         });
       } else {
         print('User profile not found');
@@ -226,5 +275,4 @@ class _ProfileState extends State<Profile> {
       print('Error loading profile: $e');
     }
   }
-
 }
