@@ -1,6 +1,7 @@
 import 'package:brainsync/pages/home.dart';
 import 'package:brainsync/pages/login.dart';
 import 'package:brainsync/common_widgets/bottomBar.dart';
+import 'package:brainsync/pages/post.dart';
 import 'package:brainsync/pages/register.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
