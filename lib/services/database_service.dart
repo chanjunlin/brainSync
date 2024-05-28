@@ -57,6 +57,10 @@ class DatabaseService {
     }
   }
 
+  Future<DocumentSnapshot<Object?>> getUserProfile(String uid) async {
+    return await _firebaseFirestore.collection('users').doc(uid).get();
+  }
+
   Stream<QuerySnapshot<UserProfile>> getUserProfiles() {
     return _usersCollection
         ?.where("uid", isNotEqualTo: _authService.user!.uid)
@@ -75,14 +79,12 @@ class DatabaseService {
   Future<void> createNewChat(String uid1, String uid2) async {
     String chatID = generateChatID(uid1: uid1, uid2: uid2);
     final docRef = _chatCollection!.doc(chatID);
-    final chat = Chat(
-        id: chatID,
-        participants: [uid1, uid2],
-        messages: []);
+    final chat = Chat(id: chatID, participants: [uid1, uid2], messages: []);
     await docRef.set(chat);
   }
 
-  Future<void> sendChatMessage(String uid1, String uid2, Message message) async {
+  Future<void> sendChatMessage(
+      String uid1, String uid2, Message message) async {
     String chatID = generateChatID(uid1: uid1, uid2: uid2);
     final docRef = _chatCollection!.doc(chatID);
     await docRef.update({
@@ -96,5 +98,36 @@ class DatabaseService {
     String chatID = generateChatID(uid1: uid1, uid2: uid2);
     final docRef = _chatCollection!.doc(chatID);
     return docRef.snapshots() as Stream<DocumentSnapshot<Chat>>;
+  }
+
+  Future<void> sendFriendRequest(String senderUid, String receiverUid) async {
+    await _firebaseFirestore.collection('users').doc(receiverUid).update({
+      'friendReqList': FieldValue.arrayUnion([senderUid])
+    });
+  }
+
+  Future<void> rejectFriendRequest(String receiverUid, String senderUid) async {
+    await _firebaseFirestore.collection('users').doc(receiverUid).update({
+      'friendReqList': FieldValue.arrayRemove([senderUid])
+    });
+  }
+
+  Future<void> acceptFriendRequest(String senderUid, String receiverUid) async {
+    DocumentReference senderDoc = _firebaseFirestore.collection('users').doc(senderUid);
+    DocumentReference receiverDoc = _firebaseFirestore.collection('users').doc(receiverUid);
+
+    await _firebaseFirestore.runTransaction((transaction) async {
+      DocumentSnapshot senderSnapshot = await transaction.get(senderDoc);
+      DocumentSnapshot receiverSnapshot = await transaction.get(receiverDoc);
+
+      transaction.update(senderDoc, {
+        'friendList': FieldValue.arrayUnion([receiverUid])
+      });
+
+      transaction.update(receiverDoc, {
+        'friendList': FieldValue.arrayUnion([senderUid]),
+        'friendReqList': FieldValue.arrayRemove([senderUid])
+      });
+    });
   }
 }

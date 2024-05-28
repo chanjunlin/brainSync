@@ -45,6 +45,12 @@ class _ChatHomePageState extends State<ChatHomePage> {
         actions: [
           IconButton(
             onPressed: () {
+              _navigationService.pushName("/addFriends");
+            },
+            icon: Icon(Icons.add),
+          ),
+          IconButton(
+            onPressed: () {
               showSearch(
                 context: context,
                 delegate: CustomSearch(),
@@ -54,7 +60,7 @@ class _ChatHomePageState extends State<ChatHomePage> {
           ),
         ],
       ),
-      body: _buildUI(),
+      body: SingleChildScrollView(child: _buildUI()),
       bottomNavigationBar: Container(
         color: Colors.black,
         child: Padding(
@@ -129,36 +135,40 @@ class _ChatHomePageState extends State<ChatHomePage> {
             child: Text("Unable to load data"),
           );
         }
-        print(snapshot.data);
         if (snapshot.hasData && snapshot.data != null) {
           final users = snapshot.data!.docs;
           return ListView.builder(
             shrinkWrap: true,
             itemCount: users.length,
             itemBuilder: (context, index) {
-              UserProfile user = users[index].data();
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10.0),
-                child: ChatTile(
-                  userProfile: user,
-                  onTap: () async {
-                    final chatExists = await _databaseService.checkChatExist(
-                        _authService.user!.uid, user.uid!);
-                    if (!chatExists) {
-                      await _databaseService.createNewChat(
+              UserProfile? user = users[index].data();
+              print(user.firstName);
+              if (user != null) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10.0),
+                  child: ChatTile(
+                    userProfile: user,
+                    onTap: () async {
+                      final chatExists = await _databaseService.checkChatExist(
                           _authService.user!.uid, user.uid!);
-                    }
-                    _navigationService
-                        .push(MaterialPageRoute(builder: (context) {
-                      return ChatPage(
-                        chatUser: user,
-                      );
-                    }));
-                  },
-                ),
-              );
+                      if (!chatExists) {
+                        await _databaseService.createNewChat(
+                            _authService.user!.uid, user.uid!);
+                      }
+                      _navigationService.push(MaterialPageRoute(builder: (context) {
+                        return ChatPage(
+                          chatUser: user,
+                        );
+                      }));
+                    },
+                  ),
+                );
+              } else {
+                return SizedBox(); // Return an empty SizedBox if user is null
+              }
             },
           );
+
         }
         return Center(
           child: CircularProgressIndicator(),
