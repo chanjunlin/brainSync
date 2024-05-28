@@ -217,7 +217,7 @@ class _LoginPageState extends State<LoginPage> {
           GestureDetector(
             child: Text(
               "Sign Up",
-              style: TextStyle(fontWeight: FontWeight.w800, color: Colors.blue),
+              style: TextStyle(fontWeight: FontWeight.w800, color: Theme.of(context).colorScheme.primary),
             ),
             onTap: () async {
               _navigationService.pushName("/register");

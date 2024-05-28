@@ -13,6 +13,8 @@ import 'dart:core';
 
 import 'package:brainsync/pages/profile.dart';
 import '../services/navigation_service.dart';
+import 'package:brainsync/pages/post.dart';
+
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -112,7 +114,7 @@ class _HomeState extends State<Home> {
             activeColor: Colors.white,
             gap: 8,
             tabs: [
-              GButton(
+              const GButton(
                 icon: Icons.home,
                 text: "Home",
               ),
@@ -126,10 +128,13 @@ class _HomeState extends State<Home> {
                 },
               ),
               GButton(
-                icon: Icons.qr_code,
-                text: "QR",
-                onPressed: () async {
-                  // _navigationService.pushNamed("/profile");
+                icon: Icons.add,
+                text: "Create",
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => PostsPage()),
+                  );
                 },
               ),
               GButton(

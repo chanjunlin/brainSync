@@ -52,7 +52,7 @@ class _RegisterPageState extends State<RegisterPage> {
               fontWeight: FontWeight.bold,
             ),
           ),
-          backgroundColor: const Color.fromARGB(255, 46, 108, 139),
+          backgroundColor: Theme.of(context).colorScheme.primary,
           centerTitle: true,
         ),
         body: SingleChildScrollView(
@@ -83,7 +83,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         onPressed: () {
                           _navigationService.pushName("/login");
                         },
-                        child: Text.rich(
+                        child: const Text.rich(
                           TextSpan(
                             children: [
                               TextSpan(text: "Already have an account? "),

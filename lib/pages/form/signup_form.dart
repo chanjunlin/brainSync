@@ -107,7 +107,7 @@ class _signUpFormState extends State<signUpForm> {
               width: double.infinity,
               child: ElevatedButton(
                 style: FilledButton.styleFrom(
-                  backgroundColor: Colors.cyan,
+                  backgroundColor: Theme.of(context).colorScheme.primary,
                   foregroundColor: Colors.white,
                 ),
                 onPressed: () async {

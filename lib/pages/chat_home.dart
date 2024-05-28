@@ -9,6 +9,7 @@ import 'package:google_nav_bar/google_nav_bar.dart';
 import '../model/user_profile.dart';
 import '../services/navigation_service.dart';
 import 'package:brainsync/pages/chat.dart';
+import 'package:brainsync/pages/post.dart';
 
 class ChatHomePage extends StatefulWidget {
   const ChatHomePage({super.key});
@@ -78,15 +79,18 @@ class _ChatHomePageState extends State<ChatHomePage> {
                   );
                 },
               ),
-              GButton(
+              const GButton(
                 icon: Icons.chat,
                 text: "Chats",
               ),
               GButton(
-                icon: Icons.qr_code,
-                text: "QR",
-                onPressed: () async {
-                  // _navigationService.pushNamed("/profile");
+                icon: Icons.add,
+                text: "Posts",
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => PostsPage()),
+                  );
                 },
               ),
               GButton(
