@@ -17,6 +17,7 @@ import '../model/user_profile.dart';
 import '../services/auth_service.dart';
 import '../services/navigation_service.dart';
 import '../services/storage_service.dart';
+import 'friends.dart';
 import 'post.dart';
 
 class Profile extends StatefulWidget {
@@ -207,6 +208,20 @@ class _ProfileState extends State<Profile> {
             print("saved");
           },
           icon: Icon(Icons.save_alt),
+        ),
+        const SizedBox(height: 10),
+        ElevatedButton(
+          onPressed: () async {
+            List<UserProfile?> friendList = await _databaseService.getFriends();
+            // Navigate to a new page and pass the friendList
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => FriendListPage(friendList: friendList),
+              ),
+            );
+          },
+          child: Text("See"),
         ),
         const SizedBox(height: 10),
         buildFriendReqSection(),

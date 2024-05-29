@@ -66,10 +66,15 @@ class _HomeState extends State<Home> {
       appBar: AppBar(
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
-        title: Text(
-          'BrainSync',
-          style: TextStyle(),
-        ),
+        title: Row(
+          children: [ElevatedButton(
+              onPressed: () async {
+              _navigationService.pushName("/friendsChat");
+            },
+              child: Text("see friends"),
+            )
+        ],
+        )
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance.collection('posts').orderBy('timestamp', descending: true).snapshots(),
@@ -103,7 +108,6 @@ class _HomeState extends State<Home> {
           );
         },
       ),
-      
       bottomNavigationBar: Container(
         color: Colors.black,
         child: Padding(
@@ -127,7 +131,7 @@ class _HomeState extends State<Home> {
                 text: "Chats",
                 onPressed: () async {
                   _navigationService.pushName(
-                    "/chat",
+                    "/friendsChat",
                   );
                 },
               ),

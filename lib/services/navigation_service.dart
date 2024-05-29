@@ -7,10 +7,14 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../pages/add_friend.dart';
 import '../pages/chat_home.dart';
+import '../pages/friends.dart';
+import '../pages/friends_chat.dart';
 import '../pages/profile.dart';
 
 class NavigationService {
   late GlobalKey<NavigatorState> _navigatorKey;
+
+
 
   final Map<String, Widget Function(BuildContext)> _routes = {
     "/login": (context) => LoginPage(),
@@ -20,6 +24,7 @@ class NavigationService {
     "/chat": (context) => ChatHomePage(),
     "/addFriends": (context) => AddFriend(),
     "/post": (context) => PostsPage(),
+    "/friendsChat": (context) => FriendsChats(),
   };
 
   Map<String, Widget Function(BuildContext)> get routes {

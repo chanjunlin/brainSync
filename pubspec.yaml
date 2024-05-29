@@ -49,6 +49,8 @@ dependencies:
   cloud_firestore: ^4.17.4
   dash_chat_2: ^0.0.20
   timeago: ^3.6.1
+  flutter_search_bar: ^3.0.0
+  anim_search_bar: ^2.0.3
 
 dev_dependencies:
   flutter_test:
