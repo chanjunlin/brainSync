@@ -14,6 +14,8 @@ import 'dart:core';
 import 'package:brainsync/pages/profile.dart';
 import '../services/navigation_service.dart';
 import 'post.dart';
+import 'package:timeago/timeago.dart' as timeago;
+import 'package:brainsync/model/time.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -42,6 +44,7 @@ class _HomeState extends State<Home> {
     _navigationService = _getIt.get<NavigationService>();
     _databaseService = _getIt.get<DatabaseService>();
     loadProfile();
+    timeago.setLocaleMessages('custom', CustomShortMessages());
   }
 
   List _items = [];
@@ -68,37 +71,39 @@ class _HomeState extends State<Home> {
           style: TextStyle(),
         ),
       ),
-      body: Column(
-        children: [
-          Container(
-            padding: EdgeInsets.all(20),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  height: 100,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text("Hi, ${user?.displayName}!"),
-                      SizedBox(height: 10),
-                      Text("Welcome Back!"),
-                    ],
-                  ),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance.collection('posts').orderBy('timestamp', descending: true).snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return const Center(child: Text("Something went wrong"));
+          }
+
+          final posts = snapshot.data?.docs ?? [];
+
+          return ListView.builder(
+            itemCount: posts.length,
+            itemBuilder: (context, index) {
+              final post = posts[index].data() as Map<String, dynamic>;
+              final timestamp = post['timestamp'] as Timestamp;
+              final date = timestamp.toDate();
+              final formattedDate = timeago.format(date, locale: 'custom');
+
+              return Card(
+                margin: const EdgeInsets.all(10),
+                child: ListTile(
+                  title: Text(post['title']),
+                  subtitle: Text(post['content']),
+                  trailing: Text(formattedDate),
                 ),
-                Container(
-                  child: Text("Insert QR CODE here"),
-                ),
-              ],
-            ),
-          ),
-          Divider(),
-          Container(),
-          Divider(),
-          Container(),
-        ],
+              );
+            },
+          );
+        },
       ),
+      
       bottomNavigationBar: Container(
         color: Colors.black,
         child: Padding(
@@ -113,7 +118,7 @@ class _HomeState extends State<Home> {
             activeColor: Colors.white,
             gap: 8,
             tabs: [
-              GButton(
+              const GButton(
                 icon: Icons.home,
                 text: "Home",
               ),
