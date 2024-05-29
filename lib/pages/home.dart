@@ -129,11 +129,8 @@ class _HomeState extends State<Home> {
               GButton(
                 icon: Icons.add,
                 text: "Create",
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => PostsPage()),
-                  );
+                onPressed: () async {
+                  _navigationService.pushName("/post");
                 },
               ),
               GButton(

@@ -19,6 +19,7 @@ class NavigationService {
     "/register": (context) => RegisterPage(),
     "/chat": (context) => ChatHomePage(),
     "/addFriends": (context) => AddFriend(),
+    "/post": (context) => PostsPage(),
   };
 
   Map<String, Widget Function(BuildContext)> get routes {
