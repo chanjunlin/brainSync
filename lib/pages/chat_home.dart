@@ -127,6 +127,12 @@ class _ChatHomePageState extends State<ChatHomePage> {
             child: _chatList(),
           ),
         ),
+        ElevatedButton(
+          onPressed: () {
+            _navigationService.pushName("/friends");
+          },
+          child: Text("Friends"),
+        ),
       ],
     );
   }
@@ -160,7 +166,8 @@ class _ChatHomePageState extends State<ChatHomePage> {
                         await _databaseService.createNewChat(
                             _authService.user!.uid, user.uid!);
                       }
-                      _navigationService.push(MaterialPageRoute(builder: (context) {
+                      _navigationService
+                          .push(MaterialPageRoute(builder: (context) {
                         return ChatPage(
                           chatUser: user,
                         );
@@ -173,7 +180,6 @@ class _ChatHomePageState extends State<ChatHomePage> {
               }
             },
           );
-
         }
         return Center(
           child: CircularProgressIndicator(),

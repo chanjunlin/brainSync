@@ -94,7 +94,14 @@ class _HomeState extends State<Home> {
             ),
           ),
           Divider(),
-          Container(),
+          Container(
+            child: ElevatedButton(
+              onPressed: () async {
+              _navigationService.pushName("/friendsChat");
+            },
+              child: Text("see friends"),
+            ),
+          ),
           Divider(),
           Container(),
         ],
@@ -122,7 +129,7 @@ class _HomeState extends State<Home> {
                 text: "Chats",
                 onPressed: () async {
                   _navigationService.pushName(
-                    "/chat",
+                    "/friendsChat",
                   );
                 },
               ),
