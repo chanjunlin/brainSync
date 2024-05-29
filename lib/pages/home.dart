@@ -71,7 +71,7 @@ class _HomeState extends State<Home> {
               onPressed: () async {
               _navigationService.pushName("/friendsChat");
             },
-              child: Text("see friends"),
+              child: const Text("see friends"),
             )
         ],
         )

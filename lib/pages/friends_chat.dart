@@ -1,6 +1,5 @@
 import 'package:brainsync/auth.dart';
 import 'package:flutter/material.dart';
-import 'package:anim_search_bar/anim_search_bar.dart';
 import 'package:get_it/get_it.dart';
 
 import '../model/user_profile.dart';
