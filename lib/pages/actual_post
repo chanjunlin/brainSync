@@ -1,0 +1,49 @@
+import 'package:flutter/material.dart';
+
+class PostDetailPage extends StatelessWidget {
+  final String title;
+  final String content;
+  final DateTime timestamp;
+  final String authorName;
+
+  PostDetailPage({
+    Key? key,
+    required this.title,
+    required this.content,
+    required this.timestamp,
+    required this.authorName,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Post Details'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              'By $authorName',
+              style: const TextStyle(
+                fontSize: 16,
+                fontStyle: FontStyle.italic
+              ),
+            ),
+            Text(
+              content,
+              style: const TextStyle(fontSize: 16),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
