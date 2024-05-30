@@ -3,6 +3,7 @@ class UserProfile {
   String? firstName;
   String? lastName;
   String? pfpURL;
+  String? profileCoverURL;
   List<String?>? friendList;
   List<String?>? friendReqList;
 
@@ -13,6 +14,7 @@ class UserProfile {
     required this.pfpURL,
     required this.friendList,
     required this.friendReqList,
+    required this.profileCoverURL,
   });
 
   UserProfile.fromJson(Map<String, dynamic> json) {
@@ -20,6 +22,7 @@ class UserProfile {
     firstName = json['firstName'];
     lastName = json['lastName'];
     pfpURL = json['pfpURL'];
+    profileCoverURL = json['profileCoverURL'];
     if (json['friendList'] != null) {
       friendList = List<String>.from(json['friendList']);
     } else {
@@ -37,6 +40,7 @@ class UserProfile {
     data['firstName'] = firstName;
     data['lastName'] = lastName;
     data['pfpURL'] = pfpURL;
+    data['profileCoverURL'] = profileCoverURL;
     data['uid'] = uid;
     data['friendList'] = friendList;
     data['friendReqList'] = friendReqList;

@@ -1,24 +1,21 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:brainsync/common_widgets/bottomBar.dart';
-import 'package:brainsync/services/alert_service.dart';
-import 'package:brainsync/services/database_service.dart';
-import 'package:brainsync/services/media_service.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import 'package:google_nav_bar/google_nav_bar.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-import '../const.dart';
-import '../model/user_profile.dart';
-import '../services/auth_service.dart';
-import '../services/navigation_service.dart';
-import '../services/storage_service.dart';
+import 'package:brainsync/common_widgets/bottomBar.dart';
+import 'package:brainsync/services/alert_service.dart';
+import 'package:brainsync/services/auth_service.dart';
+import 'package:brainsync/services/database_service.dart';
+import 'package:brainsync/services/media_service.dart';
+import 'package:brainsync/services/navigation_service.dart';
+import 'package:brainsync/services/storage_service.dart';
+import 'package:brainsync/const.dart';
+import 'package:brainsync/model/user_profile.dart';
+import 'edit_profile.dart';
 import 'friends.dart';
-import 'post.dart';
 
 class Profile extends StatefulWidget {
   const Profile({super.key});
@@ -28,23 +25,23 @@ class Profile extends StatefulWidget {
 }
 
 class _ProfileState extends State<Profile> {
+  final double coverHeight = 280;
+  final double profileHeight = 144;
   final GetIt _getIt = GetIt.instance;
 
   int _selectedIndex = 0;
   Uint8List? pickedImage;
   File? selectedImage;
-  String? userProfilePfp, name;
+  String? userProfilePfp, userProfileCover, firstName, lastName;
   List? friendReqList;
 
-  late AuthService _authService;
-  late NavigationService _navigationService;
   late AlertService _alertService;
-  late MediaService _mediaService;
-  late StorageService _storageService;
+  late AuthService _authService;
   late DatabaseService _databaseService;
-
-  final double coverHeight = 280;
-  final double profileHeight = 144;
+  late MediaService _mediaService;
+  late NavigationService _navigationService;
+  late StorageService _storageService;
+  late DocumentSnapshot user;
 
   @override
   void initState() {
@@ -65,59 +62,12 @@ class _ProfileState extends State<Profile> {
         padding: EdgeInsets.zero,
         children: [
           buildTop(),
-          buildContent(),
+          buildProfileInfo(),
+          buildActions(),
+          buildFriendRequests(),
         ],
       ),
-      bottomNavigationBar: Container(
-        color: Colors.black,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 15,
-            vertical: 20,
-          ),
-          child: GNav(
-            backgroundColor: Colors.black,
-            tabBackgroundColor: Colors.grey,
-            color: Colors.white,
-            activeColor: Colors.white,
-            gap: 8,
-            tabs: [
-              GButton(
-                icon: Icons.home,
-                text: "Home",
-                onPressed: () async {
-                  _navigationService.pushName("/home");
-                },
-              ),
-              GButton(
-                icon: Icons.chat,
-                text: "Chats",
-                onPressed: () async {
-                  _navigationService.pushName("/chat");
-                },
-              ),
-              GButton(
-                icon: Icons.add,
-                text: "Create",
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => PostsPage()),
-                  );
-                },
-              ),
-              GButton(
-                icon: Icons.person_2,
-                text: "Profile",
-              ),
-            ],
-            selectedIndex: 3,
-            onTabChange: (index) {
-              print(index);
-            },
-          ),
-        ),
-      ),
+      bottomNavigationBar: CustomBottomNavBar(initialIndex: 4),
     );
   }
 
@@ -130,22 +80,26 @@ class _ProfileState extends State<Profile> {
       alignment: Alignment.center,
       children: [
         Container(
-            margin: EdgeInsets.only(
-              bottom: bottom,
-            ),
-            child: buildCoverImage()),
+          margin: EdgeInsets.only(bottom: bottom),
+          child: buildCoverImage(),
+        ),
         Positioned(top: top, child: buildProfileImage()),
+        Positioned(
+          top: top + profileHeight / 2 + 10,
+          right: 16,
+          child: buildSignOutButton(),
+        ),
       ],
     );
   }
 
   Widget buildCoverImage() {
     return Container(
+      height: coverHeight,
+      width: double.infinity,
       color: Colors.grey,
       child: Image.network(
-        'https://www.comp.nus.edu.sg/~ngne/WEFiles/Image/Gallery/ee8928e7-a052-4ad9-9e41-be48898249fa/c835da5a-2.jpg',
-        height: coverHeight,
-        width: double.infinity,
+        userProfileCover ?? PLACEHOLDER_PROFILE_COVER,
         fit: BoxFit.cover,
       ),
     );
@@ -171,52 +125,61 @@ class _ProfileState extends State<Profile> {
     );
   }
 
-  Widget buildContent() {
+  Widget buildSignOutButton() {
+    return IconButton(
+      onPressed: () async {
+        bool result = await _authService.signOut();
+        if (result) {
+          _alertService.showToast(
+            text: "Successfully logged out!",
+            icon: Icons.check,
+          );
+          _navigationService.pushReplacementName("/login");
+        }
+      },
+      icon: Icon(Icons.logout, color: Colors.brown[300]),
+      tooltip: 'Logout',
+    );
+  }
+
+  Widget buildProfileInfo() {
     return Column(
       children: [
         const SizedBox(height: 10),
-        Text.rich(
-          TextSpan(
-            children: [
-              TextSpan(text: "Name: "),
-              TextSpan(text: "${name}"),
-            ],
+        Text(
+          "${firstName ?? 'First'} ${lastName ?? 'Last'}",
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 24,
+            color: Colors.brown[800],
           ),
         ),
         const SizedBox(height: 10),
-        Text('What Year'),
-        const SizedBox(height: 10),
+        Text(
+          'What Year',
+          style: TextStyle(
+            fontSize: 16,
+            color: Colors.brown[700],
+          ),
+        ),
+        const SizedBox(height: 16),
+        editProfileButton(),
+        const SizedBox(height: 16),
         Divider(),
         const SizedBox(height: 16),
-        IconButton(
-          onPressed: () async {
-            bool result = await _authService.signOut();
-            if (result) {
-              _alertService.showToast(
-                text: "Successfully logged out!",
-                icon: Icons.check,
-              );
-              _navigationService.pushReplacementName("/login");
-            }
-          },
-          icon: Icon(Icons.logout),
-        ),
-        const SizedBox(height: 16),
-        IconButton(
-          onPressed: () async {
-            String? pfpURl = await _storageService.saveData(
-              file: selectedImage!,
-              uid: _authService.user!.uid,
-            );
-            print("saved");
-          },
-          icon: Icon(Icons.save_alt),
-        ),
+        buildFriendRequests(),
+        Divider(),
+      ],
+    );
+  }
+
+  Widget buildActions() {
+    return Column(
+      children: [
         const SizedBox(height: 10),
         ElevatedButton(
           onPressed: () async {
             List<UserProfile?> friendList = await _databaseService.getFriends();
-            // Navigate to a new page and pass the friendList
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -224,22 +187,46 @@ class _ProfileState extends State<Profile> {
               ),
             );
           },
-          child: Text("See"),
+          child: Text("See Friends"),
         ),
         const SizedBox(height: 10),
-        buildFriendReqSection(),
       ],
     );
   }
 
-  Widget buildFriendReqSection() {
-    if (friendReqList == null) {
-      return Container();
-    }
-    return Column(
-      children:
-          friendReqList!.map((uid) => buildFriendRequestTile(uid)).toList(),
+  Widget editProfileButton() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+      child: ElevatedButton.icon(
+        onPressed: () {
+          _alertService.showToast(
+            text: "Editing profile!",
+            icon: Icons.edit,
+          );
+          _navigationService.pushName("/editProfile");
+        },
+        icon: Icon(Icons.edit),
+        label: Text("Edit Profile"),
+        style: ElevatedButton.styleFrom(
+          minimumSize: Size(double.infinity, 50),
+          backgroundColor: Colors.brown[300],
+          foregroundColor: Colors.white,
+        ),
+      ),
     );
+  }
+
+  Widget buildFriendRequests() {
+    if (friendReqList == null || friendReqList!.isEmpty) {
+      return Column(
+        children: [Text("No friends")],
+      );
+    } else {
+      return Column(
+        children:
+        friendReqList!.map((uid) => buildFriendRequestTile(uid)).toList(),
+      );
+    }
   }
 
   Widget buildFriendRequestTile(String uid) {
@@ -284,7 +271,10 @@ class _ProfileState extends State<Profile> {
       if (userProfile != null && userProfile.exists) {
         setState(() {
           userProfilePfp = userProfile.get('pfpURL') ?? PLACEHOLDER_PFP;
-          name = userProfile.get('firstName') ?? 'Name'; // Example field
+          userProfileCover =
+              userProfile.get('profileCoverURL') ?? PLACEHOLDER_PROFILE_COVER;
+          firstName = userProfile.get('firstName') ?? 'Name';
+          lastName = userProfile.get('lastName') ?? 'Name';
           friendReqList = userProfile.get("friendReqList") ?? [];
         });
       } else {

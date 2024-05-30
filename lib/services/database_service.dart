@@ -1,9 +1,8 @@
 import 'dart:async';
 
-import 'package:brainsync/auth.dart';
 import 'package:brainsync/model/user_profile.dart';
+import 'package:brainsync/services/alert_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:brainsync/utils.dart';
 
@@ -18,10 +17,12 @@ class DatabaseService {
   CollectionReference<UserProfile>? _usersCollection;
   CollectionReference? _chatCollection;
 
+  late AlertService _alertService;
   late AuthService _authService;
 
   DatabaseService() {
     setUpCollectionReferences();
+    _alertService = _getIt.get<AlertService>();
     _authService = _getIt.get<AuthService>();
   }
 
@@ -43,7 +44,7 @@ class DatabaseService {
     try {
       await _usersCollection?.doc(userProfile.uid).set(userProfile);
     } catch (e) {
-      print('Error creating user profile: $e');
+      _alertService.showToast(text: "Error creating user profile: $e");
     }
   }
 
@@ -52,7 +53,7 @@ class DatabaseService {
       String userId = _authService.user!.uid;
       return await _firebaseFirestore.collection('users').doc(userId).get();
     } catch (e) {
-      print("Error fetching user profile: $e");
+      _alertService.showToast(text: "Error fetching user profile: $e");
       return null;
     }
   }
@@ -73,13 +74,11 @@ class DatabaseService {
         }
       }
       print("Friends: ${friends.length}");
-      // Do something with the friends list
     } else {
-      print("User profile does not exist");
+      _alertService.showToast(text: "User profile doesn't exists.");
     }
     return friends;
   }
-
 
   Future<DocumentSnapshot<Object?>> getUserProfile(String uid) async {
     return await _firebaseFirestore.collection('users').doc(uid).get();
@@ -145,15 +144,19 @@ class DatabaseService {
     await _firebaseFirestore.runTransaction((transaction) async {
       DocumentSnapshot senderSnapshot = await transaction.get(senderDoc);
       DocumentSnapshot receiverSnapshot = await transaction.get(receiverDoc);
-
       transaction.update(senderDoc, {
         'friendList': FieldValue.arrayUnion([receiverUid])
       });
-
       transaction.update(receiverDoc, {
         'friendList': FieldValue.arrayUnion([senderUid]),
         'friendReqList': FieldValue.arrayRemove([senderUid])
       });
     });
+  }
+
+  Future<void> updateProfile(UserProfile user) async {
+    await _firebaseFirestore
+        .doc(_authService.currentUser!.uid)
+        .update(user.toJson());
   }
 }

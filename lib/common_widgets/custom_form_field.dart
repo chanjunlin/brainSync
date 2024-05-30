@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class CustomFormField extends StatelessWidget {
@@ -35,7 +36,18 @@ class CustomFormField extends StatelessWidget {
         decoration: InputDecoration(
           labelText: labelText,
           hintText: hintText,
-          border: const OutlineInputBorder(),
+          border: const OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(10)),
+          ),
+          focusedBorder: const OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(10)),
+            borderSide: BorderSide(
+              color: Colors.brown, // Set the color to brown when focused
+            ),
+          ),
+          labelStyle: TextStyle(
+            color: Colors.brown[800],
+          ),
         ),
       ),
     );

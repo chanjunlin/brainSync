@@ -1,13 +1,10 @@
-import 'package:brainsync/pages/login.dart';
+import 'package:brainsync/services/alert_service.dart';
 import 'package:brainsync/services/auth_service.dart';
 import 'package:brainsync/services/navigation_service.dart';
 import 'package:brainsync/utils.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:get_it/get_it.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'firebase_options.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
 
 Future<void> main() async {
   // WidgetsFlutterBinding.ensureInitialized();
@@ -27,12 +24,15 @@ Future<void> setup() async {
 class MyApp extends StatelessWidget {
 
   final GetIt _getIt = GetIt.instance;
+
   late NavigationService _navigationService;
   late AuthService _authService;
+  late AlertService _alertService;
 
   MyApp({super.key}) {
     _navigationService = _getIt.get<NavigationService>();
     _authService = _getIt.get<AuthService>();
+    _alertService = _getIt.get<AlertService>();
   }
 
   @override

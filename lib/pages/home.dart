@@ -1,19 +1,14 @@
-import 'dart:convert';
+import 'package:brainsync/common_widgets/bottomBar.dart';
 import 'package:brainsync/services/auth_service.dart';
 import 'package:brainsync/services/database_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:brainsync/navBar.dart';
-import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
-import 'package:google_nav_bar/google_nav_bar.dart';
-import 'package:http/http.dart' as http;
 import 'dart:core';
 
-import 'package:brainsync/pages/profile.dart';
 import '../services/navigation_service.dart';
-import 'post.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -57,104 +52,60 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     // getMods();
-
-    return Scaffold(
-      drawer: NavBar(),
-      appBar: AppBar(
-        backgroundColor: Colors.black,
-        foregroundColor: Colors.white,
-        title: Text(
-          'BrainSync',
-          style: TextStyle(),
+    double screenWidth = MediaQuery.of(context).size.width;
+    return SafeArea(
+      child: Scaffold(
+        // drawer: NavBar(),
+        appBar: AppBar(
+          backgroundColor: Colors.brown[300],
+          foregroundColor: Colors.white,
+          title: Text(
+            'BrainSync',
+            style: TextStyle(),
+          ),
+          automaticallyImplyLeading: false,
         ),
-      ),
-      body: Column(
-        children: [
-          Container(
-            padding: EdgeInsets.all(20),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  height: 100,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text("Hi, ${user?.displayName}!"),
-                      SizedBox(height: 10),
-                      Text("Welcome Back!"),
-                    ],
+        body: Column(
+          children: [
+            Container(
+              padding: EdgeInsets.all(20),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Container(
+                      height: 100,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text("Hi, ${user?.displayName}!"),
+                          SizedBox(height: 10),
+                          Text("Welcome Back!"),
+                        ],
+                      ),
+                    ),
                   ),
-                ),
-                Container(
-                  child: Text("Insert QR CODE here"),
-                ),
-              ],
+                  Container(
+                    child: Text("Insert QR CODE here"),
+                  ),
+                ],
+              ),
             ),
-          ),
-          Divider(),
-          Container(
-            child: ElevatedButton(
-              onPressed: () async {
-              _navigationService.pushName("/friendsChat");
-            },
-              child: Text("see friends"),
+            Divider(),
+            Container(
+              child: ElevatedButton(
+                onPressed: () async {
+                  _navigationService.pushName("/friendsChat");
+                },
+                child: Text("see friends"),
+              ),
             ),
-          ),
-          Divider(),
-          Container(),
-        ],
-      ),
-      bottomNavigationBar: Container(
-        color: Colors.black,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 15,
-            vertical: 20,
-          ),
-          child: GNav(
-            backgroundColor: Colors.black,
-            tabBackgroundColor: Colors.grey,
-            color: Colors.white,
-            activeColor: Colors.white,
-            gap: 8,
-            tabs: [
-              GButton(
-                icon: Icons.home,
-                text: "Home",
-              ),
-              GButton(
-                icon: Icons.chat,
-                text: "Chats",
-                onPressed: () async {
-                  _navigationService.pushName(
-                    "/friendsChat",
-                  );
-                },
-              ),
-              GButton(
-                icon: Icons.add,
-                text: "Create",
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => PostsPage()),
-                  );
-                },
-              ),
-              GButton(
-                icon: Icons.person_2,
-                text: "Profile",
-                onPressed: () async {
-                  _navigationService.pushName("/profile");
-                },
-              ),
-            ],
-            selectedIndex: 0,
-          ),
+            Divider(),
+            Container(),
+          ],
         ),
-      ),
+        bottomNavigationBar: CustomBottomNavBar(initialIndex: 0)),
     );
   }
 
