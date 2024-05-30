@@ -45,6 +45,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color.fromARGB(255, 193, 154, 107),
       appBar: AppBar(
         title: const Text('Post Details'),
       ),
@@ -99,10 +100,12 @@ class _PostDetailPageState extends State<PostDetailPage> {
                       final formattedDate = timeago.format(date, locale: 'custom');
                       return ListTile(
                         title: Text('${comment['authorName']} $formattedDate', style: TextStyle(
-                          fontSize: 11,
+                          fontSize: 12,
+                          color: Colors.white,
                         )),
                         subtitle: Text(comment['content'], style: TextStyle(
                           fontSize: 17,
+                          color: Colors.white,
                         )),
                       );
                     },
