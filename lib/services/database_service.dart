@@ -57,6 +57,30 @@ class DatabaseService {
     }
   }
 
+  Future<List<UserProfile?>> getFriends() async {
+    DocumentSnapshot? userDocs = await fetchUser();
+    List<UserProfile?> friends = [];
+    if (userDocs != null && userDocs.exists) {
+      Map<String, dynamic> userData = userDocs.data() as Map<String, dynamic>;
+      List<dynamic> friendList = userData['friendList'] ?? [];
+      print(friendList);
+      for (String friendId in friendList) {
+        DocumentSnapshot friendDoc =
+            await _firebaseFirestore.collection('users').doc(friendId).get();
+        if (friendDoc.exists) {
+          friends.add(
+              UserProfile.fromJson(friendDoc.data() as Map<String, dynamic>));
+        }
+      }
+      print("Friends: ${friends.length}");
+      // Do something with the friends list
+    } else {
+      print("User profile does not exist");
+    }
+    return friends;
+  }
+
+
   Future<DocumentSnapshot<Object?>> getUserProfile(String uid) async {
     return await _firebaseFirestore.collection('users').doc(uid).get();
   }
@@ -113,8 +137,10 @@ class DatabaseService {
   }
 
   Future<void> acceptFriendRequest(String senderUid, String receiverUid) async {
-    DocumentReference senderDoc = _firebaseFirestore.collection('users').doc(senderUid);
-    DocumentReference receiverDoc = _firebaseFirestore.collection('users').doc(receiverUid);
+    DocumentReference senderDoc =
+        _firebaseFirestore.collection('users').doc(senderUid);
+    DocumentReference receiverDoc =
+        _firebaseFirestore.collection('users').doc(receiverUid);
 
     await _firebaseFirestore.runTransaction((transaction) async {
       DocumentSnapshot senderSnapshot = await transaction.get(senderDoc);

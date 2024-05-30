@@ -213,9 +213,9 @@ class _LoginPageState extends State<LoginPage> {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text('Don\'t have an account? '),
+          const Text('Don\'t have an account? '),
           GestureDetector(
-            child: Text(
+            child: const Text(
               "Sign Up",
               style: TextStyle(fontWeight: FontWeight.w800, color: Colors.blue),
             ),

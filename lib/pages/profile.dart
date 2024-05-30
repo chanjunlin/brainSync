@@ -17,7 +17,7 @@ import '../model/user_profile.dart';
 import '../services/auth_service.dart';
 import '../services/navigation_service.dart';
 import '../services/storage_service.dart';
-import 'post.dart';
+import 'friends.dart';
 
 class Profile extends StatefulWidget {
   const Profile({super.key});
@@ -98,14 +98,11 @@ class _ProfileState extends State<Profile> {
               GButton(
                 icon: Icons.add,
                 text: "Create",
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => PostsPage()),
-                  );
+                onPressed: () async {
+                  _navigationService.pushName("/post");
                 },
               ),
-              GButton(
+              const GButton(
                 icon: Icons.person_2,
                 text: "Profile",
               ),
@@ -210,6 +207,20 @@ class _ProfileState extends State<Profile> {
             print("saved");
           },
           icon: Icon(Icons.save_alt),
+        ),
+        const SizedBox(height: 10),
+        ElevatedButton(
+          onPressed: () async {
+            List<UserProfile?> friendList = await _databaseService.getFriends();
+            // Navigate to a new page and pass the friendList
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => FriendListPage(friendList: friendList),
+              ),
+            );
+          },
+          child: Text("See"),
         ),
         const SizedBox(height: 10),
         buildFriendReqSection(),

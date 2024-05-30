@@ -19,6 +19,8 @@ class _PostsPageState extends State<PostsPage> {
   final TextEditingController _contentController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
+  String? userProfilePfp, name;
+
   late NavigationService _navigationService;
   final GetIt _getIt = GetIt.instance;
 
@@ -34,6 +36,7 @@ class _PostsPageState extends State<PostsPage> {
         'title': _titleController.text,
         'content': _contentController.text,
         'timestamp': Timestamp.now(),
+        'authorName': "me",                                            //change here
       });
 
       // Clear the text fields
@@ -43,6 +46,7 @@ class _PostsPageState extends State<PostsPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Post created successfully!')),
       );
+      _navigationService.pushName("/home");
     }
   }
 

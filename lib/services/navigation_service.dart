@@ -1,3 +1,4 @@
+import 'package:brainsync/pages/actual_post';
 import 'package:brainsync/pages/home.dart';
 import 'package:brainsync/pages/login.dart';
 import 'package:brainsync/common_widgets/bottomBar.dart';
@@ -5,12 +6,17 @@ import 'package:brainsync/pages/post.dart';
 import 'package:brainsync/pages/register.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart';
 import '../pages/add_friend.dart';
 import '../pages/chat_home.dart';
+import '../pages/friends.dart';
+import '../pages/friends_chat.dart';
 import '../pages/profile.dart';
 
 class NavigationService {
   late GlobalKey<NavigatorState> _navigatorKey;
+
+
 
   final Map<String, Widget Function(BuildContext)> _routes = {
     "/login": (context) => LoginPage(),
@@ -19,6 +25,8 @@ class NavigationService {
     "/register": (context) => RegisterPage(),
     "/chat": (context) => ChatHomePage(),
     "/addFriends": (context) => AddFriend(),
+    "/post": (context) => PostsPage(),
+    "/friendsChat": (context) => FriendsChats(),
   };
 
   Map<String, Widget Function(BuildContext)> get routes {
