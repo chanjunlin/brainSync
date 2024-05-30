@@ -1,10 +1,12 @@
 import 'package:brainsync/pages/edit_profile.dart';
+import 'package:brainsync/pages/actual_post';
 import 'package:brainsync/pages/home.dart';
 import 'package:brainsync/pages/login.dart';
 import 'package:brainsync/pages/register.dart';
 import 'package:brainsync/testing.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart';
 import '../pages/add_friend.dart';
 import '../pages/chat_home.dart';
 import '../pages/friends_chat.dart';
@@ -21,6 +23,7 @@ class NavigationService {
     "/editProfile": (context) => EditProfilePage(),
     "/chat": (context) => ChatHomePage(),
     "/addFriends": (context) => AddFriend(),
+    "/post": (context) => PostsPage(),
     "/friendsChat": (context) => FriendsChats(),
     "/testing": (context) => Testing(),
   };
