@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:brainsync/services/alert_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -25,35 +24,73 @@ class StorageService {
   }
 
   Future<String?> uploadUserProfile({
-    required File file,
+    required File profileFile,
     required String uid,
   }) async {
-    Reference fileRef = _fireBaseStorage
+    Reference profileFileRef = _fireBaseStorage
         .ref('users/pfp')
-        .child('$uid${p.extension(file.path)}');
-    UploadTask task = fileRef.putFile(file);
-    return task.then((p) {
+        .child('$uid${p.extension(profileFile.path)}');
+    UploadTask profileTask = profileFileRef.putFile(profileFile);
+    return profileTask.then((p) {
       if (p.state == TaskState.success) {
-        return fileRef.getDownloadURL();
+        return profileFileRef.getDownloadURL();
       }
     });
   }
 
-  Future<String> saveData({required File file, required String uid}) async {
-    String userId = _authService.user!.uid;
-    String? downloadURL = await uploadUserProfile(
-      file: file,
-      uid: uid,
-    );
-    print("before");
-    await _firestore.collection('users').doc(userId).update({
-      'pfpURL': downloadURL,
+  Future<String?> uploadUserCover({
+    required File coverFile,
+    required String uid,
+  }) async {
+    Reference coverFileRef = _fireBaseStorage
+        .ref('users/profileCover')
+        .child('$uid${p.extension(coverFile.path)}');
+    UploadTask coverTask = coverFileRef.putFile(coverFile);
+    return coverTask.then((p) {
+      if (p.state == TaskState.success) {
+        return coverFileRef.getDownloadURL();
+      }
     });
+  }
+
+  Future<String> saveData({
+    File? coverFile,
+    File? profileFile,
+    required String uid,
+    required String firstName,
+    required String lastName,
+  }) async {
+    String userId = _authService.user!.uid;
+    String? downloadProfileURL;
+    String? downloadCoverURL;
+    if (profileFile != null) {
+      downloadProfileURL = await uploadUserProfile(
+        profileFile: profileFile,
+        uid: uid,
+      );
+    }
+    if (coverFile != null) {
+      downloadCoverURL = await uploadUserCover(
+        coverFile: coverFile,
+        uid: uid,
+      );
+    }
+    Map<String, dynamic> updateData = {
+      'firstName': firstName,
+      'lastName': lastName,
+    };
+    if (downloadProfileURL != null) {
+      updateData['pfpURL'] = downloadProfileURL;
+    }
+    if (downloadCoverURL != null) {
+      updateData['profileCoverURL'] = downloadCoverURL;
+    }
+    await _firestore.collection('users').doc(userId).update(updateData);
     _alertService.showToast(
-      text: "Profile picture updated successfully!",
+      text: "Profile updated successfully!",
       icon: Icons.check,
     );
-    return "pased";
+    return "passed";
   }
 
   Future<String?> uploadImageToChat(

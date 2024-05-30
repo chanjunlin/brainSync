@@ -85,19 +85,21 @@ class _LoginPageState extends State<LoginPage> {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          const Text(
+          Text(
             "Welcome Back!",
             style: TextStyle(
               fontSize: 30,
               fontWeight: FontWeight.bold,
+              color: Colors.brown[800],
             ),
           ),
-          const Text(
+          Text(
             "Please sign in to continue",
             style: TextStyle(
-              color: Color.fromARGB(255, 77, 76, 76),
+              color: Colors.brown[800],
             ),
           ),
+          SizedBox(height: 10),
           Image.asset(
             "assets/img/study.png",
             alignment: Alignment.topCenter,
@@ -159,10 +161,11 @@ class _LoginPageState extends State<LoginPage> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             TextButton(
-              child: const Text(
+              child: Text(
                 "Forget Your Password?",
                 style: TextStyle(
                   decoration: TextDecoration.underline,
+                  color: Colors.brown.shade800,
                 ),
               ),
               onPressed: () {
@@ -195,7 +198,7 @@ class _LoginPageState extends State<LoginPage> {
             }
           }
         },
-        color: Theme.of(context).colorScheme.primary,
+        color: Colors.brown[300],
         child: const Text(
           "Login",
           style: TextStyle(
@@ -213,11 +216,15 @@ class _LoginPageState extends State<LoginPage> {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          const Text('Don\'t have an account? '),
+          Text(
+            'Don\'t have an account? ',
+            style: TextStyle(color: Colors.brown[800]),
+          ),
           GestureDetector(
             child: const Text(
               "Sign Up",
-              style: TextStyle(fontWeight: FontWeight.w800, color: Colors.blue),
+              style: TextStyle(
+                  fontWeight: FontWeight.w800, color: Colors.brown[300]),
             ),
             onTap: () async {
               _navigationService.pushName("/register");
@@ -226,13 +233,5 @@ class _LoginPageState extends State<LoginPage> {
         ],
       ),
     );
-  }
-
-  Widget _errorMessage() {
-    return Text(errorMessage == '' ? '' : '$errorMessage',
-        style: const TextStyle(
-          color: Colors.red,
-          fontWeight: FontWeight.bold,
-        ));
   }
 }

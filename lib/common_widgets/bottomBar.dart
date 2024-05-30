@@ -1,85 +1,84 @@
-import 'package:firebase_auth/firebase_auth.dart';
+// custom_bottom_nav_bar.dart
+import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import 'package:google_nav_bar/google_nav_bar.dart';
-
-import '../pages/home.dart';
-import '../pages/profile.dart';
-import '../services/auth_service.dart';
 import '../services/navigation_service.dart';
 
-class BottomBar extends StatefulWidget {
-  const BottomBar({super.key});
+class CustomBottomNavBar extends StatefulWidget {
+  final int initialIndex;
+
+  const CustomBottomNavBar({Key? key, this.initialIndex = 0}) : super(key: key);
 
   @override
-  State<BottomBar> createState() => _BottomBarState();
+  _CustomBottomNavBarState createState() => _CustomBottomNavBarState();
 }
 
-class _BottomBarState extends State<BottomBar> {
-  final GetIt _getIt = GetIt.instance;
-
-  int myIndex = 0;
-
-  List<Widget> widgetList = [
-    Text("asd"),
-    Text('How are you'),
-    Text('hii'),
-    Text('How asdasdare you'),
-  ];
-
-  late AuthService _authService;
-  late NavigationService _navigationService;
-
-  final User? user = AuthService().currentUser;
-
-  @override
-  void initState() {
-    super.initState();
-    _authService = _getIt.get<AuthService>();
-    _navigationService = _getIt.get<NavigationService>();
-  }
+class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
+  final NavigationService _navigationService = GetIt.instance<NavigationService>();
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.black,
-        foregroundColor: Colors.white,
-        title: Text(
-          'BrainSync',
-          style: TextStyle(),
+    return CurvedNavigationBar(
+      index: widget.initialIndex,
+      backgroundColor: Colors.transparent,
+      buttonBackgroundColor: Colors.brown[300],
+      color: Colors.brown.shade300,
+      animationDuration: const Duration(milliseconds: 200),
+      items: <Widget>[
+        GestureDetector(
+          child: Icon(
+            Icons.home,
+            size: 26,
+            color: Colors.white,
+          ),
+          onTap: () async {
+            _navigationService.pushName("/home");
+          },
         ),
-      ),
-      body: Center(
-        child: widgetList[myIndex],
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        onTap: (index) {
-          setState(() {
-            myIndex = index;
-          });
-        },
-        backgroundColor: Colors.black,
-        currentIndex: myIndex,
-        items: [
-          BottomNavigationBarItem(
-              icon: Icon(Icons.home),
-              label: 'Home',
-              backgroundColor: Colors.black),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.chat),
-              label: 'Chats',
-              backgroundColor: Colors.red),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.qr_code),
-              label: 'QR',
-              backgroundColor: Colors.black),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.person_2),
-              label: 'Profile',
-              backgroundColor: Colors.black),
-        ],
-      ),
+        GestureDetector(
+          child: Icon(
+            Icons.chat,
+            size: 26,
+            color: Colors.white,
+          ),
+          onTap: () async {
+            _navigationService.pushName("/friendsChat");
+          },
+        ),
+        GestureDetector(
+          child: Icon(
+            Icons.add,
+            size: 26,
+            color: Colors.white,
+          ),
+          onTap: () async {
+            // _navigationService.pushName("/post");
+          },
+        ),
+        GestureDetector(
+          child: Icon(
+            Icons.notifications,
+            size: 26,
+            color: Colors.white,
+          ),
+          onTap: () async {
+            // _navigationService.pushName("");
+          },
+        ),
+        GestureDetector(
+          child: Icon(
+            Icons.person,
+            size: 26,
+            color: Colors.white,
+          ),
+          onTap: () async {
+            _navigationService.pushName("/profile");
+          },
+        ),
+      ],
+      onTap: (index) {
+        setState(() {});
+      },
     );
   }
 }

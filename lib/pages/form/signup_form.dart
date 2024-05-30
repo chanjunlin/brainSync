@@ -125,11 +125,11 @@ class _signUpFormState extends State<signUpForm> {
                                   firstName: name,
                                   lastName: "doggie",
                                   pfpURL: PLACEHOLDER_PFP,
+                                  profileCoverURL: PLACEHOLDER_PROFILE_COVER,
                                   friendList: friendList,
                                   friendReqList: friendReqList,
                               ),
                           );
-                          print("doggi");
                           _alertService.showToast(
                             text: "Registered successfully!",
                             icon: Icons.check,

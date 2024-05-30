@@ -1,10 +1,14 @@
-import 'package:brainsync/auth.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:get_it/get_it.dart';
 
 import 'alert_service.dart';
 
 class AuthService {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  final GetIt _getIt = GetIt.instance;
+
+  late AlertService _alertService;
+
   User? _user;
 
   User? get user {
@@ -15,7 +19,9 @@ class AuthService {
     return _firebaseAuth.currentUser;
   }
 
-  AuthService() {}
+  AuthService() {
+    // _alertService = _getIt.get<AlertService>();
+  }
 
   Future<bool> login(String email, String password) async {
     try {

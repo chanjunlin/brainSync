@@ -1,17 +1,13 @@
-import 'dart:convert';
+import 'package:brainsync/common_widgets/bottomBar.dart';
 import 'package:brainsync/services/auth_service.dart';
 import 'package:brainsync/services/database_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:brainsync/navBar.dart';
-import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
-import 'package:google_nav_bar/google_nav_bar.dart';
-import 'package:http/http.dart' as http;
 import 'dart:core';
 
-import 'package:brainsync/pages/profile.dart';
 import '../services/navigation_service.dart';
 import 'actual_post';
 import 'post.dart';
@@ -192,18 +188,21 @@ class _HomeState extends State<Home> {
                   _navigationService.pushName("/post");
                 },
               ),
-              GButton(
-                icon: Icons.person_2,
-                text: "Profile",
+            ),
+            Divider(),
+            Container(
+              child: ElevatedButton(
                 onPressed: () async {
-                  _navigationService.pushName("/profile");
+                  _navigationService.pushName("/friendsChat");
                 },
+                child: Text("see friends"),
               ),
-            ],
-            selectedIndex: 0,
-          ),
+            ),
+            Divider(),
+            Container(),
+          ],
         ),
-      ),
+        bottomNavigationBar: CustomBottomNavBar(initialIndex: 0)),
     );
   }
 
