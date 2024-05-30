@@ -221,7 +221,7 @@ class _LoginPageState extends State<LoginPage> {
             style: TextStyle(color: Colors.brown[800]),
           ),
           GestureDetector(
-            child: const Text(
+            child: Text(
               "Sign Up",
               style: TextStyle(
                   fontWeight: FontWeight.w800, color: Colors.brown[300]),

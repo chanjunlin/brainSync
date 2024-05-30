@@ -52,7 +52,7 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
             color: Colors.white,
           ),
           onTap: () async {
-            // _navigationService.pushName("/post");
+            _navigationService.pushName("/post");
           },
         ),
         GestureDetector(

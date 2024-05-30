@@ -10,6 +10,7 @@ import 'package:http/http.dart';
 import '../pages/add_friend.dart';
 import '../pages/chat_home.dart';
 import '../pages/friends_chat.dart';
+import '../pages/post.dart';
 import '../pages/profile.dart';
 
 class NavigationService {
