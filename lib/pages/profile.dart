@@ -18,7 +18,6 @@ import '../services/auth_service.dart';
 import '../services/navigation_service.dart';
 import '../services/storage_service.dart';
 import 'friends.dart';
-import 'post.dart';
 
 class Profile extends StatefulWidget {
   const Profile({super.key});
@@ -103,7 +102,7 @@ class _ProfileState extends State<Profile> {
                   _navigationService.pushName("/post");
                 },
               ),
-              GButton(
+              const GButton(
                 icon: Icons.person_2,
                 text: "Profile",
               ),

@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:timeago/timeago.dart' as timeago;
+import 'package:brainsync/model/time.dart';
 
-class PostDetailPage extends StatelessWidget {
+class PostDetailPage extends StatefulWidget {
+  final String postId;
   final String title;
   final String content;
   final DateTime timestamp;
@@ -8,11 +12,35 @@ class PostDetailPage extends StatelessWidget {
 
   PostDetailPage({
     Key? key,
+    required this.postId,
     required this.title,
     required this.content,
     required this.timestamp,
     required this.authorName,
   }) : super(key: key);
+
+  @override
+  _PostDetailPageState createState() => _PostDetailPageState();
+}
+
+class _PostDetailPageState extends State<PostDetailPage> {
+  final TextEditingController _commentController = TextEditingController();
+
+  Future<void> _addComment() async {
+    if (_commentController.text.isNotEmpty) {
+      await FirebaseFirestore.instance
+          .collection('posts')
+          .doc(widget.postId)
+          .collection('comments')
+          .add({
+        'content': _commentController.text,
+        'timestamp': Timestamp.now(),
+        'authorName': 'I',                                                           //change here
+      });
+
+      _commentController.clear();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,20 +54,77 @@ class PostDetailPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              title,
+              widget.title,
               style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10),
             Text(
-              'By $authorName',
-              style: const TextStyle(
-                fontSize: 16,
-                fontStyle: FontStyle.italic
+              'By ${widget.authorName}',
+              style: const TextStyle(fontSize: 16, fontStyle: FontStyle.italic),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              widget.content,
+              style: const TextStyle(fontSize: 16),
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              'Comments',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            Expanded(
+              child: StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection('posts')
+                    .doc(widget.postId)
+                    .collection('comments')
+                    .orderBy('timestamp', descending: true)
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (snapshot.hasError) {
+                    return const Center(child: Text('Something went wrong'));
+                  }
+
+                  final comments = snapshot.data?.docs ?? [];
+
+                  return ListView.builder(
+                    itemCount: comments.length,
+                    itemBuilder: (context, index) {
+                      final comment = comments[index].data() as Map<String, dynamic>;
+                      final timestamp = comment['timestamp'] as Timestamp;
+                      final date = timestamp.toDate();
+                      final formattedDate = timeago.format(date, locale: 'custom');
+                      return ListTile(
+                        title: Text('${comment['authorName']} $formattedDate', style: TextStyle(
+                          fontSize: 11,
+                        )),
+                        subtitle: Text(comment['content'], style: TextStyle(
+                          fontSize: 17,
+                        )),
+                      );
+                    },
+                  );
+                },
               ),
             ),
-            Text(
-              content,
-              style: const TextStyle(fontSize: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _commentController,
+                    decoration: const InputDecoration(
+                      hintText: 'Add a comment',
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.send),
+                  onPressed: _addComment,
+                ),
+              ],
             ),
           ],
         ),

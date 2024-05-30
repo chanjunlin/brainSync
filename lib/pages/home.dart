@@ -13,6 +13,7 @@ import 'dart:core';
 
 import 'package:brainsync/pages/profile.dart';
 import '../services/navigation_service.dart';
+import 'actual_post';
 import 'post.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:brainsync/model/time.dart';
@@ -62,7 +63,8 @@ class _HomeState extends State<Home> {
     // getMods();
 
     return Scaffold(
-      drawer: NavBar(),
+      backgroundColor: Colors.black,
+      drawer: const NavBar(),
       appBar: AppBar(
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
@@ -97,11 +99,59 @@ class _HomeState extends State<Home> {
               final formattedDate = timeago.format(date, locale: 'custom');
 
               return Card(
-                margin: const EdgeInsets.all(10),
-                child: ListTile(
-                  title: Text(post['title']),
-                  subtitle: Text(post['content']),
-                  trailing: Text(formattedDate),
+                color: Theme.of(context).colorScheme.primary,
+                shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                margin: const EdgeInsets.symmetric(vertical: 1, horizontal: 0),
+                child: InkWell(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => PostDetailPage(
+                          postId: posts[index].id,
+                          title: post['title'],
+                          timestamp: date,
+                          content: post['content'],
+                          authorName: post['authorName'],
+                        ),
+                      ),
+                    );
+                  },
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(10),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [ Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                        Text(
+                          post['title'],
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          formattedDate,
+                          style: const TextStyle(color: Color.fromARGB(255, 202, 197, 197)),
+                        ),
+                        ],
+                      ),
+                        const SizedBox(height: 10),
+                        Text(
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          post['content'],
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.white,
+                            ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               );
             },

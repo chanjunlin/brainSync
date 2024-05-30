@@ -10,7 +10,6 @@ import '../model/user_profile.dart';
 import '../services/navigation_service.dart';
 import 'package:brainsync/pages/chat.dart';
 
-import 'post.dart';
 
 class ChatHomePage extends StatefulWidget {
   const ChatHomePage({super.key});

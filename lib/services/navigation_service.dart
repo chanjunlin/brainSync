@@ -1,3 +1,4 @@
+import 'package:brainsync/pages/actual_post';
 import 'package:brainsync/pages/home.dart';
 import 'package:brainsync/pages/login.dart';
 import 'package:brainsync/common_widgets/bottomBar.dart';
@@ -5,6 +6,7 @@ import 'package:brainsync/pages/post.dart';
 import 'package:brainsync/pages/register.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart';
 import '../pages/add_friend.dart';
 import '../pages/chat_home.dart';
 import '../pages/friends.dart';
