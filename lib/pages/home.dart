@@ -63,7 +63,7 @@ class _HomeState extends State<Home> {
       appBar: AppBar(
         backgroundColor: Colors.brown[300],
         foregroundColor: Colors.white,
-        title: Text("BrainSync"),
+        title: const Text("BrainSync"),
         // title: Row(
         //   children: [
         //     ElevatedButton(
@@ -100,7 +100,7 @@ class _HomeState extends State<Home> {
 
               return Card(
                 color: Colors.white, // Complementary color to brown
-                shape: RoundedRectangleBorder(
+                shape: const RoundedRectangleBorder(
                     side: BorderSide(
                       color: Colors.brown,
                       width: 1.0,
