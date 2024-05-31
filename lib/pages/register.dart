@@ -52,7 +52,7 @@ class _RegisterPageState extends State<RegisterPage> {
               fontWeight: FontWeight.bold,
             ),
           ),
-          backgroundColor: const Color.fromARGB(255, 46, 108, 139),
+          backgroundColor: const Color.fromARGB(255, 161, 136, 127),
           centerTitle: true,
         ),
         body: SingleChildScrollView(
@@ -67,7 +67,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     title: 'Get on board!',
                     subTitle: 'Create your profile to start your journey',
                   ),
-                  signUpForm(),
+                  const signUpForm(),
                   Column(
                     children: [
                       const Text('OR'),
@@ -75,15 +75,15 @@ class _RegisterPageState extends State<RegisterPage> {
                         width: double.infinity,
                         child: OutlinedButton.icon(
                           onPressed: () {},
-                          icon: Icon(Icons.email),
-                          label: Text("Sign-In with Google"),
+                          icon: const Icon(Icons.email),
+                          label: const Text("Sign-In with Google"),
                         ),
                       ),
                       TextButton(
                         onPressed: () {
                           _navigationService.pushName("/login");
                         },
-                        child: Text.rich(
+                        child: const Text.rich(
                           TextSpan(
                             children: [
                               TextSpan(text: "Already have an account? "),

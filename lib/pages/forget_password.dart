@@ -42,7 +42,7 @@ class _ForgetPasswordState extends State<ForgetPassword> {
     return SizedBox(
       width: MediaQuery.sizeOf(context).width,
       child: MaterialButton(
-      color: Theme.of(context).colorScheme.primary,
+      color: Colors.brown[300],
       onPressed: _sendPasswordResetEmail,
       child: const Text('Continue', style: TextStyle(
         color: Colors.white,
@@ -75,7 +75,7 @@ class _ForgetPasswordState extends State<ForgetPassword> {
           color: Colors.white,
         ),
         ),
-        backgroundColor: Theme.of(context).colorScheme.primary,
+        backgroundColor: const Color.fromARGB(255, 161, 136, 127),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
