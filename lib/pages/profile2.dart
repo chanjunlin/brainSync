@@ -17,14 +17,14 @@ import 'package:brainsync/model/user_profile.dart';
 import 'edit_profile.dart';
 import 'friends.dart';
 
-class Profile extends StatefulWidget {
-  const Profile({super.key});
+class Profile2 extends StatefulWidget {
+  const Profile2({super.key});
 
   @override
-  State<Profile> createState() => _ProfileState();
+  State<Profile2> createState() => _Profile2State();
 }
 
-class _ProfileState extends State<Profile> {
+class _Profile2State extends State<Profile2> {
   final double coverHeight = 280;
   final double profileHeight = 144;
   final GetIt _getIt = GetIt.instance;
@@ -64,9 +64,7 @@ class _ProfileState extends State<Profile> {
           buildTop(),
           buildProfileInfo(),
           Divider(),
-          // showFriends(),
-          buildActions(),
-          buildFriendRequests(),
+          buildTabBarSection(),  // Add this line
         ],
       ),
       bottomNavigationBar: CustomBottomNavBar(initialIndex: 4),
@@ -212,7 +210,7 @@ class _ProfileState extends State<Profile> {
     } else {
       return Column(
         children:
-            friendReqList!.map((uid) => buildFriendRequestTile(uid)).toList(),
+        friendReqList!.map((uid) => buildFriendRequestTile(uid)).toList(),
       );
     }
   }
@@ -271,5 +269,52 @@ class _ProfileState extends State<Profile> {
     } catch (e) {
       print('Error loading profile: $e');
     }
+  }
+
+  Widget buildTabBarSection() {
+    return DefaultTabController(
+      length: 3,
+      child: Column(
+        children: [
+          TabBar(
+            labelColor: Colors.brown[800],
+            unselectedLabelColor: Colors.brown[400],
+            tabs: [
+              Tab(text: 'Posts'),
+              Tab(text: 'Comments'),
+              Tab(text: 'Friends'),
+            ],
+          ),
+          Container(
+            height: 400, // Adjust as needed
+            child: TabBarView(
+              children: [
+                Center(child: Text('Posts Content')),
+                Center(child: Text('Comments Content')),
+                showFriendsTab(),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget showFriendsTab() {
+    return FutureBuilder<List<UserProfile?>>(
+      future: _databaseService.getFriends(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return Center(child: Text('No friends'));
+        } else {
+          // Use FriendListPage with the loaded friendList
+          return FriendListPage(friendList: snapshot.data!);
+        }
+      },
+    );
   }
 }

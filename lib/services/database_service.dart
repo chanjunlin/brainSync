@@ -48,7 +48,7 @@ class DatabaseService {
     }
   }
 
-  Future<DocumentSnapshot?> fetchUser() async {
+  Future<DocumentSnapshot?> fetchCurrentUser() async {
     try {
       String userId = _authService.user!.uid;
       return await _firebaseFirestore.collection('users').doc(userId).get();
@@ -58,8 +58,17 @@ class DatabaseService {
     }
   }
 
+  Future<DocumentSnapshot?> fetchUser(String userID) async {
+    try {
+      return await _firebaseFirestore.collection('users').doc(userID).get();
+    } catch (e) {
+      _alertService.showToast(text: "Error fetching user profile: $e");
+      return null;
+    }
+  }
+
   Future<List<UserProfile?>> getFriends() async {
-    DocumentSnapshot? userDocs = await fetchUser();
+    DocumentSnapshot? userDocs = await fetchCurrentUser();
     List<UserProfile?> friends = [];
     if (userDocs != null && userDocs.exists) {
       Map<String, dynamic> userData = userDocs.data() as Map<String, dynamic>;
@@ -136,6 +145,8 @@ class DatabaseService {
   }
 
   Future<void> acceptFriendRequest(String senderUid, String receiverUid) async {
+    print(senderUid);
+    print(receiverUid);
     DocumentReference senderDoc =
         _firebaseFirestore.collection('users').doc(senderUid);
     DocumentReference receiverDoc =
