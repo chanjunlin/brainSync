@@ -1,10 +1,10 @@
 import 'dart:io';
-import 'package:brainsync/services/navigation_service.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:brainsync/common_widgets/dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
+import 'package:brainsync/services/navigation_service.dart';
 import 'package:brainsync/services/alert_service.dart';
 import 'package:brainsync/services/auth_service.dart';
 import 'package:brainsync/services/database_service.dart';
@@ -12,15 +12,11 @@ import 'package:brainsync/services/media_service.dart';
 import 'package:brainsync/services/storage_service.dart';
 import 'package:brainsync/const.dart';
 
-import '../model/user_profile.dart';
-
 class EditProfilePage extends StatefulWidget {
-  const EditProfilePage({
-    super.key,
-  });
+  const EditProfilePage({Key? key}) : super(key: key);
 
   @override
-  State<EditProfilePage> createState() => _EditProfilePageState();
+  _EditProfilePageState createState() => _EditProfilePageState();
 }
 
 class _EditProfilePageState extends State<EditProfilePage> {
@@ -28,13 +24,13 @@ class _EditProfilePageState extends State<EditProfilePage> {
   final double profileHeight = 144;
   final _formKey = GlobalKey<FormState>();
   final GetIt _getIt = GetIt.instance;
-  String? userProfilePfp, userProfileCover, firstName, lastName;
-  List? friendReqList;
 
   TextEditingController _firstNameController = TextEditingController();
   TextEditingController _lastNameController = TextEditingController();
 
   File? selectedCoverImage, selectedProfileImage;
+  String? userProfilePfp, userProfileCover;
+  List? friendReqList;
 
   late AlertService _alertService;
   late AuthService _authService;
@@ -57,15 +53,15 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
   void loadProfile() async {
     try {
-      DocumentSnapshot? userProfile = await _databaseService.fetchUser();
+      DocumentSnapshot? userProfile = await _databaseService.fetchCurrentUser();
       if (userProfile != null && userProfile.exists) {
         setState(() {
           userProfileCover =
               userProfile.get('profileCoverURL') ?? PLACEHOLDER_PROFILE_COVER;
           userProfilePfp = userProfile.get('pfpURL') ?? PLACEHOLDER_PFP;
-          firstName = userProfile.get('firstName') ?? 'Name';
-          lastName = userProfile.get('lastName') ?? 'Name';
-          friendReqList = userProfile.get("friendReqList") ?? [];
+          _firstNameController.text = userProfile.get('firstName') ?? 'Name';
+          _lastNameController.text = userProfile.get('lastName') ?? 'Name';
+          friendReqList = userProfile.get('friendReqList') ?? [];
         });
       } else {
         print('User profile not found');
@@ -76,12 +72,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
   }
 
   void saveProfile() async {
-    print("hi");
     if (_formKey.currentState!.validate()) {
       try {
-        String? pfpURL = userProfilePfp;
-        String? profileCoverURL = userProfileCover;
-        String result = await _storageService.saveData(
+        await _storageService.saveData(
           coverFile: selectedCoverImage,
           profileFile: selectedProfileImage,
           uid: _authService.user!.uid,
@@ -106,11 +99,43 @@ class _EditProfilePageState extends State<EditProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: ListView(
-        padding: EdgeInsets.zero,
+      body: Column(
         children: [
-          buildTop(),
-          buildProfileInfo(),
+          Expanded(
+            child: ListView(
+              padding: EdgeInsets.zero,
+              children: [
+                buildTop(),
+                buildProfileInfo(),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 8.0),
+                    child: SizedBox(
+                      height: 50,
+                      child: cancelEdit(),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 8.0),
+                    child: SizedBox(
+                      height: 50,
+                      child: editProfile(),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -147,17 +172,17 @@ class _EditProfilePageState extends State<EditProfilePage> {
         color: Colors.grey,
         child: selectedCoverImage != null
             ? Image.file(
-                selectedCoverImage!,
-                height: coverHeight,
-                width: double.infinity,
-                fit: BoxFit.cover,
-              )
+          selectedCoverImage!,
+          height: coverHeight,
+          width: double.infinity,
+          fit: BoxFit.cover,
+        )
             : Image.network(
-                userProfileCover ?? PLACEHOLDER_PROFILE_COVER,
-                height: coverHeight,
-                width: double.infinity,
-                fit: BoxFit.cover,
-              ),
+          userProfileCover ?? PLACEHOLDER_PROFILE_COVER,
+          height: coverHeight,
+          width: double.infinity,
+          fit: BoxFit.cover,
+        ),
       ),
     );
   }
@@ -173,14 +198,14 @@ class _EditProfilePageState extends State<EditProfilePage> {
         }
       },
       child: Padding(
-        padding: const EdgeInsets.all(16.0), // Adjust the padding as needed
+        padding: const EdgeInsets.all(16.0),
         child: CircleAvatar(
           radius: profileHeight / 2,
           backgroundColor: Colors.grey,
           backgroundImage: selectedProfileImage != null
               ? FileImage(selectedProfileImage!)
               : NetworkImage(userProfilePfp ?? PLACEHOLDER_PFP)
-                  as ImageProvider,
+          as ImageProvider,
         ),
       ),
     );
@@ -188,7 +213,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
   Widget buildProfileInfo() {
     return Padding(
-      padding: const EdgeInsets.all(16.0), // Adjust the padding as needed
+      padding: const EdgeInsets.all(16.0),
       child: Form(
         key: _formKey,
         child: Column(
@@ -222,16 +247,41 @@ class _EditProfilePageState extends State<EditProfilePage> {
               },
             ),
             const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: saveProfile,
-              child: Text('Save'),
-              style: ElevatedButton.styleFrom(
-                minimumSize: Size(double.infinity, 50),
-              ),
-            ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget editProfile() {
+    return FilledButton(
+      style: FilledButton.styleFrom(
+        backgroundColor: Colors.brown[300],
+      ),
+      onPressed: saveProfile,
+      child: const Text('Save Edit'),
+    );
+  }
+
+  Widget cancelEdit() {
+    return FilledButton(
+      style: FilledButton.styleFrom(
+        backgroundColor: Colors.red[300],
+      ),
+      onPressed: () {
+        CustomDialog.show(
+          context: context,
+          title: "Cancel Edit",
+          content: "Do you want to cancel edit?",
+          cancelText: "Cancel",
+          discardText: "Confirm",
+          toastText: "Stopped editing",
+          onDiscard:() {
+            _navigationService.pushName("/profile");
+          }
+        );
+      },
+      child: const Text('Cancel Edit'),
     );
   }
 }

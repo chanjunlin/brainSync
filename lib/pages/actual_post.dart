@@ -1,7 +1,13 @@
+import 'dart:ffi';
+
+import 'package:brainsync/services/database_service.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:get_it/get_it.dart';
+import 'package:http/http.dart';
 import 'package:timeago/timeago.dart' as timeago;
-import 'package:brainsync/model/time.dart';
+
+import '../services/auth_service.dart';
 
 class PostDetailPage extends StatefulWidget {
   final String postId;
@@ -24,10 +30,43 @@ class PostDetailPage extends StatefulWidget {
 }
 
 class _PostDetailPageState extends State<PostDetailPage> {
+  final GetIt _getIt = GetIt.instance;
+
+  late AuthService _authService;
+  late DatabaseService _databaseService;
+  late DocumentSnapshot? user, postUser;
+
+  String? currentUser, commentUser;
+
+  @override
+  void initState() {
+    _authService = _getIt.get<AuthService>();
+    _databaseService = _getIt.get<DatabaseService>();
+    loadProfile();
+  }
+
   final TextEditingController _commentController = TextEditingController();
+
+  void loadProfile() async {
+    user = await _databaseService.fetchCurrentUser();
+    postUser = await _databaseService.fetchUser(widget.authorName);
+
+    if (user!.id == widget.authorName) {
+      setState(() {
+        currentUser = "Me";
+      });
+    } else {
+      setState(() {
+        currentUser =
+            "${postUser!.get("firstName")} ${postUser!.get("lastName")}";
+      });
+    }
+    commentUser = "${postUser!.get("firstName")} ${postUser!.get("lastName")}";
+  }
 
   Future<void> _addComment() async {
     if (_commentController.text.isNotEmpty) {
+      DocumentSnapshot? user = await _databaseService.fetchCurrentUser();
       await FirebaseFirestore.instance
           .collection('posts')
           .doc(widget.postId)
@@ -35,9 +74,9 @@ class _PostDetailPageState extends State<PostDetailPage> {
           .add({
         'content': _commentController.text,
         'timestamp': Timestamp.now(),
-        'authorName': 'I',                                                           //change here
+        'authorName': "${user!.get("firstName")} ${user!.get("lastName")}",
+        //change here
       });
-
       _commentController.clear();
     }
   }
@@ -45,9 +84,15 @@ class _PostDetailPageState extends State<PostDetailPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color.fromARGB(255, 193, 154, 107),
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Post Details'),
+        backgroundColor: Colors.brown[300],
+        title: const Text(
+          'Post Details',
+          style: TextStyle(
+            color: Colors.white,
+          ),
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -60,7 +105,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
             ),
             const SizedBox(height: 10),
             Text(
-              'By ${widget.authorName}',
+              'By ${currentUser}',
               style: const TextStyle(fontSize: 16, fontStyle: FontStyle.italic),
             ),
             const SizedBox(height: 10),
@@ -68,6 +113,8 @@ class _PostDetailPageState extends State<PostDetailPage> {
               widget.content,
               style: const TextStyle(fontSize: 16),
             ),
+            const SizedBox(height: 20),
+            Divider(),
             const SizedBox(height: 20),
             const Text(
               'Comments',
@@ -94,19 +141,24 @@ class _PostDetailPageState extends State<PostDetailPage> {
                   return ListView.builder(
                     itemCount: comments.length,
                     itemBuilder: (context, index) {
-                      final comment = comments[index].data() as Map<String, dynamic>;
+                      final comment =
+                          comments[index].data() as Map<String, dynamic>;
                       final timestamp = comment['timestamp'] as Timestamp;
                       final date = timestamp.toDate();
-                      final formattedDate = timeago.format(date, locale: 'custom');
+                      final formattedDate =
+                          timeago.format(date, locale: 'custom');
                       return ListTile(
-                        title: Text('${comment['authorName']} $formattedDate', style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.white,
-                        )),
-                        subtitle: Text(comment['content'], style: TextStyle(
-                          fontSize: 17,
-                          color: Colors.white,
-                        )),
+                        title: Text(
+                            '${comment['authorName'] == '${user!.get('firstName')} ${user!.get('lastName')}' ? "Me" : comment['authorName']} $formattedDate',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.brown[800],
+                            )),
+                        subtitle: Text(comment['content'],
+                            style: TextStyle(
+                              fontSize: 17,
+                              color: Colors.brown[800],
+                            )),
                       );
                     },
                   );

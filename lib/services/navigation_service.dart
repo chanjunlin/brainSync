@@ -1,7 +1,9 @@
 import 'package:brainsync/pages/edit_profile.dart';
-import 'package:brainsync/pages/actual_post';
+import 'package:brainsync/pages/actual_post.dart';
 import 'package:brainsync/pages/home.dart';
 import 'package:brainsync/pages/login.dart';
+import 'package:brainsync/pages/notifications.dart';
+import 'package:brainsync/pages/profile2.dart';
 import 'package:brainsync/pages/register.dart';
 import 'package:brainsync/testing.dart';
 import 'package:flutter/cupertino.dart';
@@ -20,13 +22,14 @@ class NavigationService {
     "/login": (context) => LoginPage(),
     "/register": (context) => RegisterPage(),
     "/home": (context) => Home(),
-    "/profile": (context) => Profile(),
+    "/profile": (context) => Profile2(),
     "/editProfile": (context) => EditProfilePage(),
     "/chat": (context) => ChatHomePage(),
     "/addFriends": (context) => AddFriend(),
     "/post": (context) => PostsPage(),
     "/friendsChat": (context) => FriendsChats(),
     "/testing": (context) => Testing(),
+    "/notifications": (context) => Notifications(),
   };
 
   Map<String, Widget Function(BuildContext)> get routes {

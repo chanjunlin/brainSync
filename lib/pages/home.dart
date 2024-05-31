@@ -9,8 +9,7 @@ import 'package:get_it/get_it.dart';
 import 'dart:core';
 
 import '../services/navigation_service.dart';
-import 'actual_post';
-import 'post.dart';
+import 'actual_post.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:brainsync/model/time.dart';
 
@@ -59,21 +58,23 @@ class _HomeState extends State<Home> {
     // getMods();
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.white,
       drawer: const NavBar(),
       appBar: AppBar(
-          backgroundColor: Colors.black,
-          foregroundColor: Colors.white,
-          title: Row(
-            children: [
-              ElevatedButton(
-                onPressed: () async {
-                  _navigationService.pushName("/friendsChat");
-                },
-                child: const Text("see friends"),
-              )
-            ],
-          )),
+        backgroundColor: Colors.brown[300],
+        foregroundColor: Colors.white,
+        title: Text("BrainSync"),
+        // title: Row(
+        //   children: [
+        //     ElevatedButton(
+        //       onPressed: () async {
+        //         _navigationService.pushName("/friendsChat");
+        //       },
+        //       child: const Text("see friends"),
+        //     )
+        //   ],
+        // ),
+      ),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('posts')
@@ -98,10 +99,14 @@ class _HomeState extends State<Home> {
               final formattedDate = timeago.format(date, locale: 'custom');
 
               return Card(
-                color: Theme.of(context).colorScheme.primary,
-                shape: const RoundedRectangleBorder(
+                color: Colors.white, // Complementary color to brown
+                shape: RoundedRectangleBorder(
+                    side: BorderSide(
+                      color: Colors.brown,
+                      width: 1.0,
+                    ),
                     borderRadius: BorderRadius.zero),
-                margin: const EdgeInsets.symmetric(vertical: 1, horizontal: 0),
+                margin: const EdgeInsets.symmetric(vertical: 0, horizontal: 0),
                 child: InkWell(
                   onTap: () {
                     Navigator.push(
@@ -128,16 +133,16 @@ class _HomeState extends State<Home> {
                           children: [
                             Text(
                               post['title'],
-                              style: const TextStyle(
-                                color: Colors.white,
+                              style: TextStyle(
+                                color: Colors.brown[800],
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
                             Text(
                               formattedDate,
-                              style: const TextStyle(
-                                  color: Color.fromARGB(255, 202, 197, 197)),
+                              style: TextStyle(
+                                  color: Colors.brown.shade800),
                             ),
                           ],
                         ),
@@ -146,9 +151,9 @@ class _HomeState extends State<Home> {
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           post['content'],
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 12,
-                            color: Colors.white,
+                            color: Colors.brown[800],
                           ),
                         ),
                       ],
@@ -160,61 +165,13 @@ class _HomeState extends State<Home> {
           );
         },
       ),
-      // bottomNavigationBar: Container(
-      //   color: Colors.black,
-      //   child: Padding(
-      //     padding: const EdgeInsets.symmetric(
-      //       horizontal: 15,
-      //       vertical: 20,
-      //     ),
-      //     child: GNav(
-      //       backgroundColor: Colors.black,
-      //       tabBackgroundColor: Colors.grey,
-      //       color: Colors.white,
-      //       activeColor: Colors.white,
-      //       gap: 8,
-      //       tabs: [
-      //         const GButton(
-      //           icon: Icons.home,
-      //           text: "Home",
-      //         ),
-      //         GButton(
-      //           icon: Icons.chat,
-      //           text: "Chats",
-      //           onPressed: () async {
-      //             _navigationService.pushName(
-      //               "/friendsChat",
-      //             );
-      //           },
-      //         ),
-      //         GButton(
-      //           icon: Icons.add,
-      //           text: "Create",
-      //           onPressed: () async {
-      //             _navigationService.pushName("/post");
-      //           },
-      //         ),
-      //       ),
-      //       Divider(),
-      //       Container(
-      //         child: ElevatedButton(
-      //           onPressed: () async {
-      //             _navigationService.pushName("/friendsChat");
-      //           },
-      //           child: Text("see friends"),
-      //         ),
-      //       ),
-      //       Divider(),
-      //       Container(),
-      //     ],
-      //   ),
       bottomNavigationBar: CustomBottomNavBar(initialIndex: 0),
     );
   }
 
   void loadProfile() async {
     try {
-      DocumentSnapshot? userProfile = await _databaseService.fetchUser();
+      DocumentSnapshot? userProfile = await _databaseService.fetchCurrentUser();
       if (userProfile != null && userProfile.exists) {
         setState(() {
           // userProfilePfp = userProfile.get('pfpURL') ?? PLACEHOLDER_PFP;

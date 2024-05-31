@@ -33,6 +33,7 @@ class CustomFormField extends StatelessWidget {
             return "Enter a valid ${hintText.toLowerCase()}";
           }
         },
+        cursorColor: Colors.brown[300],
         decoration: InputDecoration(
           labelText: labelText,
           hintText: hintText,
