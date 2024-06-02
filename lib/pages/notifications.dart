@@ -21,7 +21,6 @@ class _NotificationsState extends State<Notifications> {
   late AlertService _alertService;
   late AuthService _authService;
   late DatabaseService _databaseService;
-  late NavigationService _navigationService;
 
   String? userProfilePfp, userProfileCover, firstName, lastName;
   List? friendReqList;
@@ -31,26 +30,24 @@ class _NotificationsState extends State<Notifications> {
     super.initState();
     _alertService = _getIt.get<AlertService>();
     _databaseService = _getIt.get<DatabaseService>();
-    _navigationService = _getIt.get<NavigationService>();
     _authService = _getIt.get<AuthService>();
-
-    loadProfile(); // Call loadProfile() in initState()
+    loadProfile();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Notifications'),
+        title: const Text('Notifications'),
       ),
       body: buildFriendRequests(),
-      bottomNavigationBar: CustomBottomNavBar(initialIndex: 3),
+      bottomNavigationBar: const CustomBottomNavBar(initialIndex: 3),
     );
   }
 
   Widget buildFriendRequests() {
     if (friendReqList == null || friendReqList!.isEmpty) {
-      return Center(
+      return const Center(
         child: Text(
           'No friend requests',
           style: TextStyle(
@@ -99,6 +96,10 @@ class _NotificationsState extends State<Notifications> {
               setState(() {
                 friendReqList!.remove(uid);
               });
+              _alertService.showToast(
+                text: "Friend Accepted",
+                icon: Icons.check,
+              );
             },
           ),
         );

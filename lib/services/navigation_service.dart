@@ -5,6 +5,7 @@ import 'package:brainsync/pages/login.dart';
 import 'package:brainsync/pages/notifications.dart';
 import 'package:brainsync/pages/profile2.dart';
 import 'package:brainsync/pages/register.dart';
+import 'package:brainsync/pages/show_everyone.dart';
 import 'package:brainsync/testing.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -30,6 +31,7 @@ class NavigationService {
     "/friendsChat": (context) => FriendsChats(),
     "/testing": (context) => Testing(),
     "/notifications": (context) => Notifications(),
+    "/allUsers": (context) => ShowEveryone(),
   };
 
   Map<String, Widget Function(BuildContext)> get routes {

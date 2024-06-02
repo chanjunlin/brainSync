@@ -1,6 +1,9 @@
 import 'package:brainsync/services/auth_service.dart';
+import 'package:brainsync/services/database_service.dart';
+import 'package:brainsync/services/navigation_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 
 class NavBar extends StatefulWidget {
   const NavBar({super.key});
@@ -10,8 +13,19 @@ class NavBar extends StatefulWidget {
 }
 
 class _NavBarState extends State<NavBar> {
-
   final User? user = AuthService().currentUser;
+  late DatabaseService _databaseService;
+  late AuthService _authService;
+  late NavigationService _navigationService;
+
+  final GetIt _getIt = GetIt.instance;
+
+  @override
+  void initState() {
+    _databaseService = _getIt.get<DatabaseService>();
+    _authService = _getIt.get<AuthService>();
+    _navigationService = _getIt.get<NavigationService>();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,9 +47,13 @@ class _NavBarState extends State<NavBar> {
                 Text("${user?.email}"),
               ],
             ),
-            currentAccountPicture: CircleAvatar(
-
-            ),
+            currentAccountPicture: CircleAvatar(),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              _navigationService.pushName("/allUsers");
+            },
+            child: Text("See all users"),
           ),
         ],
       ),

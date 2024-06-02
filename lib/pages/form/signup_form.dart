@@ -123,7 +123,7 @@ class _signUpFormState extends State<signUpForm> {
                               userProfile: UserProfile(
                                   uid: _authService.user!.uid,
                                   firstName: name,
-                                  lastName: "doggie",
+                                  lastName: "lastName",
                                   pfpURL: PLACEHOLDER_PFP,
                                   profileCoverURL: PLACEHOLDER_PROFILE_COVER,
                                   friendList: friendList,
