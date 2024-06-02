@@ -146,9 +146,9 @@ class _PostsPageState extends State<PostsPage> {
             color: Colors.brown[800],
           ),
         ),
-        actions: [
+        actions: const [
           Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: EdgeInsets.all(8.0),
           ),
         ],
       ),
@@ -187,7 +187,7 @@ class _PostsPageState extends State<PostsPage> {
                   return null;
                 },
               ),
-              SizedBox(height: 30),
+              const SizedBox(height: 30),
               TextFormField(
                 cursorColor: Colors.brown[300],
                 controller: _contentController,

@@ -65,7 +65,7 @@ class _RegisterPageState extends State<RegisterPage> {
               height: 10,
             ),
             FormHeader(
-              image: Image.asset("assets/img/study.png"),
+              image: Image.asset("assets/img/people.png"),
               title: 'Get on board!',
               subTitle: 'Create your profile to start your journey',
             ),
@@ -97,7 +97,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         TextSpan(
                           text: "Login",
                           style: TextStyle(
-                            color: Colors.brown[300],
+                            color: Colors.brown[800],
                           ),
                         ),
                       ],

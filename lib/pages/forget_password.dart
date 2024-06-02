@@ -2,6 +2,8 @@ import 'package:brainsync/pages/login.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:brainsync/auth.dart';
+import 'package:brainsync/services/navigation_service.dart';
+import 'package:get_it/get_it.dart';
 
 
 class ForgetPassword extends StatefulWidget {
@@ -15,15 +17,22 @@ class _ForgetPasswordState extends State<ForgetPassword> {
     final TextEditingController _emailController = TextEditingController();
     String? errorMessage = " ";
 
+    final GetIt _getIt = GetIt.instance;
+
+    late NavigationService _navigationService;
+
+    @override
+  void initState() {
+    super.initState();
+    _navigationService = _getIt.get<NavigationService>();
+  }
+
 
       Future<void> _sendPasswordResetEmail() async {
     try {
       await FirebaseAuth.instance.sendPasswordResetEmail(email: _emailController.text);
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Password reset email sent')));
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context)=>const LoginPage()),
-      );
+      _navigationService.pushReplacementName("/login");
     } on FirebaseAuthException catch (e) {
       setState(() {
         errorMessage = "Invalid email";

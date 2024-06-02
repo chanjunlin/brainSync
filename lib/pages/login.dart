@@ -6,7 +6,6 @@ import 'package:dot_navigation_bar/dot_navigation_bar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:brainsync/services/alert_service.dart';
 import 'package:brainsync/services/auth_service.dart';
-import 'package:brainsync/services/navigation_service.dart';
 import 'package:brainsync/common_widgets/custom_form_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';

@@ -16,11 +16,11 @@ class FormHeader extends StatelessWidget {
     final size = MediaQuery.of(context).size;
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Image(
-          image: AssetImage("assets/img/study.png"),
-          height: size.height * 0.2,
+          image: const AssetImage("assets/img/people.png"),
+          height: size.height * 0.22,
         ),
         Text(
           title,

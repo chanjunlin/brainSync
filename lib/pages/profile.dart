@@ -63,13 +63,13 @@ class _ProfileState extends State<Profile> {
         children: [
           buildTop(),
           buildProfileInfo(),
-          Divider(),
+          const Divider(),
           // showFriends(),
           buildActions(),
           buildFriendRequests(),
         ],
       ),
-      bottomNavigationBar: CustomBottomNavBar(initialIndex: 4),
+      bottomNavigationBar: const CustomBottomNavBar(initialIndex: 4),
     );
   }
 
@@ -175,7 +175,7 @@ class _ProfileState extends State<Profile> {
               ),
             );
           },
-          child: Text("See Friends"),
+          child: const Text("See Friends"),
         ),
         const SizedBox(height: 10),
       ],
@@ -193,10 +193,10 @@ class _ProfileState extends State<Profile> {
           );
           _navigationService.pushName("/editProfile");
         },
-        icon: Icon(Icons.edit),
-        label: Text("Edit Profile"),
+        icon: const Icon(Icons.edit),
+        label: const Text("Edit Profile"),
         style: ElevatedButton.styleFrom(
-          minimumSize: Size(double.infinity, 50),
+          minimumSize: const Size(double.infinity, 50),
           backgroundColor: Colors.brown[300],
           foregroundColor: Colors.white,
         ),
@@ -206,7 +206,7 @@ class _ProfileState extends State<Profile> {
 
   Widget buildFriendRequests() {
     if (friendReqList == null || friendReqList!.isEmpty) {
-      return Column(
+      return const Column(
         children: [Text("No friends")],
       );
     } else {
@@ -222,13 +222,13 @@ class _ProfileState extends State<Profile> {
       future: _databaseService.getUserProfile(uid),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return CircularProgressIndicator();
+          return const CircularProgressIndicator();
         }
         if (snapshot.hasError) {
           return Text('Error: ${snapshot.error}');
         }
         if (!snapshot.hasData || !snapshot.data!.exists) {
-          return Text('User not found');
+          return const Text('User not found');
         }
 
         var userData = snapshot.data!.data() as Map<String, dynamic>;
@@ -239,7 +239,7 @@ class _ProfileState extends State<Profile> {
           ),
           title: Text(userData['firstName']),
           trailing: IconButton(
-            icon: Icon(Icons.check),
+            icon: const Icon(Icons.check),
             onPressed: () async {
               await _databaseService.acceptFriendRequest(
                   uid, _authService.user!.uid);
