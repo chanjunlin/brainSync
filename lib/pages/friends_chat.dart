@@ -6,7 +6,7 @@ import '../model/user_profile.dart';
 import '../services/auth_service.dart';
 import '../services/database_service.dart';
 import '../services/navigation_service.dart';
-import 'chat.dart';
+import 'chat_page.dart';
 
 class FriendsChats extends StatefulWidget {
   @override

@@ -55,6 +55,12 @@ class _NavBarState extends State<NavBar> {
             },
             child: Text("See all users"),
           ),
+          ElevatedButton(
+            onPressed: () {
+              _navigationService.pushName("/nusMods");
+            },
+            child: Text("See all mods"),
+          ),
         ],
       ),
     );
