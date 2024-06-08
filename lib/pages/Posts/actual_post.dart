@@ -1,13 +1,12 @@
-import 'dart:ffi';
-
 import 'package:brainsync/services/database_service.dart';
+import 'package:brainsync/services/navigation_service.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get_it/get_it.dart';
-import 'package:http/http.dart';
 import 'package:timeago/timeago.dart' as timeago;
-
-import '../services/auth_service.dart';
+import '../../services/auth_service.dart';
+import '../Profile/visiting_profile.dart';
+import 'comment_card.dart';
 
 class PostDetailPage extends StatefulWidget {
   final String postId;
@@ -16,7 +15,7 @@ class PostDetailPage extends StatefulWidget {
   final DateTime timestamp;
   final String authorName;
 
-  PostDetailPage({
+  const PostDetailPage({
     Key? key,
     required this.postId,
     required this.title,
@@ -34,39 +33,37 @@ class _PostDetailPageState extends State<PostDetailPage> {
 
   late AuthService _authService;
   late DatabaseService _databaseService;
-  late DocumentSnapshot? user, postUser;
+  late NavigationService _navigationService;
 
-  String? currentUser, commentUser;
+  String? currentUser;
 
   @override
   void initState() {
+    super.initState();
     _authService = _getIt.get<AuthService>();
     _databaseService = _getIt.get<DatabaseService>();
+    _navigationService = _getIt.get<NavigationService>();
     loadProfile();
   }
 
   final TextEditingController _commentController = TextEditingController();
 
   void loadProfile() async {
-    user = await _databaseService.fetchCurrentUser();
-    postUser = await _databaseService.fetchUser(widget.authorName);
+    final user = await _databaseService.fetchCurrentUser();
+    final postUser = await _databaseService.fetchUser(widget.authorName);
 
-    if (user!.id == widget.authorName) {
-      setState(() {
-        currentUser = "Me";
-      });
-    } else {
-      setState(() {
-        currentUser =
-            "${postUser!.get("firstName")} ${postUser!.get("lastName")}";
-      });
-    }
-    commentUser = "${postUser!.get("firstName")} ${postUser!.get("lastName")}";
+    setState(() {
+      currentUser = user!.id == widget.authorName
+          ? "Me"
+          : "${postUser!.get("firstName")} ${postUser.get("lastName")}";
+    });
   }
 
-  Future<void> _addComment() async {
+  Future<void> addComment() async {
     if (_commentController.text.isNotEmpty) {
-      DocumentSnapshot? user = await _databaseService.fetchCurrentUser();
+      final user = await _databaseService.fetchCurrentUser();
+      final userId = user!.get("uid");
+
       await FirebaseFirestore.instance
           .collection('posts')
           .doc(widget.postId)
@@ -74,8 +71,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
           .add({
         'content': _commentController.text,
         'timestamp': Timestamp.now(),
-        'authorName': "${user!.get("firstName")} ${user!.get("lastName")}",
-        //change here
+        'authorId': userId, // Only store the user ID
       });
       _commentController.clear();
     }
@@ -105,7 +101,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
             ),
             const SizedBox(height: 10),
             Text(
-              'By ${currentUser}',
+              'By ${currentUser ?? "Loading..."}',
               style: const TextStyle(fontSize: 16, fontStyle: FontStyle.italic),
             ),
             const SizedBox(height: 10),
@@ -114,7 +110,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
               style: const TextStyle(fontSize: 16),
             ),
             const SizedBox(height: 20),
-            Divider(),
+            const Divider(),
             const SizedBox(height: 20),
             const Text(
               'Comments',
@@ -135,30 +131,64 @@ class _PostDetailPageState extends State<PostDetailPage> {
                   if (snapshot.hasError) {
                     return const Center(child: Text('Something went wrong'));
                   }
-
                   final comments = snapshot.data?.docs ?? [];
+                  if (comments.isEmpty) {
+                    return const Center(child: Text('No comments yet.'));
+                  }
 
                   return ListView.builder(
                     itemCount: comments.length,
                     itemBuilder: (context, index) {
-                      final comment =
-                          comments[index].data() as Map<String, dynamic>;
+                      final comment = comments[index].data() as Map<String, dynamic>;
                       final timestamp = comment['timestamp'] as Timestamp;
                       final date = timestamp.toDate();
-                      final formattedDate =
-                          timeago.format(date, locale: 'custom');
-                      return ListTile(
-                        title: Text(
-                            '${comment['authorName'] == '${user!.get('firstName')} ${user!.get('lastName')}' ? "Me" : comment['authorName']} $formattedDate',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.brown[800],
-                            )),
-                        subtitle: Text(comment['content'],
-                            style: TextStyle(
-                              fontSize: 17,
-                              color: Colors.brown[800],
-                            )),
+                      final formattedDate = timeago.format(date, locale: 'custom');
+                      final authorId = comment['authorId'] as String;
+
+                      return FutureBuilder<DocumentSnapshot>(
+                        future: FirebaseFirestore.instance
+                            .collection('users')
+                            .doc(authorId)
+                            .get(),
+                        builder: (context, userSnapshot) {
+                          if (userSnapshot.connectionState == ConnectionState.waiting) {
+                            return ListTile(
+                              title: const Text('Loading...'),
+                              subtitle: Text(comment['content']),
+                            );
+                          }
+                          if (userSnapshot.hasError || !userSnapshot.hasData) {
+                            return ListTile(
+                              title: const Text('Error loading user'),
+                              subtitle: Text(comment['content']),
+                            );
+                          }
+
+                          final userData = userSnapshot.data!.data() as Map<String, dynamic>;
+                          final authorName = "${userData['firstName']} ${userData['lastName']}";
+
+                          return GestureDetector(
+                            onTap: authorId == _authService.currentUser!.uid
+                                ? null
+                                : () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => VisitProfile(
+                                    userId: authorId,
+                                  ),
+                                ),
+                              );
+                            },
+                            child: CommentCard(
+                              authorName: authorId == _authService.currentUser!.uid
+                                  ? "Me"
+                                  : authorName,
+                              content: comment['content'],
+                              formattedDate: formattedDate,
+                            ),
+                          );
+                        },
                       );
                     },
                   );
@@ -177,7 +207,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
                 ),
                 IconButton(
                   icon: const Icon(Icons.send),
-                  onPressed: _addComment,
+                  onPressed: addComment,
                 ),
               ],
             ),

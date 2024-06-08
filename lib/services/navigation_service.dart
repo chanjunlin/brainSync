@@ -1,21 +1,21 @@
-import 'package:brainsync/pages/edit_profile.dart';
-import 'package:brainsync/pages/actual_post.dart';
+import 'package:brainsync/pages/Profile/edit_profile.dart';
+import 'package:brainsync/pages/Posts/actual_post.dart';
 import 'package:brainsync/pages/home.dart';
-import 'package:brainsync/pages/login.dart';
+import 'package:brainsync/pages/Administation/login.dart';
 import 'package:brainsync/pages/notifications.dart';
-import 'package:brainsync/pages/profile2.dart';
-import 'package:brainsync/pages/register.dart';
-import 'package:brainsync/pages/show_everyone.dart';
+import 'package:brainsync/pages/Profile/profile2.dart';
+import 'package:brainsync/pages/Administation/register.dart';
+import 'package:brainsync/pages/Profile/show_everyone.dart';
 import 'package:brainsync/testing.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import '../pages/add_friend.dart';
-import '../pages/all_mods.dart';
-import '../pages/chat_home.dart';
-import '../pages/friends_chat.dart';
-import '../pages/post.dart';
-import '../pages/profile.dart';
+import '../pages/Modules/all_mods.dart';
+import '../pages/Chats/chat_home.dart';
+import '../pages/Chats/friends_chat.dart';
+import '../pages/Posts/post.dart';
+import '../pages/Profile/profile.dart';
 
 class NavigationService {
   late GlobalKey<NavigatorState> _navigatorKey;

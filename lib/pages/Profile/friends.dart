@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
-import '../const.dart';
-import '../model/user_profile.dart';
-import '../services/database_service.dart';
+import '../../const.dart';
+import '../../model/user_profile.dart';
+import '../../services/database_service.dart';
 
 class FriendListPage extends StatefulWidget {
   final List<UserProfile?> friendList;

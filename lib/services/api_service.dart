@@ -7,8 +7,10 @@ class ApiService {
   static const String apiVersion = "v2";
   static const String academicYear = "2023-2024";
 
-  static Future<Map<String, dynamic>> fetchModuleInfo(String acadYear, String? moduleCode) async {
-    var url = Uri.https(baseUrl, "/$apiVersion/$acadYear/modules/${moduleCode}.json");
+  static Future<Map<String, dynamic>> fetchModuleInfo(
+      String acadYear, String? moduleCode) async {
+    var url =
+        Uri.https(baseUrl, "/$apiVersion/$acadYear/modules/${moduleCode}.json");
     try {
       var response = await http.get(url);
       if (response.statusCode == 200) {
@@ -30,10 +32,6 @@ class ApiService {
       if (response.statusCode == 200) {
         List<dynamic> jsonData =
             jsonDecode(response.body); // Parse response body as list
-        // Log jsonData to debug
-        jsonData.forEach((module) {
-          print('Module: $module');
-        });
         return jsonData.map((json) => Module.fromJson(json)).toList();
       } else {
         throw Exception('Failed to load modules');

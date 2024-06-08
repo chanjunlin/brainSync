@@ -13,7 +13,7 @@ class NavBar extends StatefulWidget {
 }
 
 class _NavBarState extends State<NavBar> {
-  final User? user = AuthService().currentUser;
+  late User? user;
   late DatabaseService _databaseService;
   late AuthService _authService;
   late NavigationService _navigationService;
@@ -25,6 +25,7 @@ class _NavBarState extends State<NavBar> {
     _databaseService = _getIt.get<DatabaseService>();
     _authService = _getIt.get<AuthService>();
     _navigationService = _getIt.get<NavigationService>();
+    user = _authService.currentUser;
   }
 
   @override

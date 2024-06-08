@@ -4,12 +4,12 @@ import 'package:brainsync/services/database_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:brainsync/navBar.dart';
+import 'package:brainsync/common_widgets/navBar.dart';
 import 'package:get_it/get_it.dart';
 import 'dart:core';
 
 import '../services/navigation_service.dart';
-import 'actual_post.dart';
+import 'Posts/actual_post.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:brainsync/model/time.dart';
 
@@ -21,9 +21,8 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  int _selectedIndex = 0;
 
-  final User? user = AuthService().currentUser;
+  late User? user;
 
   String? name;
 
@@ -36,14 +35,13 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
-    // _authService = _getIt.get<AuthService>();
+    _authService = _getIt.get<AuthService>();
     _navigationService = _getIt.get<NavigationService>();
     _databaseService = _getIt.get<DatabaseService>();
+    user = _authService.currentUser;
     loadProfile();
     timeago.setLocaleMessages('custom', CustomShortMessages());
   }
-
-  List _items = [];
 
   @override
   Widget build(BuildContext context) {

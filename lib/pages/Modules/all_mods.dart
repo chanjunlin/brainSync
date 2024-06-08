@@ -1,16 +1,16 @@
 import 'dart:convert';
 
-import 'package:brainsync/pages/module_page.dart';
+import 'package:brainsync/pages/Modules/module_page.dart';
 import 'package:brainsync/services/navigation_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
 
-import '../common_widgets/module_card.dart';
-import '../common_widgets/search_bar.dart';
-import '../model/module.dart';
-import '../services/api_service.dart';
+import '../../common_widgets/module_card.dart';
+import '../../common_widgets/search_bar.dart';
+import '../../model/module.dart';
+import '../../services/api_service.dart';
 
 class ModuleListPage extends StatefulWidget {
   const ModuleListPage({super.key});
@@ -84,40 +84,45 @@ class _ModuleListPageState extends State<ModuleListPage> {
       ),
       body: Column(
         children: [
+          const SizedBox(height: 10),
           SearchBar(
             controller: searchController,
             onChanged: filterModules,
             hintText: 'Search for modules with Code or Title',
+            backgroundColor: MaterialStateProperty.all(Color(0xFFF8F9FF)),
           ),
+          const SizedBox(height: 10),
           Expanded(
-            child: FutureBuilder<List<Module>>(
-              future: futureModules,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
-                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return Center(child: Text('No modules found'));
-                } else {
-                  return ListView.builder(
-                    itemCount: filteredModules.isEmpty
-                        ? snapshot.data!.length
-                        : filteredModules.length,
-                    itemBuilder: (context, index) {
-                      final module = filteredModules.isEmpty
-                          ? snapshot.data![index]
-                          : filteredModules[index];
-                      return ModuleTile(
-                        module: module,
-                        onTap: () {
-                          navigateToModuleDetails(module);
-                        },
-                      );
-                    },
-                  );
-                }
-              },
+            child: Scrollbar(
+              child: FutureBuilder<List<Module>>(
+                future: futureModules,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Center(child: Text('Error: ${snapshot.error}'));
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return Center(child: Text('No modules found'));
+                  } else {
+                    return ListView.builder(
+                      itemCount: filteredModules.isEmpty
+                          ? snapshot.data!.length
+                          : filteredModules.length,
+                      itemBuilder: (context, index) {
+                        final module = filteredModules.isEmpty
+                            ? snapshot.data![index]
+                            : filteredModules[index];
+                        return ModuleTile(
+                          module: module,
+                          onTap: () {
+                            navigateToModuleDetails(module);
+                          },
+                        );
+                      },
+                    );
+                  }
+                },
+              ),
             ),
           ),
         ],

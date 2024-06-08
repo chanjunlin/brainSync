@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:brainsync/model/chat.dart';
 import 'package:brainsync/model/message.dart';
-import 'package:brainsync/pages/visiting_profile.dart';
+import 'package:brainsync/pages/Profile/visit_profile.dart';
 import 'package:brainsync/services/database_service.dart';
 import 'package:brainsync/services/storage_service.dart';
 import 'package:brainsync/utils.dart';
@@ -11,12 +11,12 @@ import 'package:flutter/material.dart';
 import 'package:dash_chat_2/dash_chat_2.dart';
 import 'package:get_it/get_it.dart';
 
-import '../model/user_profile.dart';
-import '../services/auth_service.dart';
+import '../../model/user_profile.dart';
+import '../../services/auth_service.dart';
 
 import 'dart:core';
 
-import '../services/media_service.dart';
+import '../../services/media_service.dart';
 
 class ChatPage extends StatefulWidget {
   final UserProfile chatUser;
@@ -79,7 +79,7 @@ class _ChatPageState extends State<ChatPage> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => VisitingProfile(
+                builder: (context) => VisitProfile(
                     userId: otherUser),
               ),
             );

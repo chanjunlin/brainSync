@@ -9,6 +9,7 @@ import 'package:brainsync/services/storage_service.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get_it/get_it.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> setUpFireBase() async {
   await Firebase.initializeApp(

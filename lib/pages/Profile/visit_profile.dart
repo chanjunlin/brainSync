@@ -4,25 +4,26 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get_it/get_it.dart';
 
-import '../model/user_profile.dart';
-import '../services/auth_service.dart';
+import '../../model/user_profile.dart';
+import '../../services/auth_service.dart';
 
-class VisitingProfile extends StatefulWidget {
+class VisitProfile extends StatefulWidget {
   final UserProfile userId;
 
-  VisitingProfile({required this.userId});
+  VisitProfile({required this.userId});
 
   @override
-  State<VisitingProfile> createState() => _VisitingProfileState();
+  State<VisitProfile> createState() => _VisitProfileState();
 }
 
-class _VisitingProfileState extends State<VisitingProfile> {
+class _VisitProfileState extends State<VisitProfile> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final GetIt _getIt = GetIt.instance;
 
   late AuthService _authService;
   late DatabaseService _databaseService;
   late String userToAdd;
+  bool isFriendRequestSent = false;
 
   ChatUser? currentUser, otherUser;
 
@@ -54,7 +55,6 @@ class _VisitingProfileState extends State<VisitingProfile> {
       body: FutureBuilder<DocumentSnapshot>(
         future: _firestore.collection('users').doc(widget.userId!.uid).get(),
         builder: (context, snapshot) {
-          print("one");
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
           }
@@ -65,9 +65,6 @@ class _VisitingProfileState extends State<VisitingProfile> {
             return Center(child: Text('User not found'));
           }
 
-          print('two');
-          print(currentUser!.id);
-          print(otherUser!.id);
           var userData = snapshot.data!.data() as Map<String, dynamic>;
           String? pfpURL = userData['pfpURL'];
           String? firstName = userData['firstName'];
@@ -88,7 +85,7 @@ class _VisitingProfileState extends State<VisitingProfile> {
                 SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: () async {
-                    await _databaseService.sendFriendRequest(currentUser!.id, otherUser!.id);
+                    await _databaseService.sendFriendRequest(currentUser!.id, otherUser!.id, updateFriendRequestStatus);
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text('Friend request sent!')),
                     );
@@ -102,5 +99,10 @@ class _VisitingProfileState extends State<VisitingProfile> {
         },
       ),
     );
+  }
+  void updateFriendRequestStatus(bool isSent) {
+    setState(() {
+      isFriendRequestSent = isSent;
+    });
   }
 }

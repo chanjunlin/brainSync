@@ -120,14 +120,13 @@ class _ProfileState extends State<Profile> {
   Widget buildSignOutButton() {
     return IconButton(
       onPressed: () async {
-        bool result = await _authService.signOut();
-        if (result) {
-          _alertService.showToast(
-            text: "Successfully logged out!",
-            icon: Icons.check,
-          );
-          _navigationService.pushReplacementName("/login");
-        }
+        await _authService.signOut();
+
+        _alertService.showToast(
+          text: "Successfully logged out!",
+          icon: Icons.check,
+        );
+        _navigationService.pushReplacementName("/login");
       },
       icon: Icon(Icons.logout, color: Colors.brown[300]),
       tooltip: 'Logout',
@@ -218,8 +217,8 @@ class _ProfileState extends State<Profile> {
   }
 
   Widget buildFriendRequestTile(String uid) {
-    return FutureBuilder<DocumentSnapshot<Object?>>(
-      future: _databaseService.getUserProfile(uid),
+    return StreamBuilder<DocumentSnapshot<Object?>>(
+      stream: _databaseService.getUserProfile(uid),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const CircularProgressIndicator();
