@@ -8,6 +8,10 @@ import 'dart:core';
 
 import '../services/navigation_service.dart';
 import 'package:get_it/get_it.dart';
+import '../services/api_service.dart';
+import '../model/module.dart';
+import 'dart:async';
+
 
 class PostsPage extends StatefulWidget {
   @override
@@ -26,12 +30,58 @@ class _PostsPageState extends State<PostsPage> {
   late NavigationService _navigationService;
   final GetIt _getIt = GetIt.instance;
 
+  List<Module> _modules = [];
+  List<Module> _filteredModules = [];
+  Timer? _debounce;
+
   @override
   void initState() {
     super.initState();
     _alertService = _getIt.get<AlertService>();
     _navigationService = _getIt.get<NavigationService>();
     _authService = _getIt.get<AuthService>();
+    _fetchModules();
+    _titleController.addListener(() {
+      _onSearchChanged();
+    }
+    );
+  }
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    _titleController.dispose();
+    _contentController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _fetchModules() async {
+    try {
+      final modules = await ApiService.fetchModules();
+      setState(() {
+        _modules = modules;
+      });
+    }
+    catch (e) {
+      print("error");
+    }
+  }
+
+  void _onSearchChanged() {
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    _debounce = Timer(const Duration(milliseconds: 300), () {
+      _filterModules(_titleController.text);
+    });
+  }
+
+  void _filterModules(String type) {
+    setState(() {
+      _filteredModules = _modules.where((module)=> module.code.toLowerCase().startsWith(type.toLowerCase())).take(10).toList();
+    });
+  }
+
+  bool _isValidModuleCode(String title){
+    return _modules.any((module)=> module.code == title);
   }
 
   Future<void> _createPost() async {
@@ -130,6 +180,28 @@ class _PostsPageState extends State<PostsPage> {
     );
   }
 
+  Widget _buildSuggestionList() {
+    if (_filteredModules.isEmpty || _titleController.text.isEmpty || _isValidModuleCode(_titleController.text)) {
+      return Container();
+    }
+    return Container(
+      constraints: const BoxConstraints(maxHeight: 150),
+      child: ListView.builder(
+      itemCount: _filteredModules.length,
+      itemBuilder: (context, index){
+        return ListTile(
+          title: Text(_filteredModules[index].code),
+          onTap: () {
+            setState(() {
+              _titleController.text = _filteredModules[index].code; //provide suggestions for title
+            });
+          },
+        );
+      },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -165,7 +237,7 @@ class _PostsPageState extends State<PostsPage> {
                 cursorColor: Colors.brown[300],
                 controller: _titleController,
                 decoration: InputDecoration(
-                  labelText: 'Title',
+                  labelText: 'Module Code',
                   labelStyle: TextStyle(
                     color: Colors.brown[800],
                   ),
@@ -182,11 +254,15 @@ class _PostsPageState extends State<PostsPage> {
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a title';
+                    return 'Please enter a module code';
+                  }
+                  else if (!_isValidModuleCode(value)){
+                    return 'Invalid module code';
                   }
                   return null;
                 },
               ),
+              _buildSuggestionList(),
               const SizedBox(height: 30),
               TextFormField(
                 cursorColor: Colors.brown[300],
@@ -216,7 +292,7 @@ class _PostsPageState extends State<PostsPage> {
                 },
               ),
               const SizedBox(height: 20),
-              Spacer(), // Add Spacer to push buttons to the bottom
+              const Spacer(), // Add Spacer to push buttons to the bottom
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [

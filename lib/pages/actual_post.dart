@@ -3,6 +3,7 @@ import 'dart:ffi';
 import 'package:brainsync/services/database_service.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/widgets.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http/http.dart';
 import 'package:timeago/timeago.dart' as timeago;
@@ -101,24 +102,27 @@ class _PostDetailPageState extends State<PostDetailPage> {
           children: [
             Text(
               widget.title,
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.brown[800]),
             ),
             const SizedBox(height: 10),
             Text(
               'By ${currentUser}',
-              style: const TextStyle(fontSize: 16, fontStyle: FontStyle.italic),
+              style: TextStyle(fontSize: 16, fontStyle: FontStyle.italic, color: Colors.brown[800]),
             ),
             const SizedBox(height: 10),
             Text(
               widget.content,
-              style: const TextStyle(fontSize: 16),
+              style: TextStyle(fontSize: 16, color: Colors.brown[800]),
             ),
             const SizedBox(height: 20),
             Divider(),
             const SizedBox(height: 20),
-            const Text(
+            Text(
               'Comments',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 18, 
+              fontWeight: FontWeight.bold,
+              color: Colors.brown[800],
+              ),
             ),
             Expanded(
               child: StreamBuilder<QuerySnapshot>(
@@ -147,18 +151,31 @@ class _PostDetailPageState extends State<PostDetailPage> {
                       final date = timestamp.toDate();
                       final formattedDate =
                           timeago.format(date, locale: 'custom');
-                      return ListTile(
-                        title: Text(
-                            '${comment['authorName'] == '${user!.get('firstName')} ${user!.get('lastName')}' ? "Me" : comment['authorName']} $formattedDate',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.brown[800],
-                            )),
-                        subtitle: Text(comment['content'],
-                            style: TextStyle(
-                              fontSize: 17,
-                              color: Colors.brown[800],
-                            )),
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                        child: Card(
+                          color: Colors.white,
+                          shape: const RoundedRectangleBorder(
+                            side: BorderSide(
+                              color: Colors.brown,
+                              width: 1.0,
+                            ),
+                          ),
+                          margin: const EdgeInsets.symmetric(vertical: 0, horizontal: 0),
+                          child: ListTile(
+                            title: Text(
+                              '${comment['authorName'] == '${user!.get('firstName')} ${user!.get('lastName')}' ? "Me" : comment['authorName']} $formattedDate',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.brown[800],
+                              )),
+                          subtitle: Text(comment['content'],
+                              style: TextStyle(
+                                fontSize: 17,
+                                color: Colors.brown[800],
+                              )),
+                        ),
+                        ),
                       );
                     },
                   );
