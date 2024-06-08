@@ -2,6 +2,7 @@ import 'package:brainsync/services/database_service.dart';
 import 'package:brainsync/services/navigation_service.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/widgets.dart';
 import 'package:get_it/get_it.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import '../../services/auth_service.dart';
@@ -97,24 +98,32 @@ class _PostDetailPageState extends State<PostDetailPage> {
           children: [
             Text(
               widget.title,
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.brown[800]),
             ),
             const SizedBox(height: 10),
             Text(
+<<<<<<< HEAD:lib/pages/Posts/actual_post.dart
               'By ${currentUser ?? "Loading..."}',
               style: const TextStyle(fontSize: 16, fontStyle: FontStyle.italic),
+=======
+              'By ${currentUser}',
+              style: TextStyle(fontSize: 16, fontStyle: FontStyle.italic, color: Colors.brown[800]),
+>>>>>>> master:lib/pages/actual_post.dart
             ),
             const SizedBox(height: 10),
             Text(
               widget.content,
-              style: const TextStyle(fontSize: 16),
+              style: TextStyle(fontSize: 16, color: Colors.brown[800]),
             ),
             const SizedBox(height: 20),
             const Divider(),
             const SizedBox(height: 20),
-            const Text(
+            Text(
               'Comments',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 18, 
+              fontWeight: FontWeight.bold,
+              color: Colors.brown[800],
+              ),
             ),
             Expanded(
               child: StreamBuilder<QuerySnapshot>(
@@ -142,6 +151,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
                       final comment = comments[index].data() as Map<String, dynamic>;
                       final timestamp = comment['timestamp'] as Timestamp;
                       final date = timestamp.toDate();
+<<<<<<< HEAD:lib/pages/Posts/actual_post.dart
                       final formattedDate = timeago.format(date, locale: 'custom');
                       final authorId = comment['authorId'] as String;
 
@@ -189,6 +199,35 @@ class _PostDetailPageState extends State<PostDetailPage> {
                             ),
                           );
                         },
+=======
+                      final formattedDate =
+                          timeago.format(date, locale: 'custom');
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                        child: Card(
+                          color: Colors.white,
+                          shape: const RoundedRectangleBorder(
+                            side: BorderSide(
+                              color: Colors.brown,
+                              width: 1.0,
+                            ),
+                          ),
+                          margin: const EdgeInsets.symmetric(vertical: 0, horizontal: 0),
+                          child: ListTile(
+                            title: Text(
+                              '${comment['authorName'] == '${user!.get('firstName')} ${user!.get('lastName')}' ? "Me" : comment['authorName']} $formattedDate',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.brown[800],
+                              )),
+                          subtitle: Text(comment['content'],
+                              style: TextStyle(
+                                fontSize: 17,
+                                color: Colors.brown[800],
+                              )),
+                        ),
+                        ),
+>>>>>>> master:lib/pages/actual_post.dart
                       );
                     },
                   );
