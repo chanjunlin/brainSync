@@ -11,6 +11,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import '../pages/add_friend.dart';
+import '../pages/all_mods.dart';
 import '../pages/chat_home.dart';
 import '../pages/friends_chat.dart';
 import '../pages/post.dart';
@@ -32,6 +33,7 @@ class NavigationService {
     "/testing": (context) => Testing(),
     "/notifications": (context) => Notifications(),
     "/allUsers": (context) => ShowEveryone(),
+    "/nusMods": (context) => ModuleListPage(),
   };
 
   Map<String, Widget Function(BuildContext)> get routes {

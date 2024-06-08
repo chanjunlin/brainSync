@@ -144,14 +144,6 @@ class _Profile2State extends State<Profile2> {
             color: Colors.brown[800],
           ),
         ),
-        const SizedBox(height: 10),
-        Text(
-          'What Year',
-          style: TextStyle(
-            fontSize: 16,
-            color: Colors.brown[700],
-          ),
-        ),
         const SizedBox(height: 16),
         editProfileButton(),
         const SizedBox(height: 16),
@@ -273,13 +265,14 @@ class _Profile2State extends State<Profile2> {
 
   Widget buildTabBarSection() {
     return DefaultTabController(
-      length: 3,
+      length: 4,
       child: Column(
         children: [
           TabBar(
             labelColor: Colors.brown[800],
             unselectedLabelColor: Colors.brown[400],
             tabs: [
+              Tab(text: 'About'),
               Tab(text: 'Posts'),
               Tab(text: 'Comments'),
               Tab(text: 'Friends'),
@@ -289,6 +282,35 @@ class _Profile2State extends State<Profile2> {
             height: 400, // Adjust as needed
             child: TabBarView(
               children: [
+                Column(
+                  children: [
+                    const SizedBox(height: 10),
+                    Text(
+                      'Year: Year 2',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.brown[700],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Current modules: ',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.brown[700],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Modules completed: ',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.brown[700],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+                ),
                 Center(child: Text('Posts Content')),
                 Center(child: Text('Comments Content')),
                 showFriendsTab(),

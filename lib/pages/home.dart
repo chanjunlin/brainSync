@@ -45,17 +45,8 @@ class _HomeState extends State<Home> {
 
   List _items = [];
 
-  // Future<void> getMods() async {
-  //   var url = await http.get(
-  //       Uri.https("api.nusmods.com", "v2/2018-2019/modules/CS2040.json"));
-  //   var jsonData = await jsonDecode(url.body);
-  //   for (var mods in jsonData)
-  //     print(mods);
-  // }
-
   @override
   Widget build(BuildContext context) {
-    // getMods();
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -64,16 +55,6 @@ class _HomeState extends State<Home> {
         backgroundColor: Colors.brown[300],
         foregroundColor: Colors.white,
         title: const Text("BrainSync"),
-        // title: Row(
-        //   children: [
-        //     ElevatedButton(
-        //       onPressed: () async {
-        //         _navigationService.pushName("/friendsChat");
-        //       },
-        //       child: const Text("see friends"),
-        //     )
-        //   ],
-        // ),
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
@@ -141,8 +122,7 @@ class _HomeState extends State<Home> {
                             ),
                             Text(
                               formattedDate,
-                              style: TextStyle(
-                                  color: Colors.brown.shade800),
+                              style: TextStyle(color: Colors.brown.shade800),
                             ),
                           ],
                         ),
