@@ -4,17 +4,23 @@ class UserProfile {
   String? lastName;
   String? pfpURL;
   String? profileCoverURL;
+  String? year;
   List<String?>? friendList;
   List<String?>? friendReqList;
+  List<String?>? currentModules;
+  List<String?>? completedModules;
 
   UserProfile({
     required this.uid,
     required this.firstName,
     required this.lastName,
     required this.pfpURL,
+    required this.year,
     required this.friendList,
     required this.friendReqList,
     required this.profileCoverURL,
+    required this.completedModules,
+    required this.currentModules,
   });
 
   UserProfile.fromJson(Map<String, dynamic> json) {
@@ -23,6 +29,7 @@ class UserProfile {
     lastName = json['lastName'];
     pfpURL = json['pfpURL'];
     profileCoverURL = json['profileCoverURL'];
+    year = json['year'];
     if (json['friendList'] != null) {
       friendList = List<String>.from(json['friendList']);
     } else {
@@ -33,6 +40,16 @@ class UserProfile {
     } else {
       friendReqList = [];
     }
+    if (json['completedModules'] != null) {
+      completedModules = List<String>.from(json['completedModules']);
+    } else {
+      completedModules = [];
+    }
+    if (json['currentModules'] != null) {
+      currentModules = List<String>.from(json['currentModules']);
+    } else {
+      currentModules = [];
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -42,8 +59,11 @@ class UserProfile {
     data['pfpURL'] = pfpURL;
     data['profileCoverURL'] = profileCoverURL;
     data['uid'] = uid;
+    data['year'] = year;
     data['friendList'] = friendList;
     data['friendReqList'] = friendReqList;
+    data['completedModule'] = completedModules;
+    data['currentModule'] = currentModules;
     return data;
   }
 }

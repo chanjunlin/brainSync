@@ -6,10 +6,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'dart:core';
 
-import '../services/navigation_service.dart';
+import '../../services/navigation_service.dart';
 import 'package:get_it/get_it.dart';
-import '../services/api_service.dart';
-import '../model/module.dart';
+import 'package:brainsync/services/api_service.dart';
+import 'package:brainsync/model/module.dart';
 import 'dart:async';
 
 
@@ -159,7 +159,7 @@ class _PostsPageState extends State<PostsPage> {
     );
   }
 
-  Widget _discardButton() {
+  Widget discardButton() {
     return FilledButton(
       style: FilledButton.styleFrom(
         backgroundColor: Colors.red[300],
@@ -303,7 +303,7 @@ class _PostsPageState extends State<PostsPage> {
                       child: SizedBox(
                         height: 50,
                         // Adjust the height to make the buttons larger
-                        child: _discardButton(),
+                        child: discardButton(),
                       ),
                     ),
                   ),

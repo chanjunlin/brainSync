@@ -1,4 +1,6 @@
+import 'package:brainsync/services/navigation_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
 import 'alert_service.dart';
@@ -7,7 +9,8 @@ class AuthService {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   final GetIt _getIt = GetIt.instance;
 
-  late AlertService _alertService;
+  // late AlertService _alertService;
+  // late NavigationService _navigationService;
 
   User? _user;
 
@@ -21,6 +24,7 @@ class AuthService {
 
   AuthService() {
     // _alertService = _getIt.get<AlertService>();
+    // _navigationService = _getIt.get<NavigationService>();
   }
 
   Future<bool> login(String email, String password) async {
@@ -29,11 +33,16 @@ class AuthService {
           email: email, password: password);
       if (credential.user != null) {
         _user = credential.user;
-        print(_user);
-        return true;
+        if (_user!.emailVerified) {
+          return true;
+        } else {
+          await _firebaseAuth.signOut();
+          throw Exception("Please verify your email before logging in.");
+        }
       }
     } catch (e) {
       print(e);
+      throw e;
     }
     return false;
   }
@@ -42,8 +51,9 @@ class AuthService {
     try {
       await _firebaseAuth.signOut();
       return true;
-    } catch (e) {}
-    return false;
+    } catch (e) {
+      return false;
+    }
   }
 
   void authChangeStreamListener(User? user) {
@@ -76,5 +86,15 @@ class AuthService {
       return e.toString();
     }
     return "false";
+  }
+
+  Future<void> sendEmailVerification() async {
+    try {
+      User? user = FirebaseAuth.instance.currentUser;
+      await user?.sendEmailVerification();
+      print("email sent");
+    } catch (e) {
+      print('Error sending verification email: $e');
+    }
   }
 }
