@@ -5,9 +5,9 @@ import 'package:brainsync/services/media_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
-import '../const.dart';
-import '../services/auth_service.dart';
-import '../services/navigation_service.dart';
+import '../../const.dart';
+import '../../services/auth_service.dart';
+import '../../services/navigation_service.dart';
 import 'package:brainsync/pages/form/signup_form.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -69,7 +69,7 @@ class _RegisterPageState extends State<RegisterPage> {
               title: 'Get on board!',
               subTitle: 'Create your profile to start your journey',
             ),
-            const signUpForm(),
+            const SignUpForm(),
             Column(
               children: [
                 // const Text('OR'),

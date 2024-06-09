@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:brainsync/common_widgets/dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -33,7 +34,7 @@ class _Profile2State extends State<Profile2> {
   Uint8List? pickedImage;
   File? selectedImage;
   String? userProfilePfp, userProfileCover, firstName, lastName;
-  List? friendReqList;
+  List? friendReqList, currentModules, completedModules;
 
   late AlertService _alertService;
   late AuthService _authService;
@@ -53,6 +54,7 @@ class _Profile2State extends State<Profile2> {
     _mediaService = _getIt.get<MediaService>();
     _databaseService = _getIt.get<DatabaseService>();
     loadProfile();
+    print(currentModules);
   }
 
   @override
@@ -64,7 +66,7 @@ class _Profile2State extends State<Profile2> {
           buildTop(),
           buildProfileInfo(),
           Divider(),
-          buildTabBarSection(),  // Add this line
+          buildTabBarSection(), // Add this line
         ],
       ),
       bottomNavigationBar: CustomBottomNavBar(initialIndex: 4),
@@ -118,14 +120,12 @@ class _Profile2State extends State<Profile2> {
   Widget buildSignOutButton() {
     return IconButton(
       onPressed: () async {
-        bool result = await _authService.signOut();
-        if (result) {
-          _alertService.showToast(
-            text: "Successfully logged out!",
-            icon: Icons.check,
-          );
-          _navigationService.pushReplacementName("/login");
-        }
+        await _authService.signOut();
+        _alertService.showToast(
+          text: "Successfully logged out!",
+          icon: Icons.check,
+        );
+        _navigationService.pushReplacementName("/login");
       },
       icon: Icon(Icons.logout, color: Colors.brown[300]),
       tooltip: 'Logout',
@@ -202,14 +202,14 @@ class _Profile2State extends State<Profile2> {
     } else {
       return Column(
         children:
-        friendReqList!.map((uid) => buildFriendRequestTile(uid)).toList(),
+            friendReqList!.map((uid) => buildFriendRequestTile(uid)).toList(),
       );
     }
   }
 
   Widget buildFriendRequestTile(String uid) {
-    return FutureBuilder<DocumentSnapshot<Object?>>(
-      future: _databaseService.getUserProfile(uid),
+    return StreamBuilder<DocumentSnapshot<Object?>>(
+      stream: _databaseService.getUserProfile(uid),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return CircularProgressIndicator();
@@ -254,6 +254,8 @@ class _Profile2State extends State<Profile2> {
           firstName = userProfile.get('firstName') ?? 'Name';
           lastName = userProfile.get('lastName') ?? 'Name';
           friendReqList = userProfile.get("friendReqList") ?? [];
+          currentModules = userProfile.get("currentModule") ?? [];
+          completedModules = userProfile.get("completedModule") ?? [];
         });
       } else {
         print('User profile not found');
@@ -272,7 +274,7 @@ class _Profile2State extends State<Profile2> {
             labelColor: Colors.brown[800],
             unselectedLabelColor: Colors.brown[400],
             tabs: [
-              Tab(text: 'About'),
+              Tab(text: 'Modules'),
               Tab(text: 'Posts'),
               Tab(text: 'Comments'),
               Tab(text: 'Friends'),
@@ -282,41 +284,132 @@ class _Profile2State extends State<Profile2> {
             height: 400, // Adjust as needed
             child: TabBarView(
               children: [
-                Column(
-                  children: [
-                    const SizedBox(height: 10),
-                    Text(
-                      'Year: Year 2',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.brown[700],
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Current modules: ',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.brown[700],
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Modules completed: ',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.brown[700],
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                  ],
-                ),
+                showModule(),
                 Center(child: Text('Posts Content')),
                 Center(child: Text('Comments Content')),
                 showFriendsTab(),
               ],
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget showModule() {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 16),
+          Text(
+            'Current Modules:',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
+              color: Colors.brown[800],
+            ),
+          ),
+          SizedBox(
+            height: 8,
+          ),
+          if (currentModules != null && currentModules!.isNotEmpty)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: currentModules!.map((module) {
+                return Dismissible(
+                  key: UniqueKey(),
+                  confirmDismiss: (direction) async {
+                    // Show confirmation dialog
+                    return await showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: Text("Remove Module"),
+                          content: Text("Do you want to remove the module?"),
+                          actions: <Widget>[
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop(
+                                    false); // Dismiss dialog and return false
+                              },
+                              child: Text("Cancel"),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop(
+                                    true); // Dismiss dialog and return true
+                              },
+                              child: Text("Confirm"),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  },
+                  onDismissed: (direction) {
+                    print(module);
+                    print(_authService.currentUser!.uid);
+                    _databaseService.removeModule(
+                        _authService.currentUser!.uid, module);
+                    setState(() {
+                      currentModules!.remove(module);
+                    });
+                  },
+                  background: Container(
+                    color: Colors.red,
+                    child: Icon(
+                      Icons.delete,
+                      color: Colors.white,
+                    ),
+                  ),
+                  child: ListTile(
+                    title: Text(
+                      '$module',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.brown[700],
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          if (currentModules == null || currentModules!.isEmpty)
+            Text('No current modules'),
+          const SizedBox(height: 16),
+
+          // Completed Modules Section
+          Text(
+            'Completed Modules:',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
+              color: Colors.brown[800],
+            ),
+          ),
+          SizedBox(
+            height: 8,
+          ),
+          if (completedModules != null && completedModules!.isNotEmpty)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: completedModules!.map((module) {
+                return ListTile(
+                  title: Text(
+                    '$module',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.brown[700],
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          if (completedModules == null || completedModules!.isEmpty)
+            Text('No completed modules'),
+          const SizedBox(height: 16),
         ],
       ),
     );

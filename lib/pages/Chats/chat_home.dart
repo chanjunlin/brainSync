@@ -6,9 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 
-import '../model/user_profile.dart';
-import '../services/navigation_service.dart';
-import 'package:brainsync/pages/chat_page.dart';
+import '../../model/user_profile.dart';
+import '../../services/navigation_service.dart';
+import 'package:brainsync/pages/Chats/chat_page.dart';
 
 
 class ChatHomePage extends StatefulWidget {

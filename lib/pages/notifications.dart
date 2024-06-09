@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:brainsync/pages/Profile/visiting_profile.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
@@ -7,7 +10,6 @@ import '../const.dart';
 import '../services/alert_service.dart';
 import '../services/auth_service.dart';
 import '../services/database_service.dart';
-import '../services/navigation_service.dart';
 
 class Notifications extends StatefulWidget {
   const Notifications({Key? key}) : super(key: key);
@@ -22,8 +24,16 @@ class _NotificationsState extends State<Notifications> {
   late AuthService _authService;
   late DatabaseService _databaseService;
 
-  String? userProfilePfp, userProfileCover, firstName, lastName;
-  List? friendReqList;
+  String userProfilePfp = PLACEHOLDER_PFP;
+  String userProfileCover = PLACEHOLDER_PROFILE_COVER;
+  String firstName = 'First';
+  String lastName = 'Last';
+  String bio = 'No bio available';
+  bool isFriendRequestSent = false;
+  List? friendReqList = [];
+  bool isFriend = false;
+
+  late StreamSubscription<DocumentSnapshot> friendRequestStream;
 
   @override
   void initState() {
@@ -35,9 +45,16 @@ class _NotificationsState extends State<Notifications> {
   }
 
   @override
+  void dispose() {
+    friendRequestStream.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: const Text('Notifications'),
       ),
       body: buildFriendRequests(),
@@ -68,8 +85,8 @@ class _NotificationsState extends State<Notifications> {
   }
 
   Widget buildFriendRequestTile(String uid) {
-    return FutureBuilder<DocumentSnapshot<Object?>>(
-      future: _databaseService.getUserProfile(uid),
+    return StreamBuilder<DocumentSnapshot<Object?>>(
+      stream: _databaseService.getUserProfile(uid),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const CircularProgressIndicator();
@@ -83,24 +100,35 @@ class _NotificationsState extends State<Notifications> {
 
         var userData = snapshot.data!.data() as Map<String, dynamic>;
 
-        return ListTile(
-          leading: CircleAvatar(
-            backgroundImage: NetworkImage(userData['pfpURL']),
-          ),
-          title: Text(userData['firstName']),
-          trailing: IconButton(
-            icon: const Icon(Icons.check),
-            onPressed: () async {
-              await _databaseService.acceptFriendRequest(
-                  uid, _authService.user!.uid);
-              setState(() {
-                friendReqList!.remove(uid);
-              });
-              _alertService.showToast(
-                text: "Friend Accepted",
-                icon: Icons.check,
+        return Card(
+          child: ListTile(
+            onTap: () {
+              // Redirect to the profile page of the user who sent the request
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => VisitProfile(userId: uid),
+                ),
               );
             },
+            leading: CircleAvatar(
+              backgroundImage: NetworkImage(userData['pfpURL']),
+            ),
+            title: Text(userData['firstName']),
+            trailing: IconButton(
+              icon: const Icon(Icons.check),
+              onPressed: () async {
+                await _databaseService.acceptFriendRequest(
+                    uid, _authService.user!.uid);
+                setState(() {
+                  friendReqList!.remove(uid);
+                });
+                _alertService.showToast(
+                  text: "Friend Accepted",
+                  icon: Icons.check,
+                );
+              },
+            ),
           ),
         );
       },
@@ -121,21 +149,34 @@ class _NotificationsState extends State<Notifications> {
 
   void loadProfile() async {
     try {
-      DocumentSnapshot? userProfile = await _databaseService.fetchCurrentUser();
-      if (userProfile != null && userProfile.exists) {
-        setState(() {
-          userProfilePfp = userProfile.get('pfpURL') ?? PLACEHOLDER_PFP;
-          userProfileCover =
-              userProfile.get('profileCoverURL') ?? PLACEHOLDER_PROFILE_COVER;
-          firstName = userProfile.get('firstName') ?? 'Name';
-          lastName = userProfile.get('lastName') ?? 'Name';
-          friendReqList = userProfile.get("friendReqList") ?? [];
-        });
-      } else {
-        print('User profile not found');
-      }
+      print(friendReqList);
+      friendRequestStream = _databaseService
+          .getUserProfile(_authService.currentUser!.uid)
+          .listen((userProfile) {
+        if (userProfile.exists) {
+          var data = userProfile.data() as Map<String, dynamic>;
+          setState(() {
+            userProfilePfp = data['pfpURL'] ?? PLACEHOLDER_PFP;
+            userProfileCover =
+                data['profileCoverURL'] ?? PLACEHOLDER_PROFILE_COVER;
+            firstName = data['firstName'] ?? 'First';
+            lastName = data['lastName'] ?? 'Last';
+            bio = data['bio'] ?? 'No bio available';
+
+            // Ensure correct casting and initialization of friendReqList
+            friendReqList = List<String>.from(data['friendReqList'] ?? []);
+            List friendList = data['friendList'] ?? [];
+
+            isFriend = friendList.contains(_authService.currentUser!.uid);
+            isFriendRequestSent =
+                friendReqList!.contains(_authService.currentUser!.uid);
+          });
+        } else {
+          print('User profile not found');
+        }
+      });
     } catch (e) {
-      print('Error loading profile: $e');
+      print(e);
     }
   }
 }

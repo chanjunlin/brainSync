@@ -1,7 +1,7 @@
-// custom_bottom_nav_bar.dart
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+
 import '../services/navigation_service.dart';
 
 class CustomBottomNavBar extends StatefulWidget {
@@ -14,7 +14,8 @@ class CustomBottomNavBar extends StatefulWidget {
 }
 
 class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
-  final NavigationService _navigationService = GetIt.instance<NavigationService>();
+  final NavigationService _navigationService =
+      GetIt.instance<NavigationService>();
 
   @override
   Widget build(BuildContext context) {
@@ -24,60 +25,31 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
       buttonBackgroundColor: Colors.brown[300],
       color: Colors.brown.shade300,
       animationDuration: const Duration(milliseconds: 200),
-      items: <Widget>[
-        GestureDetector(
-          child: Icon(
-            Icons.home,
-            size: 26,
-            color: Colors.white,
-          ),
-          onTap: () async {
-            _navigationService.pushName("/home");
-          },
-        ),
-        GestureDetector(
-          child: Icon(
-            Icons.chat,
-            size: 26,
-            color: Colors.white,
-          ),
-          onTap: () async {
-            _navigationService.pushName("/friendsChat");
-          },
-        ),
-        GestureDetector(
-          child: Icon(
-            Icons.add,
-            size: 26,
-            color: Colors.white,
-          ),
-          onTap: () async {
-            _navigationService.pushName("/post");
-          },
-        ),
-        GestureDetector(
-          child: Icon(
-            Icons.notifications,
-            size: 26,
-            color: Colors.white,
-          ),
-          onTap: () async {
-            _navigationService.pushName("/notifications");
-          },
-        ),
-        GestureDetector(
-          child: Icon(
-            Icons.person,
-            size: 26,
-            color: Colors.white,
-          ),
-          onTap: () async {
-            _navigationService.pushName("/profile");
-          },
-        ),
+      items: const <Widget>[
+        Icon(Icons.home, size: 26, color: Colors.white),
+        Icon(Icons.chat, size: 26, color: Colors.white),
+        Icon(Icons.add, size: 26, color: Colors.white),
+        Icon(Icons.notifications, size: 26, color: Colors.white),
+        Icon(Icons.person, size: 26, color: Colors.white),
       ],
       onTap: (index) {
-        setState(() {});
+        switch (index) {
+          case 0:
+            _navigationService.pushName("/home");
+            break;
+          case 1:
+            _navigationService.pushName("/friendsChat");
+            break;
+          case 2:
+            _navigationService.pushName("/post");
+            break;
+          case 3:
+            _navigationService.pushName("/notifications");
+            break;
+          case 4:
+            _navigationService.pushName("/profile");
+            break;
+        }
       },
     );
   }

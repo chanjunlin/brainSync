@@ -1,4 +1,4 @@
-import 'package:brainsync/pages/login.dart';
+import 'package:brainsync/pages/Administation/login.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:brainsync/auth.dart';

@@ -1,14 +1,14 @@
 import 'package:brainsync/auth.dart';
 import 'package:brainsync/common_widgets/user_tile.dart';
-import 'package:brainsync/pages/visiting_profile.dart';
+import 'package:brainsync/pages/Profile/visit_profile.dart';
 import 'package:brainsync/services/auth_service.dart';
 import 'package:brainsync/services/database_service.dart';
 import 'package:brainsync/services/navigation_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import '../common_widgets/chat_tile.dart';
-import '../model/user_profile.dart'; // Assuming you have a UserProfile model defined
+import '../../common_widgets/chat_tile.dart';
+import '../../model/user_profile.dart'; // Assuming you have a UserProfile model defined
 
 class ShowEveryone extends StatefulWidget {
   @override
@@ -75,7 +75,7 @@ class _ShowEveryoneState extends State<ShowEveryone> {
                     }
                     _navigationService.push(
                       MaterialPageRoute(builder: (context) {
-                        return VisitingProfile(
+                        return VisitProfile(
                           userId: user,
                         );
                       }),
