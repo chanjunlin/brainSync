@@ -115,7 +115,9 @@ class _PostDetailPageState extends State<PostDetailPage> {
               style: TextStyle(fontSize: 16, color: Colors.brown[800]),
             ),
             const SizedBox(height: 20),
-            Divider(),
+              Divider(
+              color: Colors.brown[800],
+            ),
             const SizedBox(height: 20),
             Text(
               'Comments',
