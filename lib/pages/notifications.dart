@@ -10,7 +10,6 @@ import '../const.dart';
 import '../services/alert_service.dart';
 import '../services/auth_service.dart';
 import '../services/database_service.dart';
-import '../services/navigation_service.dart';
 
 class Notifications extends StatefulWidget {
   const Notifications({Key? key}) : super(key: key);
@@ -55,6 +54,7 @@ class _NotificationsState extends State<Notifications> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: const Text('Notifications'),
       ),
       body: buildFriendRequests(),
@@ -150,12 +150,15 @@ class _NotificationsState extends State<Notifications> {
   void loadProfile() async {
     try {
       print(friendReqList);
-      friendRequestStream = _databaseService.getUserProfile(_authService.currentUser!.uid).listen((userProfile) {
+      friendRequestStream = _databaseService
+          .getUserProfile(_authService.currentUser!.uid)
+          .listen((userProfile) {
         if (userProfile.exists) {
           var data = userProfile.data() as Map<String, dynamic>;
           setState(() {
             userProfilePfp = data['pfpURL'] ?? PLACEHOLDER_PFP;
-            userProfileCover = data['profileCoverURL'] ?? PLACEHOLDER_PROFILE_COVER;
+            userProfileCover =
+                data['profileCoverURL'] ?? PLACEHOLDER_PROFILE_COVER;
             firstName = data['firstName'] ?? 'First';
             lastName = data['lastName'] ?? 'Last';
             bio = data['bio'] ?? 'No bio available';
@@ -165,7 +168,8 @@ class _NotificationsState extends State<Notifications> {
             List friendList = data['friendList'] ?? [];
 
             isFriend = friendList.contains(_authService.currentUser!.uid);
-            isFriendRequestSent = friendReqList!.contains(_authService.currentUser!.uid);
+            isFriendRequestSent =
+                friendReqList!.contains(_authService.currentUser!.uid);
           });
         } else {
           print('User profile not found');
