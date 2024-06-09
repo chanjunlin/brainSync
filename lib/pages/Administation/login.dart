@@ -2,10 +2,12 @@ import 'package:brainsync/const.dart';
 import 'package:brainsync/pages/Administation/forget_password.dart';
 import 'package:brainsync/services/auth_service.dart';
 import 'package:brainsync/services/navigation_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:brainsync/services/alert_service.dart';
 import 'package:brainsync/common_widgets/custom_form_field.dart';
 import 'package:get_it/get_it.dart';
+import 'package:sign_in_button/sign_in_button.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -21,6 +23,9 @@ class _LoginPageState extends State<LoginPage> {
 
   final GetIt _getIt = GetIt.instance;
   final GlobalKey<FormState> _loginFormKey = GlobalKey();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  User? _user;
 
   late AuthService _authService;
   late NavigationService _navigationService;
@@ -32,12 +37,17 @@ class _LoginPageState extends State<LoginPage> {
     _authService = _getIt.get<AuthService>();
     _navigationService = _getIt.get<NavigationService>();
     _alertService = _getIt.get<AlertService>();
+    _auth.authStateChanges().listen((event) {
+      setState(() {
+        _user = event;
+      });
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: false,
+      resizeToAvoidBottomInset: true,
       body: _buildUI(),
     );
   }
@@ -50,6 +60,7 @@ class _LoginPageState extends State<LoginPage> {
           vertical: 20.0,
         ),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             _headerText(),
             _loginForm(),
@@ -82,7 +93,7 @@ class _LoginPageState extends State<LoginPage> {
               color: Colors.brown[800],
             ),
           ),
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
           Container(
             width: double.infinity,  // Matches the width of the form fields
             child: Image.asset(
@@ -97,12 +108,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Widget _loginForm() {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-      margin: EdgeInsets.symmetric(
-        vertical: MediaQuery.sizeOf(context).height * 0.05,
-      ),
-      child: Form(
+    return Form(
         key: _loginFormKey,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -130,7 +136,7 @@ class _LoginPageState extends State<LoginPage> {
                 });
               },
             ),
-            const SizedBox(height: 30),
+            _forgetPassword(),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
@@ -164,12 +170,18 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
             ),
-            const SizedBox(height: 30),
-            _forgetPassword(),
+            const SizedBox(height: 10),
+            const Center(
+              child: Text("----------or sign in with----------", style: TextStyle(
+                fontSize: 12,
+                color: Color.fromARGB(255, 78, 52, 46),
+              ),
+              ),
+            ),
+            _googlebutton(),
           ],
         ),
-      ),
-    );
+      );
   }
 
   Widget _forgetPassword() {
@@ -180,6 +192,7 @@ class _LoginPageState extends State<LoginPage> {
           style: TextStyle(
             decoration: TextDecoration.underline,
             color: Colors.brown.shade800,
+            fontSize: 12,
           ),
         ),
         onPressed: () {
@@ -192,6 +205,26 @@ class _LoginPageState extends State<LoginPage> {
         },
       ),
     );
+  }
+
+  Widget _googlebutton() {
+    return Center(child: SizedBox(
+      height: 50,
+      child: SignInButton(Buttons.google,
+      text: "google",
+      onPressed: _googlesignin,
+      ),
+    ),);
+  }
+
+  void _googlesignin() {
+    try {
+      GoogleAuthProvider _googleAuthProvider = GoogleAuthProvider();
+      _auth.signInWithProvider(_googleAuthProvider);
+    }
+    catch (error) {
+      print(error);
+    }
   }
 
   Widget _createAnAccount() {
@@ -218,3 +251,5 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 }
+
+
