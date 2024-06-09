@@ -1,17 +1,18 @@
+import 'dart:core';
+
 import 'package:brainsync/common_widgets/bottomBar.dart';
+import 'package:brainsync/common_widgets/navBar.dart';
+import 'package:brainsync/model/time.dart';
 import 'package:brainsync/services/auth_service.dart';
 import 'package:brainsync/services/database_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:brainsync/common_widgets/navBar.dart';
 import 'package:get_it/get_it.dart';
-import 'dart:core';
+import 'package:timeago/timeago.dart' as timeago;
 
 import '../services/navigation_service.dart';
 import 'Posts/actual_post.dart';
-import 'package:timeago/timeago.dart' as timeago;
-import 'package:brainsync/model/time.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -21,7 +22,6 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-
   late User? user;
 
   String? name;
@@ -45,7 +45,6 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       backgroundColor: Colors.white,
       drawer: const NavBar(),

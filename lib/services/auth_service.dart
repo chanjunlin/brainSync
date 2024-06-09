@@ -34,7 +34,6 @@ class AuthService {
       if (credential.user != null) {
         _user = credential.user;
         if (_user!.emailVerified) {
-          // User's email is verified, allow login
           return true;
         } else {
           await _firebaseAuth.signOut();

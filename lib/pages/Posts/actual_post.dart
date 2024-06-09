@@ -1,13 +1,12 @@
 import 'package:brainsync/services/database_service.dart';
 import 'package:brainsync/services/navigation_service.dart';
-import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:timeago/timeago.dart' as timeago;
+
 import '../../services/auth_service.dart';
 import '../Profile/visiting_profile.dart';
-import 'comment_card.dart';
 
 class PostDetailPage extends StatefulWidget {
   final String postId;
@@ -98,17 +97,18 @@ class _PostDetailPageState extends State<PostDetailPage> {
           children: [
             Text(
               widget.title,
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.brown[800]),
+              style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.brown[800]),
             ),
             const SizedBox(height: 10),
             Text(
-<<<<<<< HEAD:lib/pages/Posts/actual_post.dart
               'By ${currentUser ?? "Loading..."}',
-              style: const TextStyle(fontSize: 16, fontStyle: FontStyle.italic),
-=======
-              'By ${currentUser}',
-              style: TextStyle(fontSize: 16, fontStyle: FontStyle.italic, color: Colors.brown[800]),
->>>>>>> master:lib/pages/actual_post.dart
+              style: TextStyle(
+                  fontSize: 16,
+                  fontStyle: FontStyle.italic,
+                  color: Colors.brown[800]),
             ),
             const SizedBox(height: 10),
             Text(
@@ -120,9 +120,10 @@ class _PostDetailPageState extends State<PostDetailPage> {
             const SizedBox(height: 20),
             Text(
               'Comments',
-              style: TextStyle(fontSize: 18, 
-              fontWeight: FontWeight.bold,
-              color: Colors.brown[800],
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.brown[800],
               ),
             ),
             Expanded(
@@ -148,11 +149,12 @@ class _PostDetailPageState extends State<PostDetailPage> {
                   return ListView.builder(
                     itemCount: comments.length,
                     itemBuilder: (context, index) {
-                      final comment = comments[index].data() as Map<String, dynamic>;
+                      final comment =
+                      comments[index].data() as Map<String, dynamic>;
                       final timestamp = comment['timestamp'] as Timestamp;
                       final date = timestamp.toDate();
-<<<<<<< HEAD:lib/pages/Posts/actual_post.dart
-                      final formattedDate = timeago.format(date, locale: 'custom');
+                      final formattedDate =
+                      timeago.format(date, locale: 'custom');
                       final authorId = comment['authorId'] as String;
 
                       return FutureBuilder<DocumentSnapshot>(
@@ -161,7 +163,8 @@ class _PostDetailPageState extends State<PostDetailPage> {
                             .doc(authorId)
                             .get(),
                         builder: (context, userSnapshot) {
-                          if (userSnapshot.connectionState == ConnectionState.waiting) {
+                          if (userSnapshot.connectionState ==
+                              ConnectionState.waiting) {
                             return ListTile(
                               title: const Text('Loading...'),
                               subtitle: Text(comment['content']),
@@ -174,8 +177,10 @@ class _PostDetailPageState extends State<PostDetailPage> {
                             );
                           }
 
-                          final userData = userSnapshot.data!.data() as Map<String, dynamic>;
-                          final authorName = "${userData['firstName']} ${userData['lastName']}";
+                          final userData =
+                          userSnapshot.data!.data() as Map<String, dynamic>;
+                          final authorName =
+                              "${userData['firstName']} ${userData['lastName']}";
 
                           return GestureDetector(
                             onTap: authorId == _authService.currentUser!.uid
@@ -184,50 +189,58 @@ class _PostDetailPageState extends State<PostDetailPage> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => VisitProfile(
-                                    userId: authorId,
-                                  ),
+                                  builder: (context) =>
+                                      VisitProfile(userId: authorId),
                                 ),
                               );
                             },
-                            child: CommentCard(
-                              authorName: authorId == _authService.currentUser!.uid
-                                  ? "Me"
-                                  : authorName,
-                              content: comment['content'],
-                              formattedDate: formattedDate,
+                            child: Container(
+                              margin: const EdgeInsets.symmetric(vertical: 8.0),
+                              padding: const EdgeInsets.all(12.0),
+                              decoration: BoxDecoration(
+                                color: Colors.brown[50],
+                                borderRadius: BorderRadius.circular(8.0),
+                                border: Border.all(
+                                  color: Colors.brown.shade200,
+                                ),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        authorId ==
+                                            _authService.currentUser!.uid
+                                            ? "Me"
+                                            : authorName,
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.brown[800],
+                                        ),
+                                      ),
+                                      Text(
+                                        formattedDate,
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.brown[500],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    comment['content'],
+                                    style:
+                                    TextStyle(color: Colors.brown[700]),
+                                  ),
+                                ],
+                              ),
                             ),
                           );
                         },
-=======
-                      final formattedDate =
-                          timeago.format(date, locale: 'custom');
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                        child: Card(
-                          color: Colors.white,
-                          shape: const RoundedRectangleBorder(
-                            side: BorderSide(
-                              color: Colors.brown,
-                              width: 1.0,
-                            ),
-                          ),
-                          margin: const EdgeInsets.symmetric(vertical: 0, horizontal: 0),
-                          child: ListTile(
-                            title: Text(
-                              '${comment['authorName'] == '${user!.get('firstName')} ${user!.get('lastName')}' ? "Me" : comment['authorName']} $formattedDate',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.brown[800],
-                              )),
-                          subtitle: Text(comment['content'],
-                              style: TextStyle(
-                                fontSize: 17,
-                                color: Colors.brown[800],
-                              )),
-                        ),
-                        ),
->>>>>>> master:lib/pages/actual_post.dart
                       );
                     },
                   );

@@ -8,8 +8,8 @@ import 'dart:core';
 
 import '../../services/navigation_service.dart';
 import 'package:get_it/get_it.dart';
-import '../services/api_service.dart';
-import '../model/module.dart';
+import 'package:brainsync/services/api_service.dart';
+import 'package:brainsync/model/module.dart';
 import 'dart:async';
 
 

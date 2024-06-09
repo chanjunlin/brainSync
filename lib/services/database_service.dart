@@ -106,9 +106,7 @@ class DatabaseService {
       List<dynamic> friendFriendList = friendData['friendList'] ?? [];
 
       for (String friendId in userFriendList) {
-        print(friendId);
         if (friendFriendList.contains(friendId)) {
-          print(friendId);
           DocumentSnapshot? mutualFriendDoc = await fetchUser(friendId);
           commonFriends.add(
               UserProfile.fromJson(mutualFriendDoc?.data() as Map<String, dynamic>));
@@ -205,7 +203,6 @@ class DatabaseService {
   }
 
   Future<void> removeFriend(String userId, String receiverUid) async {
-    print("button is pressed");
     try {
       DocumentSnapshot userDoc =
           await _firebaseFirestore.collection('users').doc(userId).get();
