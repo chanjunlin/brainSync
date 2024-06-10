@@ -1,10 +1,6 @@
-import 'package:brainsync/const.dart';
-import 'package:brainsync/pages/Administation/forget_password.dart';
-import 'package:brainsync/services/auth_service.dart';
+import 'package:brainsync/pages/form/login_form.dart';
 import 'package:brainsync/services/navigation_service.dart';
 import 'package:flutter/material.dart';
-import 'package:brainsync/services/alert_service.dart';
-import 'package:brainsync/common_widgets/custom_form_field.dart';
 import 'package:get_it/get_it.dart';
 
 class LoginPage extends StatefulWidget {
@@ -15,52 +11,58 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  String? email, password;
-  String? errorMessage = '';
-  bool isLogin = true;
+  bool _isLoading = false;
 
   final GetIt _getIt = GetIt.instance;
-  final GlobalKey<FormState> _loginFormKey = GlobalKey();
 
-  late AuthService _authService;
   late NavigationService _navigationService;
-  late AlertService _alertService;
 
   @override
   void initState() {
     super.initState();
-    _authService = _getIt.get<AuthService>();
     _navigationService = _getIt.get<NavigationService>();
-    _alertService = _getIt.get<AlertService>();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      body: _buildUI(),
+      body: _isLoading
+          ? buildLoadingScreen()
+          : buildUI(), // Show loading screen if _isLoading is true
     );
   }
 
-  Widget _buildUI() {
+  Widget buildUI() {
     return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 16.0,
-          vertical: 20.0,
-        ),
-        child: Column(
-          children: [
-            _headerText(),
-            _loginForm(),
-            _createAnAccount(),
-          ],
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: 16.0,
+            vertical: 20.0,
+          ),
+          child: Column(
+            children: [
+              headerText(),
+              LoginForm(
+                setLoading: (bool isLoading) {
+                  setState(() {
+                    _isLoading = isLoading;
+                  });
+                },
+                navigateToHome: () {
+                  _navigationService.pushReplacementName("/home");
+                },
+              ),
+              createAnAccount(),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _headerText() {
+  Widget headerText() {
     return SizedBox(
       width: MediaQuery.sizeOf(context).width,
       child: Column(
@@ -84,11 +86,11 @@ class _LoginPageState extends State<LoginPage> {
           ),
           SizedBox(height: 10),
           Container(
-            width: double.infinity,  // Matches the width of the form fields
+            width: double.infinity,
             child: Image.asset(
               "assets/img/study.png",
               alignment: Alignment.topCenter,
-              fit: BoxFit.fitWidth, // Ensure the image fits within the container width
+              fit: BoxFit.fitWidth,
             ),
           ),
         ],
@@ -96,105 +98,7 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Widget _loginForm() {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-      margin: EdgeInsets.symmetric(
-        vertical: MediaQuery.sizeOf(context).height * 0.05,
-      ),
-      child: Form(
-        key: _loginFormKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            CustomFormField(
-              labelText: "Email",
-              hintText: "Enter a valid email",
-              height: MediaQuery.sizeOf(context).height * 0.09,
-              validationRegEx: EMAIL_VALIDATION_REGEX,
-              onSaved: (value) {
-                setState(() {
-                  email = value;
-                });
-              },
-            ),
-            CustomFormField(
-              labelText: "Password",
-              hintText: "Enter a valid password",
-              obscureText: true,
-              height: MediaQuery.sizeOf(context).height * 0.09,
-              validationRegEx: PASSWORD_VALIDATION_REGEX,
-              onSaved: (value) {
-                setState(() {
-                  password = value;
-                });
-              },
-            ),
-            const SizedBox(height: 30),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.brown[300],
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
-                onPressed: () async {
-                  if (_loginFormKey.currentState?.validate() ?? false) {
-                    _loginFormKey.currentState?.save();
-                    bool result = await _authService.login(email!, password!);
-                    if (result) {
-                      _navigationService.pushReplacementName("/home");
-                    } else {
-                      _alertService.showToast(
-                        text: "Invalid email or password! (Checked if you have verified your email)",
-                        icon: Icons.error_outline_rounded,
-                      );
-                    }
-                  }
-                },
-                child: const Text(
-                  "Login",
-                  style: TextStyle(
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 30),
-            _forgetPassword(),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _forgetPassword() {
-    return Center(
-      child: TextButton(
-        child: Text(
-          "Forget Your Password?",
-          style: TextStyle(
-            decoration: TextDecoration.underline,
-            color: Colors.brown.shade800,
-          ),
-        ),
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const ForgetPassword(),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _createAnAccount() {
+  Widget createAnAccount() {
     return Row(
       mainAxisSize: MainAxisSize.max,
       mainAxisAlignment: MainAxisAlignment.center,
@@ -215,6 +119,14 @@ class _LoginPageState extends State<LoginPage> {
           },
         )
       ],
+    );
+  }
+
+  Widget buildLoadingScreen() {
+    return Center(
+      child: CircularProgressIndicator(
+        color: Colors.brown[300],
+      ),
     );
   }
 }

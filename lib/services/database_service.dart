@@ -29,22 +29,22 @@ class DatabaseService {
   void setUpCollectionReferences() {
     _usersCollection =
         _firebaseFirestore.collection('users').withConverter<UserProfile>(
-              fromFirestore: (snapshots, _) =>
-                  UserProfile.fromJson(snapshots.data()!),
-              toFirestore: (userProfile, _) => userProfile.toJson(),
-            );
+          fromFirestore: (snapshots, _) =>
+              UserProfile.fromJson(snapshots.data()!),
+          toFirestore: (userProfile, _) => userProfile.toJson(),
+        );
     _chatCollection = _firebaseFirestore
         .collection('chats')
         .withConverter<Chat>(
-            fromFirestore: (snapshots, _) => Chat.fromJson(snapshots.data()!),
-            toFirestore: (chat, _) => chat.toJson());
+        fromFirestore: (snapshots, _) => Chat.fromJson(snapshots.data()!),
+        toFirestore: (chat, _) => chat.toJson());
   }
 
   Future<void> createUserProfile({required UserProfile userProfile}) async {
     try {
       await _usersCollection?.doc(userProfile.uid).set(userProfile);
     } catch (e) {
-      _alertService.showToast(text: "Error creating user profile: $e");
+
     }
   }
 
@@ -53,7 +53,7 @@ class DatabaseService {
       String userId = _authService.user!.uid;
       return await _firebaseFirestore.collection('users').doc(userId).get();
     } catch (e) {
-      _alertService.showToast(text: "Error fetching user profile: $e");
+      // _alertService.showToast(text: "Error fetching user profile: $e");
       return null;
     }
   }
@@ -62,7 +62,7 @@ class DatabaseService {
     try {
       return await _firebaseFirestore.collection('users').doc(userID).get();
     } catch (e) {
-      _alertService.showToast(text: "Error fetching user profile: $e");
+      // _alertService.showToast(text: "Error fetching user profile: $e");
       return null;
     }
   }
@@ -75,14 +75,14 @@ class DatabaseService {
       List<dynamic> friendList = userData['friendList'] ?? [];
       for (String friendId in friendList) {
         DocumentSnapshot friendDoc =
-            await _firebaseFirestore.collection('users').doc(friendId).get();
+        await _firebaseFirestore.collection('users').doc(friendId).get();
         if (friendDoc.exists) {
           friends.add(
               UserProfile.fromJson(friendDoc.data() as Map<String, dynamic>));
         }
       }
     } else {
-      _alertService.showToast(text: "User profile doesn't exists.");
+      // _alertService.showToast(text: "User profile doesn't exists.");
     }
     return friends;
   }
@@ -100,7 +100,7 @@ class DatabaseService {
         friendDocs.exists) {
       Map<String, dynamic> userData = userDocs.data() as Map<String, dynamic>;
       Map<String, dynamic> friendData =
-          friendDocs.data() as Map<String, dynamic>;
+      friendDocs.data() as Map<String, dynamic>;
 
       List<dynamic> userFriendList = userData['friendList'] ?? [];
       List<dynamic> friendFriendList = friendData['friendList'] ?? [];
@@ -113,7 +113,7 @@ class DatabaseService {
         }
       }
     } else {
-      _alertService.showToast(text: "User profile doesn't exists.");
+      // _alertService.showToast(text: "User profile doesn't exists.");
     }
     return commonFriends;
   }
@@ -185,9 +185,9 @@ class DatabaseService {
 
   Future<void> acceptFriendRequest(String senderUid, String receiverUid) async {
     DocumentReference senderDoc =
-        _firebaseFirestore.collection('users').doc(senderUid);
+    _firebaseFirestore.collection('users').doc(senderUid);
     DocumentReference receiverDoc =
-        _firebaseFirestore.collection('users').doc(receiverUid);
+    _firebaseFirestore.collection('users').doc(receiverUid);
 
     await _firebaseFirestore.runTransaction((transaction) async {
       transaction.update(senderDoc, {
@@ -205,9 +205,9 @@ class DatabaseService {
   Future<void> removeFriend(String userId, String receiverUid) async {
     try {
       DocumentSnapshot userDoc =
-          await _firebaseFirestore.collection('users').doc(userId).get();
+      await _firebaseFirestore.collection('users').doc(userId).get();
       DocumentSnapshot receiverDoc =
-          await _firebaseFirestore.collection('users').doc(receiverUid).get();
+      await _firebaseFirestore.collection('users').doc(receiverUid).get();
       List<dynamic>? friendList = userDoc["friendList"];
       List<dynamic>? receiverFriendList = receiverDoc["friendList"];
       if (friendList != null && friendList.contains(receiverUid)) {
@@ -229,7 +229,7 @@ class DatabaseService {
 
   Future<void> addModuleToUserSchedule(String userId, String moduleCode) async {
     DocumentReference userDoc =
-        _firebaseFirestore.collection('users').doc(userId);
+    _firebaseFirestore.collection('users').doc(userId);
     await userDoc.update({
       'currentModule': FieldValue.arrayUnion([moduleCode])
     });
@@ -238,10 +238,10 @@ class DatabaseService {
   Future<bool> isInCurrentModule(String userId, String moduleCode) async {
     try {
       DocumentSnapshot userDoc =
-          await _firebaseFirestore.collection('users').doc(userId).get();
+      await _firebaseFirestore.collection('users').doc(userId).get();
       Map<String, dynamic> userData = userDoc.data() as Map<String, dynamic>;
       List<String> currentModules =
-          List<String>.from(userData['currentModule'] ?? []);
+      List<String>.from(userData['currentModule'] ?? []);
       return currentModules.contains(moduleCode);
     } catch (error) {
       print("Error checking current module: $error");
@@ -252,10 +252,10 @@ class DatabaseService {
   Future<bool> isInCompletedModule(String userId, String moduleCode) async {
     try {
       DocumentSnapshot userDoc =
-          await _firebaseFirestore.collection('users').doc(userId).get();
+      await _firebaseFirestore.collection('users').doc(userId).get();
       Map<String, dynamic> userData = userDoc.data() as Map<String, dynamic>;
       List<String> computedModules =
-          List<String>.from(userData['completedModule'] ?? []);
+      List<String>.from(userData['completedModule'] ?? []);
       return computedModules.contains(moduleCode);
     } catch (error) {
       print("Error checking current module: $error");
@@ -266,7 +266,7 @@ class DatabaseService {
   Future<void> removeModule(String userId, String moduleCode) async {
     try {
       DocumentSnapshot userDoc =
-          await _firebaseFirestore.collection('users').doc(userId).get();
+      await _firebaseFirestore.collection('users').doc(userId).get();
       List<dynamic>? currentModules = userDoc["currentModule"];
       if (currentModules != null && currentModules.contains(moduleCode)) {
         currentModules.remove(moduleCode);
