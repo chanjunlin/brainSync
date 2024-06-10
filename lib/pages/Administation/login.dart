@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:brainsync/services/alert_service.dart';
 import 'package:brainsync/common_widgets/custom_form_field.dart';
 import 'package:get_it/get_it.dart';
-import 'package:sign_in_button/sign_in_button.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -17,6 +17,10 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+
+  ValueNotifier userCredential = ValueNotifier('');
+
+
   String? email, password;
   String? errorMessage = '';
   bool isLogin = true;
@@ -25,11 +29,37 @@ class _LoginPageState extends State<LoginPage> {
   final GlobalKey<FormState> _loginFormKey = GlobalKey();
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  User? _user;
-
   late AuthService _authService;
   late NavigationService _navigationService;
   late AlertService _alertService;
+
+  Future<bool> signOutFromGoogle() async {
+    try {
+      await FirebaseAuth.instance.signOut();
+      return true;
+    } on Exception catch (_) {
+      return false;
+    }
+  }
+
+  Future<dynamic> signInWithGoogle() async {
+    try {
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+
+      final GoogleSignInAuthentication? googleAuth =
+          await googleUser?.authentication;
+
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth?.accessToken,
+        idToken: googleAuth?.idToken,
+      );
+
+      return await FirebaseAuth.instance.signInWithCredential(credential);
+    } on Exception catch (e) {
+      // TODO
+      print('exception->$e');
+    }
+  }
 
   @override
   void initState() {
@@ -37,11 +67,6 @@ class _LoginPageState extends State<LoginPage> {
     _authService = _getIt.get<AuthService>();
     _navigationService = _getIt.get<NavigationService>();
     _alertService = _getIt.get<AlertService>();
-    _auth.authStateChanges().listen((event) {
-      setState(() {
-        _user = event;
-      });
-    });
   }
 
   @override
@@ -178,6 +203,7 @@ class _LoginPageState extends State<LoginPage> {
               ),
               ),
             ),
+            const SizedBox(height: 15,),
             _googlebutton(),
           ],
         ),
@@ -208,24 +234,74 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Widget _googlebutton() {
-    return Center(child: SizedBox(
-      height: 50,
-      child: SignInButton(Buttons.google,
-      text: "google",
-      onPressed: _googlesignin,
-      ),
-    ),);
+    return ValueListenableBuilder(
+            valueListenable: userCredential,
+            builder: (context, value, child) {
+              return (userCredential.value == '' ||
+                      userCredential.value == null)
+                  ? Center(
+                      child: Card(
+                        elevation: 5,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10)),
+                        child: SizedBox(
+                  width: 50,
+                  height: 50,
+                  child: IconButton(
+                    icon: Image.asset(
+                      'assets/img/google.jpg',
+                    ),
+                    onPressed: () async {
+                      userCredential.value = await signInWithGoogle();
+                      if (userCredential.value != null) {
+                        print(userCredential.value!.email);
+                        _navigationService.pushReplacementName("/home");
+                      }
+                    },
+                  ),
+                ),
+              ),
+            )
+                  : Center(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            width: 10,
+                            height: 10,
+                            clipBehavior: Clip.antiAlias,
+                            decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                    width: 1.5, color: Colors.black54)),
+                            child: Image.network(
+                                userCredential.value.user!.photoURL.toString()),
+                          ),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          Text(userCredential.value.user!.displayName
+                              .toString()),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          Text(userCredential.value.user!.email.toString()),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          ElevatedButton(
+                              onPressed: () async {
+                                bool result = await signOutFromGoogle();
+                                if (result) userCredential.value = '';
+                              },
+                              child: const Text('Logout'))
+                        ],
+                      ),
+                    );
+            });
   }
-
-  void _googlesignin() {
-    try {
-      GoogleAuthProvider _googleAuthProvider = GoogleAuthProvider();
-      _auth.signInWithProvider(_googleAuthProvider);
-    }
-    catch (error) {
-      print(error);
-    }
-  }
+                
 
   Widget _createAnAccount() {
     return Row(
@@ -251,5 +327,3 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 }
-
-
