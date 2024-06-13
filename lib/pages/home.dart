@@ -150,10 +150,10 @@ class _HomeState extends State<Home> {
   void loadProfile() async {
     try {
       DocumentSnapshot? userProfile = await _databaseService.fetchCurrentUser();
+      print(userProfile);
       if (userProfile != null && userProfile.exists) {
         setState(() {
-          // userProfilePfp = userProfile.get('pfpURL') ?? PLACEHOLDER_PFP;
-          name = userProfile.get('firstName') ?? 'Name'; // Example field
+          name = userProfile.get('firstName') ?? 'Name';
         });
       } else {
         print('User profile not found');

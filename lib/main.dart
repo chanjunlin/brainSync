@@ -1,7 +1,11 @@
+import 'dart:async';
+
 import 'package:brainsync/services/alert_service.dart';
 import 'package:brainsync/services/auth_service.dart';
 import 'package:brainsync/services/navigation_service.dart';
 import 'package:brainsync/utils.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -20,15 +24,46 @@ Future<void> setup() async {
   await registerServices();
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   final GetIt _getIt = GetIt.instance;
 
-  late AuthService _authService;
-  late NavigationService _navigationService;
+  MyApp({super.key}) {}
 
-  MyApp({super.key}) {
-    _authService = _getIt.get<AuthService>();
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  final GetIt _getIt = GetIt.instance;
+
+  late NavigationService _navigationService;
+  late AuthService _authService;
+  late AlertService _alertService;
+  late StreamSubscription<User?> user;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
     _navigationService = _getIt.get<NavigationService>();
+    _authService = _getIt.get<AuthService>();
+    _alertService = _getIt.get<AlertService>();
+    user = FirebaseAuth.instance.authStateChanges().listen(
+          (user) {
+        if (user == null) {
+          print("signed out");
+        } else {
+          print(user.displayName);
+          print("signed in");
+        }
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    user.cancel();
+    super.dispose();
   }
 
   @override
@@ -42,7 +77,7 @@ class MyApp extends StatelessWidget {
         ),
         textTheme: GoogleFonts.montserratTextTheme(),
       ),
-      initialRoute: _authService.user != null ? "/home" : "/login",
+      initialRoute: _authService.currentUser == null ? "/login" : "/home", // Use AuthService instead of FirebaseAuth
       routes: _navigationService.routes,
     );
   }

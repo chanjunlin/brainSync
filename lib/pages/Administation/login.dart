@@ -27,9 +27,8 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      body: _isLoading
-          ? buildLoadingScreen()
-          : buildUI(), // Show loading screen if _isLoading is true
+      backgroundColor: Colors.white, // Set the background color here
+      body: _isLoading ? buildLoadingScreen() : buildUI(), // Show loading screen if _isLoading is true
     );
   }
 
@@ -37,10 +36,7 @@ class _LoginPageState extends State<LoginPage> {
     return SafeArea(
       child: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 16.0,
-            vertical: 20.0,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: Column(
             children: [
               headerText(),
@@ -85,13 +81,10 @@ class _LoginPageState extends State<LoginPage> {
             ),
           ),
           SizedBox(height: 10),
-          Container(
-            width: double.infinity,
-            child: Image.asset(
-              "assets/img/study.png",
-              alignment: Alignment.topCenter,
-              fit: BoxFit.fitWidth,
-            ),
+          Image.asset(
+            "assets/img/study.png",
+            alignment: Alignment.topCenter,
+            fit: BoxFit.fitWidth,
           ),
         ],
       ),

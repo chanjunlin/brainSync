@@ -7,9 +7,7 @@ import 'package:brainsync/services/media_service.dart';
 import 'package:brainsync/services/navigation_service.dart';
 import 'package:brainsync/services/storage_service.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:get_it/get_it.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> setUpFireBase() async {
   await Firebase.initializeApp(
@@ -23,7 +21,6 @@ Future<void> registerServices() async {
   getIt.registerSingleton<AuthService>(
     AuthService(),
   );
-
   getIt.registerSingleton<NavigationService>(
     NavigationService(),
   );

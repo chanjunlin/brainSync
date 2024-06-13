@@ -11,8 +11,11 @@ class LoginForm extends StatefulWidget {
   final Function(bool) setLoading;
   final Function navigateToHome;
 
-  const LoginForm(
-      {super.key, required this.setLoading, required this.navigateToHome});
+  const LoginForm({
+    super.key,
+    required this.setLoading,
+    required this.navigateToHome,
+  });
 
   @override
   State<LoginForm> createState() => _LoginFormState();
@@ -26,6 +29,7 @@ class _LoginFormState extends State<LoginForm> {
   late AuthService _authService;
 
   String? email, password;
+  bool _obscurePassword = true; // Added to manage password visibility
 
   @override
   void initState() {
@@ -50,7 +54,7 @@ class _LoginFormState extends State<LoginForm> {
               CustomFormField(
                 labelText: "Email",
                 hintText: "Enter a valid email",
-                height: MediaQuery.sizeOf(context).height * 0.09,
+                height: MediaQuery.sizeOf(context).height * 0.07,
                 validationRegEx: EMAIL_VALIDATION_REGEX,
                 onSaved: (value) {
                   setState(() {
@@ -61,8 +65,18 @@ class _LoginFormState extends State<LoginForm> {
               CustomFormField(
                 labelText: "Password",
                 hintText: "Enter a valid password",
-                obscureText: true,
-                height: MediaQuery.sizeOf(context).height * 0.09,
+                obscureText: _obscurePassword, // Use the obscurePassword variable
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _obscurePassword = !_obscurePassword;
+                    });
+                  },
+                ),
+                height: MediaQuery.sizeOf(context).height * 0.07,
                 validationRegEx: PASSWORD_VALIDATION_REGEX,
                 onSaved: (value) {
                   setState(() {
@@ -70,7 +84,10 @@ class _LoginFormState extends State<LoginForm> {
                   });
                 },
               ),
-              const SizedBox(height: 30),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: forgetPassword(),
+              ),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -81,22 +98,30 @@ class _LoginFormState extends State<LoginForm> {
                       borderRadius: BorderRadius.circular(10.0),
                     ),
                     padding: const EdgeInsets.symmetric(vertical: 16),
+                    elevation: 5,
+                    shadowColor: Colors.brown[100],
                   ),
                   onPressed: () async {
                     if (_loginFormKey.currentState?.validate() ?? false) {
                       _loginFormKey.currentState?.save();
                       widget.setLoading(true);
-                      bool result = await _authService.login(email!, password!);
-                      widget.setLoading(false);
-
-                      if (result) {
-                        widget.navigateToHome();
-                      } else {
+                      try {
+                        bool result = await _authService.login(email!, password!);
+                        if (result) {
+                          widget.navigateToHome();
+                        } else {
+                          _alertService.showToast(
+                            text: "Invalid email or password!",
+                            icon: Icons.error_outline_rounded,
+                          );
+                        }
+                      } catch (error) {
                         _alertService.showToast(
-                          text:
-                              "Invalid email or password! (Check if you have verified your email)",
+                          text: "Invalid email or password!",
                           icon: Icons.error_outline_rounded,
                         );
+                      } finally {
+                        widget.setLoading(false);
                       }
                     }
                   },
@@ -104,25 +129,58 @@ class _LoginFormState extends State<LoginForm> {
                     "Login",
                     style: TextStyle(
                       color: Colors.white,
+                      fontSize: 18,
                     ),
                   ),
                 ),
               ),
               const SizedBox(height: 30),
-              forgetPassword(),
-              SquareTile(
-                imagePath: "assets/img/google.png",
-                onTap: () async {
-                  widget.setLoading(true);
-                  try {
-                    await _authService.signInWithGoogle(context);
-                    widget.navigateToHome();
-                  } catch (error) {
-                    print("Error signing in with Google: $error");
-                  } finally {
-                    widget.setLoading(false);
-                  }
-                },
+              Row(
+                children: [
+                  const Expanded(
+                    child: Divider(
+                      thickness: 1,
+                      color: Colors.brown,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Text(
+                      "Or",
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.brown[800],
+                      ),
+                    ),
+                  ),
+                  const Expanded(
+                    child: Divider(
+                      thickness: 1,
+                      color: Colors.brown,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Center(
+                child: SquareTile(
+                  imagePath: "assets/img/google.png",
+                  onTap: () async {
+                    widget.setLoading(true);
+                    try {
+                      await _authService.signInWithGoogle(context);
+                      widget.navigateToHome();
+                    } catch (error) {
+                      _alertService.showToast(
+                        text: "Error signing in with Google. Please try again.",
+                        icon: Icons.error_outline_rounded,
+                      );
+                    } finally {
+                      widget.setLoading(false);
+                    }
+                  },
+                  label: "Sign in with Google",
+                ),
               ),
             ],
           ),
@@ -132,24 +190,22 @@ class _LoginFormState extends State<LoginForm> {
   }
 
   Widget forgetPassword() {
-    return Center(
-      child: TextButton(
-        child: Text(
-          "Forget Your Password?",
-          style: TextStyle(
-            decoration: TextDecoration.underline,
-            color: Colors.brown.shade800,
-          ),
+    return TextButton(
+      child: Text(
+        "Forget Your Password?",
+        style: TextStyle(
+          decoration: TextDecoration.underline,
+          color: Colors.brown.shade800,
         ),
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const ForgetPassword(),
-            ),
-          );
-        },
       ),
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const ForgetPassword(),
+          ),
+        );
+      },
     );
   }
 }

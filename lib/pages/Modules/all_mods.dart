@@ -1,27 +1,21 @@
-import 'dart:convert';
-
-import 'package:brainsync/pages/Modules/module_page.dart';
-import 'package:brainsync/services/navigation_service.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import 'package:http/http.dart' as http;
 
 import '../../common_widgets/module_card.dart';
-import '../../common_widgets/search_bar.dart';
 import '../../model/module.dart';
 import '../../services/api_service.dart';
+import '../../services/navigation_service.dart';
+import '../Modules/module_page.dart';
 
 class ModuleListPage extends StatefulWidget {
-  const ModuleListPage({super.key});
+  const ModuleListPage({Key? key}) : super(key: key);
 
   @override
-  State<ModuleListPage> createState() => _ModuleListPageState();
+  _ModuleListPageState createState() => _ModuleListPageState();
 }
 
 class _ModuleListPageState extends State<ModuleListPage> {
   late Future<List<Module>> futureModules;
-  late Future<Map<String, dynamic>> futureModuleInfo;
   late List<Module> filteredModules = [];
   late TextEditingController searchController;
   late NavigationService _navigationService;
@@ -47,12 +41,11 @@ class _ModuleListPageState extends State<ModuleListPage> {
 
   Future<void> navigateToModuleDetails(Module module) async {
     moduleCode = module.code;
-    futureModuleInfo = ApiService.fetchModuleInfo(acadYear, moduleCode);
     _navigationService.push(
       MaterialPageRoute(
         builder: (context) {
           return ModulePage(
-            moduleInfo: futureModuleInfo,
+            moduleInfo: ApiService.fetchModuleInfo(acadYear, moduleCode),
           );
         },
       ),
@@ -60,14 +53,21 @@ class _ModuleListPageState extends State<ModuleListPage> {
   }
 
   void filterModules(String query) async {
+    await Future.delayed(Duration(milliseconds: 300));
+
     final modules = await futureModules;
     setState(() {
       filteredModules = modules
           .where((module) =>
-              module.code.toLowerCase().contains(query.toLowerCase()) ||
-              module.title.toLowerCase().contains(query.toLowerCase()))
+      module.code.toLowerCase().contains(query.toLowerCase()) ||
+          module.title.toLowerCase().contains(query.toLowerCase()))
           .toList();
     });
+  }
+
+  void clearSearch() {
+    searchController.clear();
+    filterModules('');
   }
 
   @override
@@ -85,11 +85,14 @@ class _ModuleListPageState extends State<ModuleListPage> {
       body: Column(
         children: [
           const SizedBox(height: 10),
-          SearchBar(
-            controller: searchController,
-            onChanged: filterModules,
-            hintText: 'Search for modules with Code or Title',
-            backgroundColor: MaterialStateProperty.all(Color(0xFFF8F9FF)),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: SearchBar(
+              controller: searchController,
+              onChanged: filterModules,
+              hintText: 'Search for modules with Code or Title',
+              backgroundColor: MaterialStateProperty.all(Color(0xFFF8F9FF)),
+            ),
           ),
           const SizedBox(height: 10),
           Expanded(
@@ -126,6 +129,11 @@ class _ModuleListPageState extends State<ModuleListPage> {
             ),
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: clearSearch,
+        tooltip: 'Clear Search',
+        child: Icon(Icons.clear),
       ),
     );
   }
