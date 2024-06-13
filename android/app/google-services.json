@@ -9,10 +9,23 @@
       "client_info": {
         "mobilesdk_app_id": "1:669544143843:android:b776510edddf65fa8f9ed6",
         "android_client_info": {
-          "package_name": "com.example.brainsync"
+          "package_name": "com.example.app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "669544143843-f060etkffkt2m8qnnmea2367qhlh6l0q.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.app",
+            "certificate_hash": "b2d287bd1db0664443a3e54fa3cc60d446027617"
+          }
+        },
+        {
+          "client_id": "669544143843-a30l5jcshga56acrtt6hmpj11sp8jvsv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyA3hUG8AWkjXxlknxy3RRAej7xqkASsHsQ"
@@ -20,7 +33,55 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "669544143843-a30l5jcshga56acrtt6hmpj11sp8jvsv.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "669544143843-147do1r0grqlenusfnpjjp3s67nb3m3d.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.brainsync"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:669544143843:android:25cf25b7485f08f38f9ed6",
+        "android_client_info": {
+          "package_name": "com.example.brainsync"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "669544143843-a30l5jcshga56acrtt6hmpj11sp8jvsv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA3hUG8AWkjXxlknxy3RRAej7xqkASsHsQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "669544143843-a30l5jcshga56acrtt6hmpj11sp8jvsv.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "669544143843-147do1r0grqlenusfnpjjp3s67nb3m3d.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.brainsync"
+              }
+            }
+          ]
         }
       }
     }

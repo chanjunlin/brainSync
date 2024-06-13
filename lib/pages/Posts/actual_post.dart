@@ -207,34 +207,27 @@ class _PostDetailPageState extends State<PostDetailPage> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Row(
-                                    mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        authorId ==
-                                            _authService.currentUser!.uid
-                                            ? "Me"
-                                            : authorName,
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.brown[800],
-                                        ),
-                                      ),
-                                      Text(
-                                        formattedDate,
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color: Colors.brown[500],
-                                        ),
-                                      ),
-                                    ],
+                                  Text(
+                                    authorId == _authService.currentUser!.uid
+                                        ? "Me"
+                                        : authorName,
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.brown[800],
+                                    ),
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
                                     comment['content'],
-                                    style:
-                                    TextStyle(color: Colors.brown[700]),
+                                    style: TextStyle(color: Colors.brown[700]),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    formattedDate,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.brown[500],
+                                    ),
                                   ),
                                 ],
                               ),

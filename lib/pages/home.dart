@@ -103,6 +103,7 @@ class _HomeState extends State<Home> {
                   child: Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(10),
+                    height: 100,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -113,7 +114,7 @@ class _HomeState extends State<Home> {
                               post['title'],
                               style: TextStyle(
                                 color: Colors.brown[800],
-                                fontSize: 20,
+                                fontSize: 25,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -129,7 +130,7 @@ class _HomeState extends State<Home> {
                           overflow: TextOverflow.ellipsis,
                           post['content'],
                           style: TextStyle(
-                            fontSize: 12,
+                            fontSize: 15,
                             color: Colors.brown[800],
                           ),
                         ),
