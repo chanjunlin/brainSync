@@ -1,18 +1,19 @@
+import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:brainsync/common_widgets/custom_form_field.dart';
 import 'package:brainsync/common_widgets/square_tile.dart';
 import 'package:brainsync/const.dart';
 import 'package:brainsync/pages/Administation/forget_password.dart';
+import 'package:brainsync/pages/home.dart';
 import 'package:brainsync/services/alert_service.dart';
 import 'package:brainsync/services/auth_service.dart';
-import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
 class LoginForm extends StatefulWidget {
   final Function(bool) setLoading;
   final Function navigateToHome;
 
-  const LoginForm(
-      {super.key, required this.setLoading, required this.navigateToHome});
+  const LoginForm({Key? key, required this.setLoading, required this.navigateToHome}) : super(key: key);
 
   @override
   State<LoginForm> createState() => _LoginFormState();
@@ -40,7 +41,7 @@ class _LoginFormState extends State<LoginForm> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
         margin: EdgeInsets.symmetric(
-          vertical: MediaQuery.sizeOf(context).height * 0.05,
+          vertical: MediaQuery.of(context).size.height * 0.05,
         ),
         child: Form(
           key: _loginFormKey,
@@ -50,7 +51,7 @@ class _LoginFormState extends State<LoginForm> {
               CustomFormField(
                 labelText: "Email",
                 hintText: "Enter a valid email",
-                height: MediaQuery.sizeOf(context).height * 0.09,
+                height: MediaQuery.of(context).size.height * 0.09,
                 validationRegEx: EMAIL_VALIDATION_REGEX,
                 onSaved: (value) {
                   setState(() {
@@ -62,7 +63,7 @@ class _LoginFormState extends State<LoginForm> {
                 labelText: "Password",
                 hintText: "Enter a valid password",
                 obscureText: true,
-                height: MediaQuery.sizeOf(context).height * 0.09,
+                height: MediaQuery.of(context).size.height * 0.09,
                 validationRegEx: PASSWORD_VALIDATION_REGEX,
                 onSaved: (value) {
                   setState(() {
@@ -93,8 +94,7 @@ class _LoginFormState extends State<LoginForm> {
                         widget.navigateToHome();
                       } else {
                         _alertService.showToast(
-                          text:
-                              "Invalid email or password! (Check if you have verified your email)",
+                          text: "Invalid email or password! (Check if you have verified your email)",
                           icon: Icons.error_outline_rounded,
                         );
                       }

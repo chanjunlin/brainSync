@@ -9,6 +9,7 @@ import '../model/user_profile.dart';
 class AuthService {
   String lastName = "", selectedYear = "";
   List<String?> friendReqList = [], friendList = [];
+  
 
   User? _user;
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;

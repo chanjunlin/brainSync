@@ -1,12 +1,12 @@
 buildscript {
-    ext.kotlin_version = '1.6.10' // Or the Kotlin version you are using
+    ext.kotlin_version = '1.9.0' // Ensure this matches the version used by your dependencies
     repositories {
         google()
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.0.4' // Make sure this version matches your project's requirements
-        classpath 'com.google.gms:google-services:4.3.15' // Or the latest version you are using
+        classpath 'com.android.tools.build:gradle:7.0.4' // Adjust to your required version
+        classpath 'com.google.gms:google-services:4.3.15' // Adjust to your required version
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
