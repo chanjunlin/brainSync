@@ -1,14 +1,15 @@
 import 'dart:async';
+import 'dart:core';
 
+import 'package:brainsync/common_widgets/dialog.dart';
+import 'package:brainsync/model/module.dart';
+import 'package:brainsync/services/alert_service.dart';
+import 'package:brainsync/services/api_service.dart';
+import 'package:brainsync/services/auth_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-
-import '../../common_widgets/dialog.dart';
-import '../../model/module.dart';
-import '../../services/alert_service.dart';
-import '../../services/api_service.dart';
-import '../../services/auth_service.dart';
+import 'package:badword_guard/badword_guard.dart';
 import '../../services/navigation_service.dart';
 
 class PostsPage extends StatefulWidget {
@@ -17,10 +18,13 @@ class PostsPage extends StatefulWidget {
 }
 
 class _PostsPageState extends State<PostsPage> {
+
+  String? userProfilePfp, name;
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _contentController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   final GetIt _getIt = GetIt.instance;
+  final LanguageChecker _checker = LanguageChecker();
 
   late AlertService _alertService;
   late AuthService _authService;
@@ -61,8 +65,7 @@ class _PostsPageState extends State<PostsPage> {
     setState(() {
       filteredModules = modules
           .where((module) =>
-              module.code.toLowerCase().contains(query.toLowerCase()) ||
-              module.title.toLowerCase().contains(query.toLowerCase()))
+              module.code.toLowerCase().startsWith(query.toLowerCase()))
           .toList();
     });
   }
@@ -125,7 +128,7 @@ class _PostsPageState extends State<PostsPage> {
           },
         );
       },
-      child: Text(
+      child: const Text(
         'Discard Post',
         style: TextStyle(
           fontSize: 16,
@@ -169,7 +172,7 @@ class _PostsPageState extends State<PostsPage> {
         decoration: BoxDecoration(
           border: Border.all(color: Colors.brown[300]!),
           borderRadius: BorderRadius.circular(10),
-          color: Color(0xFFF8F9FF),
+          color: const Color(0xFFF8F9FF),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -194,7 +197,7 @@ class _PostsPageState extends State<PostsPage> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: Text(
+        title: const Text(
           "Create a Post!",
           style: TextStyle(
             color: Colors.white,
@@ -246,7 +249,7 @@ class _PostsPageState extends State<PostsPage> {
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
-                    style: TextStyle(fontSize: 16.0),
+                    style: const TextStyle(fontSize: 16.0),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter a module code';
@@ -301,7 +304,7 @@ class _PostsPageState extends State<PostsPage> {
                     },
                   ),
                   const SizedBox(height: 20),
-                  Spacer(),
+                  const Spacer(),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [

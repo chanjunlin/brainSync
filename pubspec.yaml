@@ -55,6 +55,8 @@ dependencies:
   curved_navigation_bar: ^1.0.3
   scrollable_positioned_list: ^0.3.8
   shared_preferences: ^2.2.3
+  google_sign_in: ^6.2.1
+  badword_guard: ^1.0.0
 
 dev_dependencies:
   flutter_test:
@@ -83,6 +85,7 @@ flutter:
     - assets/img/study.png
     - assets/img/lock1.png
     - assets/img/people.png
+    - assets/img/google.png
 
 
   # An image asset can refer to one or more resolution-specific "variants", see
