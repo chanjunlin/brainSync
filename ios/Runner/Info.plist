@@ -2,7 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-    <!-- Existing keys -->
     <key>CFBundleURLTypes</key>
     <array>
         <dict>
@@ -10,30 +9,24 @@
             <string>Editor</string>
             <key>CFBundleURLSchemes</key>
             <array>
-                <!-- Google Sign-In URL Scheme -->
+                <string>com.example.brainsync</string>
+            </array>
+        </dict>
+        <dict>
+            <key>CFBundleURLSchemes</key>
+            <array>
+                <!-- TODO Replace this value: -->
+                <!-- Copied from GoogleService-Info.plist key REVERSED_CLIENT_ID -->
                 <string>com.googleusercontent.apps.669544143843-147do1r0grqlenusfnpjjp3s67nb3m3d</string>
-                <!-- Facebook URL Scheme -->
-                <string>fb{your-app-id}</string>
             </array>
         </dict>
     </array>
-    <key>GIDClientID</key>
-    <string>669544143843-147do1r0grqlenusfnpjjp3s67nb3m3d.apps.googleusercontent.com</string>
-    
-    <!-- Facebook SDK keys -->
-    <key>FacebookAppID</key>
-    <string>{your-app-id}</string>
-    <key>FacebookDisplayName</key>
-    <string>{your-app-name}</string>
-    <key>LSApplicationQueriesSchemes</key>
-    <array>
-        <string>fbapi</string>
-        <string>fb-messenger-share-api</string>
-        <string>fbauth2</string>
-        <string>fbshareextension</string>
-    </array>
 
-    <!-- Existing keys -->
+    <key>GIDClientID</key>
+    <!-- TODO Replace this value: -->
+    <!-- Copied from GoogleService-Info.plist key CLIENT_ID -->
+    <string>669544143843-147do1r0grqlenusfnpjjp3s67nb3m3d.apps.googleusercontent.com</string>
+
     <key>CFBundleDevelopmentRegion</key>
     <string>$(DEVELOPMENT_LANGUAGE)</string>
     <key>CFBundleDisplayName</key>

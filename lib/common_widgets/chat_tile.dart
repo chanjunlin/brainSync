@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../model/user_profile.dart';
 
 class ChatTile extends StatelessWidget {
-
   final UserProfile userProfile;
   final Function onTap;
 

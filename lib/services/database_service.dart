@@ -50,7 +50,8 @@ class DatabaseService {
 
   Future<DocumentSnapshot?> fetchCurrentUser() async {
     try {
-      String userId = _authService.user!.uid;
+      String userId = _authService.currentUser!.uid;
+      print(userId);
       return await _firebaseFirestore.collection('users').doc(userId).get();
     } catch (e) {
       // _alertService.showToast(text: "Error fetching user profile: $e");

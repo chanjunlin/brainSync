@@ -63,7 +63,7 @@ class _NavBarState extends State<NavBar> {
           ListTile(
             title: Text("See all users"),
             onTap: () {
-              _navigationService.pushName("/allUsers");
+              _authService.signOut();
             },
           ),
           ListTile(
