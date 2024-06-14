@@ -20,13 +20,13 @@ class _PostsPageState extends State<PostsPage> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _contentController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  final GetIt _getIt = GetIt.instance;
 
   late AlertService _alertService;
   late AuthService _authService;
   late NavigationService _navigationService;
-  final GetIt _getIt = GetIt.instance;
 
-  List<Module> modules = [];
+  late Future<List<Module>> futureModules;
   List<Module> filteredModules = [];
   Timer? _debounce;
 
@@ -36,8 +36,8 @@ class _PostsPageState extends State<PostsPage> {
     _alertService = _getIt.get<AlertService>();
     _navigationService = _getIt.get<NavigationService>();
     _authService = _getIt.get<AuthService>();
-    fetchModules();
-    _titleController.addListener(_onSearchChanged);
+    futureModules = ApiService.fetchModules();
+    _titleController.addListener(onTitleChanged);
   }
 
   @override
@@ -48,38 +48,26 @@ class _PostsPageState extends State<PostsPage> {
     super.dispose();
   }
 
-  Future<void> fetchModules() async {
-    try {
-      final fetchModules = await ApiService.fetchModules();
-      setState(() {
-        modules = fetchModules;
-      });
-    } catch (e) {
-      print("Error fetching modules: $e");
-    }
-  }
-
-  void _onSearchChanged() {
+  void onTitleChanged() {
     if (_debounce?.isActive ?? false) _debounce!.cancel();
     _debounce = Timer(const Duration(milliseconds: 300), () {
-      _filterModules(_titleController.text);
+      filterModules(_titleController.text);
     });
   }
 
-  void _filterModules(String query) async {
-    await Future.delayed(Duration(milliseconds: 300));
+  void filterModules(String query) async {
+    final modules = await futureModules;
     setState(() {
       filteredModules = modules
           .where((module) =>
               module.code.toLowerCase().contains(query.toLowerCase()) ||
               module.title.toLowerCase().contains(query.toLowerCase()))
-          .take(10)
           .toList();
     });
   }
 
   bool isValidModuleCode(String title) {
-    return modules.any((module) => module.code == title);
+    return filteredModules.any((module) => module.code == title);
   }
 
   Future<void> createPost() async {
@@ -98,7 +86,7 @@ class _PostsPageState extends State<PostsPage> {
         text: "Post created successfully!",
         icon: Icons.check,
       );
-      _navigationService.pushName("/home");
+      _navigationService.pushReplacementName("/home");
     }
   }
 
@@ -155,29 +143,35 @@ class _PostsPageState extends State<PostsPage> {
   }
 
   Widget buildSuggestionList() {
-    if (filteredModules.isEmpty ||
-        _titleController.text.isEmpty ||
-        isValidModuleCode(_titleController.text)) {
+    final currentText = _titleController.text.trim();
+    if (currentText.isEmpty || isValidModuleCode(currentText)) {
       return Container();
     }
-    return Container(
-      constraints: const BoxConstraints(maxHeight: 150),
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.brown[300]!),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: ListView.builder(
-        itemCount: filteredModules.length,
-        itemBuilder: (context, index) {
-          return ListTile(
-            title: Text(filteredModules[index].code),
-            onTap: () {
-              setState(() {
-                _titleController.text = filteredModules[index].code;
-              });
-            },
-          );
-        },
+    final List<Module> visibleModules = filteredModules.take(3).toList();
+    return Positioned(
+      top: 107,
+      left: 16,
+      right: 16,
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.brown[300]!),
+          borderRadius: BorderRadius.circular(10),
+          color: Color(0xFFF8F9FF),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: visibleModules.map((module) {
+            return ListTile(
+              title: Text(module.code),
+              onTap: () {
+                setState(() {
+                  _titleController.text = module.code;
+                  filteredModules.clear();
+                });
+              },
+            );
+          }).toList(),
+        ),
       ),
     );
   }
@@ -190,133 +184,134 @@ class _PostsPageState extends State<PostsPage> {
         title: Text(
           "Create a Post!",
           style: TextStyle(
-            color: Colors.brown[800],
+            color: Colors.white,
           ),
         ),
-        backgroundColor: Colors.brown[200],
+        backgroundColor: Colors.brown[300],
         elevation: 0,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "Module Code",
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.brown[800],
-                ),
-              ),
-              const SizedBox(height: 10),
-              TextFormField(
-                style: TextStyle(
-                  color: Colors.brown[800],
-                ),
-                cursorColor: Colors.brown[300],
-                controller: _titleController,
-                decoration: InputDecoration(
-                  labelText: 'Module Code',
-                  labelStyle: TextStyle(
-                    color: Colors.brown[800],
-                  ),
-                  prefixIcon: Icon(
-                    Icons.code,
-                    color: Colors.brown[300],
-                  ),
-                  focusColor: Colors.brown[300],
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.brown[300]!),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.brown[300]!),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  border: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.brown[300]!),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a module code';
-                  } else if (!isValidModuleCode(value)) {
-                    return 'Invalid module code';
-                  }
-                  return null;
-                },
-              ),
-              buildSuggestionList(),
-              const SizedBox(height: 30),
-              Text(
-                "Content",
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.brown[800],
-                ),
-              ),
-              const SizedBox(height: 10),
-              TextFormField(
-                cursorColor: Colors.brown[300],
-                controller: _contentController,
-                decoration: InputDecoration(
-                  labelText: 'Content',
-                  labelStyle: TextStyle(
-                    color: Colors.brown[800],
-                  ),
-                  prefixIcon: Icon(
-                    Icons.text_fields,
-                    color: Colors.brown[300],
-                  ),
-                  focusColor: Colors.brown[300],
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.brown[300]!),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.brown[300]!),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  border: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.brown[300]!),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                maxLines: null,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter content';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 20),
-              Spacer(),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      body: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.only(right: 8.0),
-                      child: discardButton(),
+                  Text(
+                    "Module Code",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.brown[800],
                     ),
                   ),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 8.0),
-                      child: sendButton(),
+                  const SizedBox(height: 10),
+                  TextFormField(
+                    controller: _titleController,
+                    decoration: InputDecoration(
+                      labelText: 'Module Code',
+                      labelStyle: TextStyle(
+                        color: Colors.brown[800],
+                      ),
+                      prefixIcon: Icon(
+                        Icons.code,
+                        color: Colors.brown[300],
+                      ),
+                      focusColor: Colors.brown[300],
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.brown[300]!),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.brown[300]!),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      border: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.brown[300]!),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
                     ),
+                    style: TextStyle(fontSize: 16.0),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter a module code';
+                      } else if (!isValidModuleCode(value)) {
+                        return 'Invalid module code';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 30),
+                  Text(
+                    "Content",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.brown[800],
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  TextFormField(
+                    cursorColor: Colors.brown[300],
+                    controller: _contentController,
+                    decoration: InputDecoration(
+                      labelText: 'Content',
+                      labelStyle: TextStyle(
+                        color: Colors.brown[800],
+                      ),
+                      prefixIcon: Icon(
+                        Icons.text_fields,
+                        color: Colors.brown[300],
+                      ),
+                      focusColor: Colors.brown[300],
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.brown[300]!),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.brown[300]!),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      border: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.brown[300]!),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    maxLines: null,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter content';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  Spacer(),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: 8.0),
+                          child: discardButton(),
+                        ),
+                      ),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 8.0),
+                          child: sendButton(),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ],
+            ),
           ),
-        ),
+          buildSuggestionList(),
+        ],
       ),
     );
   }

@@ -31,6 +31,9 @@ class _ModuleListPageState extends State<ModuleListPage> {
     futureModules = ApiService.fetchModules();
     searchController = TextEditingController();
     _navigationService = _getIt.get<NavigationService>();
+    searchController.addListener(() {
+      setState(() {});
+    });
   }
 
   @override
@@ -59,8 +62,8 @@ class _ModuleListPageState extends State<ModuleListPage> {
     setState(() {
       filteredModules = modules
           .where((module) =>
-      module.code.toLowerCase().contains(query.toLowerCase()) ||
-          module.title.toLowerCase().contains(query.toLowerCase()))
+              module.code.toLowerCase().contains(query.toLowerCase()) ||
+              module.title.toLowerCase().contains(query.toLowerCase()))
           .toList();
     });
   }
@@ -87,14 +90,48 @@ class _ModuleListPageState extends State<ModuleListPage> {
           const SizedBox(height: 10),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: SearchBar(
+            child: TextField(
               controller: searchController,
               onChanged: filterModules,
-              hintText: 'Search for modules with Code or Title',
-              backgroundColor: MaterialStateProperty.all(Color(0xFFF8F9FF)),
+              decoration: InputDecoration(
+                hintText: 'Search for modules with Code or Title',
+                filled: true,
+                fillColor: Color(0xFFF8F9FF),
+                prefixIcon: Icon(Icons.search, color: Colors.grey),
+                suffixIcon: searchController.text.isNotEmpty
+                    ? IconButton(
+                        icon: Icon(Icons.clear, color: Colors.grey),
+                        onPressed: clearSearch,
+                      )
+                    : null,
+                contentPadding:
+                    EdgeInsets.symmetric(vertical: 15.0, horizontal: 10.0),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(30.0),
+                  borderSide: BorderSide(
+                    color: Colors.grey,
+                    width: 1.0,
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(30.0),
+                  borderSide: BorderSide(
+                    color: Colors.grey,
+                    width: 1.0,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(30.0),
+                  borderSide: BorderSide(
+                    color: Colors.brown.shade300,
+                    width: 2.0,
+                  ),
+                ),
+              ),
+              style: TextStyle(fontSize: 16.0),
             ),
           ),
-          const SizedBox(height: 10),
+          Divider(),
           Expanded(
             child: Scrollbar(
               child: FutureBuilder<List<Module>>(
@@ -129,11 +166,6 @@ class _ModuleListPageState extends State<ModuleListPage> {
             ),
           ),
         ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: clearSearch,
-        tooltip: 'Clear Search',
-        child: Icon(Icons.clear),
       ),
     );
   }
