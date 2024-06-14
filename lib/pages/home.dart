@@ -25,6 +25,8 @@ class _HomeState extends State<Home> {
   late User? user;
 
   String? name;
+  String searchQuery = "";
+  bool isSearching = false;
 
   late AuthService _authService;
   late NavigationService _navigationService;
@@ -51,7 +53,33 @@ class _HomeState extends State<Home> {
       appBar: AppBar(
         backgroundColor: Colors.brown[300],
         foregroundColor: Colors.white,
-        title: const Text("BrainSync"),
+        title: !isSearching
+            ? const Text("BrainSync")
+            : TextField(
+                onChanged: (value) {
+                  setState(() {
+                    searchQuery = value;
+                  });
+                },
+                style: const TextStyle(color: Colors.white),
+                decoration: const InputDecoration(
+                  hintText: "Search...",
+                  hintStyle: TextStyle(color: Colors.white),
+                ),
+              ),
+        actions: [
+          IconButton(
+            onPressed: () {
+              setState(() {
+                isSearching = !isSearching;
+                if (!isSearching) {
+                  searchQuery = "";
+                }
+              });
+            },
+            icon: Icon(isSearching ? Icons.close : Icons.search),
+          )
+        ],
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
@@ -66,7 +94,12 @@ class _HomeState extends State<Home> {
             return const Center(child: Text("Something went wrong"));
           }
 
-          final posts = snapshot.data?.docs ?? [];
+          final posts = snapshot.data?.docs.where((post) {
+            if (searchQuery.isEmpty) return true;
+            final data = post.data() as Map<String, dynamic>;
+            final title = data['title'] as String;
+            return title.toLowerCase().contains(searchQuery.toLowerCase());
+          }).toList() ?? [];
 
           return ListView.builder(
             itemCount: posts.length,

@@ -33,6 +33,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.11.0"
+  badword_guard:
+    dependency: "direct main"
+    description:
+      name: badword_guard
+      sha256: "5553ab2d6b678dd9cbde6c5b619b40ea93d8e48f7b80d3fff13ea5ddce11e8c9"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.1"
   boolean_selector:
     dependency: transitive
     description:
@@ -149,10 +157,10 @@ packages:
     dependency: "direct main"
     description:
       name: curved_navigation_bar
-      sha256: "342da2fd038bd7ec8bd0f5948d57c7fde22930b438edc2489e786c1770f68fbd"
+      sha256: bb4ab128fcb6f4a9f0f1f72d227db531818b20218984789777f049fcbf919279
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.5"
+    version: "1.0.6"
   curved_navigation_bar_with_label:
     dependency: "direct main"
     description:

@@ -9,6 +9,7 @@ import 'package:brainsync/services/auth_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:badword_guard/badword_guard.dart';
 
 import '../../services/navigation_service.dart';
 
@@ -18,9 +19,6 @@ class PostsPage extends StatefulWidget {
 }
 
 class _PostsPageState extends State<PostsPage> {
-  final TextEditingController _titleController = TextEditingController();
-  final TextEditingController _contentController = TextEditingController();
-  final _formKey = GlobalKey<FormState>();
 
   String? userProfilePfp, name;
 
@@ -28,10 +26,15 @@ class _PostsPageState extends State<PostsPage> {
   late AuthService _authService;
   late NavigationService _navigationService;
   final GetIt _getIt = GetIt.instance;
+  final LanguageChecker _checker = LanguageChecker();
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _contentController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
 
   List<Module> _modules = [];
   List<Module> _filteredModules = [];
   Timer? _debounce;
+
 
   @override
   void initState() {
@@ -87,14 +90,25 @@ class _PostsPageState extends State<PostsPage> {
 
   Future<void> createPost() async {
     if (_formKey.currentState!.validate()) {
+      String content = _contentController.text;
+      
+      if (_checker.containsBadLanguage(content)) {
+        _alertService.showToast(
+          text: "Post contains inappropriate content!",
+          icon: Icons.error,
+        );
+        return;
+      }
+
+      String filteredContent = _checker.filterBadWords(content);
+
       await FirebaseFirestore.instance.collection('posts').add({
         'title': _titleController.text,
-        'content': _contentController.text,
+        'content': filteredContent,
         'timestamp': Timestamp.now(),
-        'authorName': _authService.currentUser!.uid, //change here
+        'authorName': _authService.currentUser!.uid,
       });
 
-      // Clear the text fields
       _titleController.clear();
       _contentController.clear();
 
@@ -110,7 +124,7 @@ class _PostsPageState extends State<PostsPage> {
     return showDialog<void>(
         context: context,
         barrierDismissible: false,
-        // makes it so that the user need to close the pop-up
+        // Makes it so that the user needs to close the pop-up
         builder: (BuildContext context) {
           return AlertDialog(
             title: const Text("Discard Post?"),
@@ -169,7 +183,7 @@ class _PostsPageState extends State<PostsPage> {
         CustomDialog.show(
             context: context,
             title: "Delete Post",
-            content: "Do you want to delete post?",
+            content: "Do you want to delete the post?",
             cancelText: "Cancel",
             discardText: "Confirm",
             toastText: "Post Cancelled",
@@ -196,8 +210,7 @@ class _PostsPageState extends State<PostsPage> {
             title: Text(_filteredModules[index].code),
             onTap: () {
               setState(() {
-                _titleController.text = _filteredModules[index]
-                    .code; //provide suggestions for title
+                _titleController.text = _filteredModules[index].code; // Provide suggestions for title
               });
             },
           );

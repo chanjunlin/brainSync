@@ -1,9 +1,11 @@
+import 'package:brainsync/services/alert_service.dart';
 import 'package:brainsync/services/database_service.dart';
 import 'package:brainsync/services/navigation_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:timeago/timeago.dart' as timeago;
+import 'package:badword_guard/badword_guard.dart';
 
 import '../../services/auth_service.dart';
 import '../Profile/visiting_profile.dart';
@@ -34,12 +36,14 @@ class _PostDetailPageState extends State<PostDetailPage> {
   late AuthService _authService;
   late DatabaseService _databaseService;
   late NavigationService _navigationService;
+  late AlertService _alertService;
 
   String? currentUser;
 
   @override
   void initState() {
     super.initState();
+    _alertService = _getIt.get<AlertService>();
     _authService = _getIt.get<AuthService>();
     _databaseService = _getIt.get<DatabaseService>();
     _navigationService = _getIt.get<NavigationService>();
@@ -47,6 +51,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
   }
 
   final TextEditingController _commentController = TextEditingController();
+  final LanguageChecker _checker = LanguageChecker();
 
   void loadProfile() async {
     final user = await _databaseService.fetchCurrentUser();
@@ -61,6 +66,16 @@ class _PostDetailPageState extends State<PostDetailPage> {
 
   Future<void> addComment() async {
     if (_commentController.text.isNotEmpty) {
+      if (_checker.containsBadLanguage(_commentController.text)) {
+        _alertService.showToast(
+          text: "Comment contains inappropriate content!",
+          icon: Icons.error,
+        );
+        return;
+      }
+
+      String filteredComment = _checker.filterBadWords(_commentController.text);
+
       final user = await _databaseService.fetchCurrentUser();
       final userId = user!.get("uid");
 
@@ -69,7 +84,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
           .doc(widget.postId)
           .collection('comments')
           .add({
-        'content': _commentController.text,
+        'content': filteredComment,
         'timestamp': Timestamp.now(),
         'authorId': userId, // Only store the user ID
       });
