@@ -1,21 +1,17 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:brainsync/common_widgets/dialog.dart';
-import 'package:flutter/material.dart';
-import 'package:get_it/get_it.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-
 import 'package:brainsync/common_widgets/bottomBar.dart';
+import 'package:brainsync/const.dart';
+import 'package:brainsync/model/user_profile.dart';
 import 'package:brainsync/services/alert_service.dart';
 import 'package:brainsync/services/auth_service.dart';
 import 'package:brainsync/services/database_service.dart';
-import 'package:brainsync/services/media_service.dart';
 import 'package:brainsync/services/navigation_service.dart';
-import 'package:brainsync/services/storage_service.dart';
-import 'package:brainsync/const.dart';
-import 'package:brainsync/model/user_profile.dart';
-import 'edit_profile.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
+
 import 'friends.dart';
 
 class Profile2 extends StatefulWidget {
@@ -39,9 +35,7 @@ class _Profile2State extends State<Profile2> {
   late AlertService _alertService;
   late AuthService _authService;
   late DatabaseService _databaseService;
-  late MediaService _mediaService;
   late NavigationService _navigationService;
-  late StorageService _storageService;
   late DocumentSnapshot user;
 
   @override
@@ -50,11 +44,30 @@ class _Profile2State extends State<Profile2> {
     _authService = _getIt.get<AuthService>();
     _navigationService = _getIt.get<NavigationService>();
     _alertService = _getIt.get<AlertService>();
-    _storageService = _getIt.get<StorageService>();
-    _mediaService = _getIt.get<MediaService>();
     _databaseService = _getIt.get<DatabaseService>();
     loadProfile();
-    print(currentModules);
+  }
+
+  void loadProfile() async {
+    try {
+      DocumentSnapshot? userProfile = await _databaseService.fetchCurrentUser();
+      if (userProfile != null && userProfile.exists) {
+        setState(() {
+          userProfilePfp = userProfile.get('pfpURL') ?? PLACEHOLDER_PFP;
+          userProfileCover =
+              userProfile.get('profileCoverURL') ?? PLACEHOLDER_PROFILE_COVER;
+          firstName = userProfile.get('firstName') ?? 'Name';
+          lastName = userProfile.get('lastName') ?? 'Name';
+          friendReqList = userProfile.get("friendReqList") ?? [];
+          currentModules = userProfile.get("currentModule") ?? [];
+          completedModules = userProfile.get("completedModule") ?? [];
+        });
+      } else {
+        print('User profile not found');
+      }
+    } catch (e) {
+      print('Error loading profile: $e');
+    }
   }
 
   @override
@@ -65,11 +78,11 @@ class _Profile2State extends State<Profile2> {
         children: [
           buildTop(),
           buildProfileInfo(),
-          Divider(),
+          const Divider(),
           buildTabBarSection(), // Add this line
         ],
       ),
-      bottomNavigationBar: CustomBottomNavBar(initialIndex: 4),
+      bottomNavigationBar: const CustomBottomNavBar(initialIndex: 4),
     );
   }
 
@@ -165,7 +178,7 @@ class _Profile2State extends State<Profile2> {
               ),
             );
           },
-          child: Text("See Friends"),
+          child: const Text("See Friends"),
         ),
         const SizedBox(height: 10),
       ],
@@ -183,10 +196,10 @@ class _Profile2State extends State<Profile2> {
           );
           _navigationService.pushName("/editProfile");
         },
-        icon: Icon(Icons.edit),
-        label: Text("Edit Profile"),
+        icon: const Icon(Icons.edit),
+        label: const Text("Edit Profile"),
         style: ElevatedButton.styleFrom(
-          minimumSize: Size(double.infinity, 50),
+          minimumSize: const Size(double.infinity, 50),
           backgroundColor: Colors.brown[300],
           foregroundColor: Colors.white,
         ),
@@ -196,7 +209,7 @@ class _Profile2State extends State<Profile2> {
 
   Widget buildFriendRequests() {
     if (friendReqList == null || friendReqList!.isEmpty) {
-      return Column(
+      return const Column(
         children: [Text("No friends")],
       );
     } else {
@@ -218,7 +231,7 @@ class _Profile2State extends State<Profile2> {
           return Text('Error: ${snapshot.error}');
         }
         if (!snapshot.hasData || !snapshot.data!.exists) {
-          return Text('User not found');
+          return const Text('User not found');
         }
 
         var userData = snapshot.data!.data() as Map<String, dynamic>;
@@ -229,7 +242,7 @@ class _Profile2State extends State<Profile2> {
           ),
           title: Text(userData['firstName']),
           trailing: IconButton(
-            icon: Icon(Icons.check),
+            icon: const Icon(Icons.check),
             onPressed: () async {
               await _databaseService.acceptFriendRequest(
                   uid, _authService.user!.uid);
@@ -243,28 +256,6 @@ class _Profile2State extends State<Profile2> {
     );
   }
 
-  void loadProfile() async {
-    try {
-      DocumentSnapshot? userProfile = await _databaseService.fetchCurrentUser();
-      if (userProfile != null && userProfile.exists) {
-        setState(() {
-          userProfilePfp = userProfile.get('pfpURL') ?? PLACEHOLDER_PFP;
-          userProfileCover =
-              userProfile.get('profileCoverURL') ?? PLACEHOLDER_PROFILE_COVER;
-          firstName = userProfile.get('firstName') ?? 'Name';
-          lastName = userProfile.get('lastName') ?? 'Name';
-          friendReqList = userProfile.get("friendReqList") ?? [];
-          currentModules = userProfile.get("currentModule") ?? [];
-          completedModules = userProfile.get("completedModule") ?? [];
-        });
-      } else {
-        print('User profile not found');
-      }
-    } catch (e) {
-      print('Error loading profile: $e');
-    }
-  }
-
   Widget buildTabBarSection() {
     return DefaultTabController(
       length: 4,
@@ -273,7 +264,7 @@ class _Profile2State extends State<Profile2> {
           TabBar(
             labelColor: Colors.brown[800],
             unselectedLabelColor: Colors.brown[400],
-            tabs: [
+            tabs: const [
               Tab(text: 'Modules'),
               Tab(text: 'Posts'),
               Tab(text: 'Comments'),
@@ -285,8 +276,8 @@ class _Profile2State extends State<Profile2> {
             child: TabBarView(
               children: [
                 showModule(),
-                Center(child: Text('Posts Content')),
-                Center(child: Text('Comments Content')),
+                const Center(child: Text('Posts Content')),
+                const Center(child: Text('Comments Content')),
                 showFriendsTab(),
               ],
             ),
@@ -311,7 +302,7 @@ class _Profile2State extends State<Profile2> {
               color: Colors.brown[800],
             ),
           ),
-          SizedBox(
+          const SizedBox(
             height: 8,
           ),
           if (currentModules != null && currentModules!.isNotEmpty)
@@ -326,22 +317,22 @@ class _Profile2State extends State<Profile2> {
                       context: context,
                       builder: (BuildContext context) {
                         return AlertDialog(
-                          title: Text("Remove Module"),
-                          content: Text("Do you want to remove the module?"),
+                          title: const Text("Remove Module"),
+                          content: const Text("Do you want to remove the module?"),
                           actions: <Widget>[
                             TextButton(
                               onPressed: () {
                                 Navigator.of(context).pop(
                                     false); // Dismiss dialog and return false
                               },
-                              child: Text("Cancel"),
+                              child: const Text("Cancel"),
                             ),
                             TextButton(
                               onPressed: () {
                                 Navigator.of(context).pop(
                                     true); // Dismiss dialog and return true
                               },
-                              child: Text("Confirm"),
+                              child: const Text("Confirm"),
                             ),
                           ],
                         );
@@ -349,8 +340,6 @@ class _Profile2State extends State<Profile2> {
                     );
                   },
                   onDismissed: (direction) {
-                    print(module);
-                    print(_authService.currentUser!.uid);
                     _databaseService.removeModule(
                         _authService.currentUser!.uid, module);
                     setState(() {
@@ -359,7 +348,7 @@ class _Profile2State extends State<Profile2> {
                   },
                   background: Container(
                     color: Colors.red,
-                    child: Icon(
+                    child: const Icon(
                       Icons.delete,
                       color: Colors.white,
                     ),
@@ -377,7 +366,7 @@ class _Profile2State extends State<Profile2> {
               }).toList(),
             ),
           if (currentModules == null || currentModules!.isEmpty)
-            Text('No current modules'),
+            const Text('No current modules'),
           const SizedBox(height: 16),
 
           // Completed Modules Section
@@ -389,7 +378,7 @@ class _Profile2State extends State<Profile2> {
               color: Colors.brown[800],
             ),
           ),
-          SizedBox(
+          const SizedBox(
             height: 8,
           ),
           if (completedModules != null && completedModules!.isNotEmpty)
@@ -408,7 +397,7 @@ class _Profile2State extends State<Profile2> {
               }).toList(),
             ),
           if (completedModules == null || completedModules!.isEmpty)
-            Text('No completed modules'),
+            const Text('No completed modules'),
           const SizedBox(height: 16),
         ],
       ),
@@ -420,11 +409,11 @@ class _Profile2State extends State<Profile2> {
       future: _databaseService.getFriends(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
+          return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
           return Center(child: Text('Error: ${snapshot.error}'));
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return Center(child: Text('No friends'));
+          return const Center(child: Text('No friends'));
         } else {
           // Use FriendListPage with the loaded friendList
           return FriendListPage(friendList: snapshot.data!);

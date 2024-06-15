@@ -1,5 +1,6 @@
 import 'package:brainsync/common_widgets/chat_tile.dart';
 import 'package:brainsync/common_widgets/search_bar.dart';
+import 'package:brainsync/pages/Chats/chat_page.dart';
 import 'package:brainsync/services/auth_service.dart';
 import 'package:brainsync/services/database_service.dart';
 import 'package:flutter/material.dart';
@@ -8,8 +9,6 @@ import 'package:google_nav_bar/google_nav_bar.dart';
 
 import '../../model/user_profile.dart';
 import '../../services/navigation_service.dart';
-import 'package:brainsync/pages/Chats/chat_page.dart';
-
 
 class ChatHomePage extends StatefulWidget {
   const ChatHomePage({super.key});
@@ -39,16 +38,16 @@ class _ChatHomePageState extends State<ChatHomePage> {
       appBar: AppBar(
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
-        title: Text(
+        automaticallyImplyLeading: false,
+        title: const Text(
           'BrainSync',
-          style: TextStyle(),
         ),
         actions: [
           IconButton(
             onPressed: () {
               _navigationService.pushName("/addFriends");
             },
-            icon: Icon(Icons.add),
+            icon: const Icon(Icons.add),
           ),
           IconButton(
             onPressed: () {
@@ -57,7 +56,7 @@ class _ChatHomePageState extends State<ChatHomePage> {
                 delegate: CustomSearch(),
               );
             },
-            icon: Icon(Icons.search),
+            icon: const Icon(Icons.search),
           ),
         ],
       ),
@@ -80,12 +79,10 @@ class _ChatHomePageState extends State<ChatHomePage> {
                 icon: Icons.home,
                 text: "Home",
                 onPressed: () async {
-                  _navigationService.pushName(
-                    "/home",
-                  );
+                  _navigationService.pushName("/home");
                 },
               ),
-              GButton(
+              const GButton(
                 icon: Icons.chat,
                 text: "Chats",
               ),
@@ -127,7 +124,7 @@ class _ChatHomePageState extends State<ChatHomePage> {
           onPressed: () {
             _navigationService.pushName("/friends");
           },
-          child: Text("Friends"),
+          child: const Text("Friends"),
         ),
       ],
     );
@@ -142,6 +139,11 @@ class _ChatHomePageState extends State<ChatHomePage> {
             child: Text("Unable to load data"),
           );
         }
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
         if (snapshot.hasData && snapshot.data != null) {
           final users = snapshot.data!.docs;
           return ListView.builder(
@@ -149,7 +151,6 @@ class _ChatHomePageState extends State<ChatHomePage> {
             itemCount: users.length,
             itemBuilder: (context, index) {
               UserProfile? user = users[index].data();
-              print(user.firstName);
               if (user != null) {
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 10.0),
@@ -164,21 +165,19 @@ class _ChatHomePageState extends State<ChatHomePage> {
                       }
                       _navigationService
                           .push(MaterialPageRoute(builder: (context) {
-                        return ChatPage(
-                          chatUser: user,
-                        );
+                        return ChatPage(chatUser: user);
                       }));
                     },
                   ),
                 );
               } else {
-                return SizedBox(); // Return an empty SizedBox if user is null
+                return const SizedBox(); // Return an empty SizedBox if user is null
               }
             },
           );
         }
-        return Center(
-          child: CircularProgressIndicator(),
+        return const Center(
+          child: Text("No users found"),
         );
       },
     );

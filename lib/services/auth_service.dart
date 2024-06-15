@@ -8,7 +8,11 @@ import '../model/user_profile.dart';
 
 class AuthService {
   String lastName = "", selectedYear = "";
-  List<String?> friendReqList = [], friendList = [];
+  List<String?> friendReqList = [],
+      friendList = [],
+      currentModules = [],
+      completedModules = [],
+      chats = [];
 
   User? _user;
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
@@ -22,10 +26,10 @@ class AuthService {
   void setUpCollectionReferences() {
     _usersCollection =
         _firebaseFirestore.collection('users').withConverter<UserProfile>(
-          fromFirestore: (snapshots, _) =>
-              UserProfile.fromJson(snapshots.data()!),
-          toFirestore: (userProfile, _) => userProfile.toJson(),
-        );
+              fromFirestore: (snapshots, _) =>
+                  UserProfile.fromJson(snapshots.data()!),
+              toFirestore: (userProfile, _) => userProfile.toJson(),
+            );
   }
 
   User? get user => _user;
@@ -58,14 +62,14 @@ class AuthService {
       if (googleUser == null) return;
 
       final GoogleSignInAuthentication googleAuth =
-      await googleUser.authentication;
+          await googleUser.authentication;
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 
       final UserCredential userCredential =
-      await _firebaseAuth.signInWithCredential(credential);
+          await _firebaseAuth.signInWithCredential(credential);
       _user = userCredential.user;
 
       if (userCredential.user != null) {
@@ -81,13 +85,14 @@ class AuthService {
               friendList: friendList,
               friendReqList: friendReqList,
               year: selectedYear,
-              completedModules: [],
-              currentModules: [],
+              completedModules: completedModules,
+              currentModules: currentModules,
+              chats: chats,
             ),
           );
         } else {
           UserProfile userProfile =
-          await getUserProfile(userCredential.user!.uid);
+              await getUserProfile(userCredential.user!.uid);
           await userCredential.user!.updateDisplayName(userProfile.firstName);
         }
       }
@@ -144,7 +149,7 @@ class AuthService {
   Future<UserProfile> getUserProfile(String uid) async {
     try {
       DocumentSnapshot<Map<String, dynamic>> userProfileSnapshot =
-      await _firebaseFirestore.collection('users').doc(uid).get();
+          await _firebaseFirestore.collection('users').doc(uid).get();
       if (userProfileSnapshot.exists) {
         return UserProfile.fromJson(userProfileSnapshot.data()!);
       } else {
@@ -169,7 +174,7 @@ class AuthService {
   Future<bool> checkIfUserExists(String uid) async {
     try {
       final DocumentSnapshot<Map<String, dynamic>> userData =
-      await _firebaseFirestore.collection('users').doc(uid).get();
+          await _firebaseFirestore.collection('users').doc(uid).get();
       return userData.exists;
     } catch (e) {
       print('Error checking if user exists: $e');
@@ -177,11 +182,11 @@ class AuthService {
     }
   }
 
-  // void authChangeStreamListener(User? user) {
-  //   if (user != null) {
-  //     _user = user;
-  //   } else {
-  //     _user = null;
-  //   }
-  // }
+// void authChangeStreamListener(User? user) {
+//   if (user != null) {
+//     _user = user;
+//   } else {
+//     _user = null;
+//   }
+// }
 }

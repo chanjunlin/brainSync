@@ -1,12 +1,13 @@
-import 'package:brainsync/auth.dart';
+import 'package:brainsync/common_widgets/bottomBar.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
+import '../../const.dart';
 import '../../model/user_profile.dart';
 import '../../services/auth_service.dart';
 import '../../services/database_service.dart';
 import '../../services/navigation_service.dart';
-import 'chat_page.dart';
 
 class FriendsChats extends StatefulWidget {
   @override
@@ -14,7 +15,6 @@ class FriendsChats extends StatefulWidget {
 }
 
 class _FriendsChatsState extends State<FriendsChats> {
-  // variables
   final GetIt _getIt = GetIt.instance;
 
   late NavigationService _navigationService;
@@ -22,6 +22,13 @@ class _FriendsChatsState extends State<FriendsChats> {
   late AuthService _authService;
 
   bool hasChats = false;
+  bool presentChat = false;
+
+  List<UserProfile?> allFriends = [];
+  List<UserProfile?> filteredFriends = [];
+  List? friendReqList, currentModules, completedModules, chats;
+
+  String? userProfilePfp, userProfileCover, firstName, lastName;
 
   @override
   void initState() {
@@ -29,33 +36,30 @@ class _FriendsChatsState extends State<FriendsChats> {
     _authService = _getIt.get<AuthService>();
     _navigationService = _getIt.get<NavigationService>();
     _databaseService = _getIt.get<DatabaseService>();
-    getFriends();
+    loadProfile();
   }
 
-  Future<void> getFriends() async {
-    _allFriends = await _databaseService.getFriends();
-    setState(() {
-      _filteredFriends = _allFriends;
-    });
-  }
-
-  TextEditingController _searchController = TextEditingController();
-  List<UserProfile?> _allFriends = [];
-  List<UserProfile?> _filteredFriends =
-      []; // Filtered list based on search query
-
-  Future<void> checkChats() async {
-    String currentUserId = _authService.user!.uid;
-    for (UserProfile? friend in _allFriends) {
-      String? friendId = friend?.uid;
-      bool chatExists =
-          await _databaseService.checkChatExist(currentUserId, friendId!);
-      if (chatExists) {
+  void loadProfile() async {
+    try {
+      DocumentSnapshot? userProfile = await _databaseService.fetchCurrentUser();
+      if (userProfile != null && userProfile.exists) {
         setState(() {
-          hasChats = true;
+          userProfilePfp = userProfile.get('pfpURL') ?? PLACEHOLDER_PFP;
+          userProfileCover =
+              userProfile.get('profileCoverURL') ?? PLACEHOLDER_PROFILE_COVER;
+          firstName = userProfile.get('firstName') ?? 'Name';
+          lastName = userProfile.get('lastName') ?? 'Name';
+          friendReqList = userProfile.get("friendReqList") ?? [];
+          currentModules = userProfile.get("currentModule") ?? [];
+          completedModules = userProfile.get("completedModule") ?? [];
+          chats = userProfile.get("chats") ?? [];
+          hasChats = chats!.isNotEmpty;
         });
-        break;
+      } else {
+        print('User profile not found');
       }
+    } catch (e) {
+      print('Error loading profile: $e');
     }
   }
 
@@ -63,113 +67,39 @@ class _FriendsChatsState extends State<FriendsChats> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Friends & Chats'),
+        title: const Text('Friends & Chats'),
+        automaticallyImplyLeading: false,
       ),
-      body: Column(
-        children: [
-          IconButton(
-            onPressed: () {
-              showSearch(
-                context: context,
-                delegate: CustomSearch(
-                  allFriends: _allFriends,
-                ),
-              );
+      body: hasChats
+          ? ListView.builder(
+        itemCount: chats?.length ?? 0,
+        itemBuilder: (context, index) {
+          return ListTile(
+            title: Text('Chat ${chats![index]}'),
+            onTap: () {
+              // Handle chat item tap
             },
-            icon: const Icon(Icons.search),
-          ),
-
-        ],
-      ),
-    );
-  }
-}
-
-class CustomSearch extends SearchDelegate {
-  final List<UserProfile?> allFriends; // Add a parameter for allFriends
-  final GetIt _getIt = GetIt.instance;
-
-  late DatabaseService _databaseService;
-  late AuthService _authService;
-  late NavigationService _navigationService;
-
-  CustomSearch({required this.allFriends}) {
-    _databaseService = _getIt.get<DatabaseService>();
-    _authService = _getIt.get<AuthService>();
-    _navigationService = _getIt.get<NavigationService>();
-  }
-
-  @override
-  List<Widget> buildActions(BuildContext context) {
-    return [
-      IconButton(
-        onPressed: () {
-          query = '';
+          );
         },
-        icon: const Icon(Icons.clear),
+      )
+          : Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'No chats!',
+              style: TextStyle(fontSize: 24),
+            ),
+            SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+              },
+              child: Text('Create a chat'),
+            ),
+          ],
+        ),
       ),
-    ];
-  }
-
-  @override
-  Widget buildLeading(BuildContext context) {
-    return IconButton(
-      icon: const Icon(Icons.arrow_back),
-      onPressed: () {
-        close(context, null);
-      },
-    );
-  }
-
-  @override
-  Widget buildResults(BuildContext context) {
-    List<UserProfile> matchQuery = [];
-    for (var person in allFriends) {
-      if (person!.firstName!.toLowerCase().contains(query.toLowerCase())) {
-        matchQuery.add(person);
-      }
-    }
-    return ListView.builder(
-      itemCount: matchQuery.length,
-      itemBuilder: (context, index) {
-        var result = matchQuery[index];
-        return ListTile(
-          title: Text(result.firstName ?? 'No Name'),
-        );
-      },
-    );
-  }
-
-  @override
-  Widget buildSuggestions(BuildContext context) {
-    List<UserProfile> matchQuery = [];
-    for (var person in allFriends) {
-      if (person!.firstName!.toLowerCase().contains(query.toLowerCase())) {
-        matchQuery.add(person);
-      }
-    }
-    return ListView.builder(
-      itemCount: matchQuery.length,
-      itemBuilder: (context, index) {
-        var result = matchQuery[index];
-        return ListTile(
-          title: Text(result.firstName ?? 'No Name'),
-          onTap: () async {
-            final chatExists = await _databaseService.checkChatExist(
-                _authService.user!.uid, result.uid!);
-            if (!chatExists) {
-              await _databaseService.createNewChat(
-                  _authService.user!.uid, result.uid!);
-            }
-            _navigationService
-                .push(MaterialPageRoute(builder: (context) {
-              return ChatPage(
-                chatUser: result,
-              );
-            }));
-          },
-        );
-      },
+      bottomNavigationBar: const CustomBottomNavBar(initialIndex: 1),
     );
   }
 }
