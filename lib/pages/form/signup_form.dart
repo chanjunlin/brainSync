@@ -1,17 +1,15 @@
-import 'dart:ffi';
-
 import 'package:brainsync/model/user_profile.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
+import '../../common_widgets/custom_form_field.dart';
 import '../../const.dart';
 import '../../services/alert_service.dart';
 import '../../services/auth_service.dart';
 import '../../services/database_service.dart';
 import '../../services/media_service.dart';
 import '../../services/navigation_service.dart';
-import '../../common_widgets/custom_form_field.dart';
 import '../../services/storage_service.dart';
 
 class SignUpForm extends StatefulWidget {
@@ -25,7 +23,11 @@ class SignUpForm extends StatefulWidget {
 
 class SignUpFormState extends State<SignUpForm> {
   String? firstName, lastName, email, password, repassword, selectedYear;
-  List<String>? friendList, friendReqList, currentModules, completedModules;
+  List<String>? friendList,
+      friendReqList,
+      currentModules,
+      completedModules,
+      chats;
 
   final GetIt _getIt = GetIt.instance;
   final GlobalKey<FormState> _signupFormKey = GlobalKey();
@@ -217,8 +219,9 @@ class SignUpFormState extends State<SignUpForm> {
                                     friendList: friendList,
                                     friendReqList: friendReqList,
                                     year: selectedYear,
-                                    completedModules: [],
-                                    currentModules: [],
+                                    completedModules: currentModules,
+                                    currentModules: completedModules,
+                                    chats: chats,
                                   ),
                                 );
                                 await _authService.sendEmailVerification();

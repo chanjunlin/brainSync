@@ -1,11 +1,7 @@
-import 'package:brainsync/const.dart';
-import 'package:brainsync/pages/Administation/forget_password.dart';
-import 'package:brainsync/services/auth_service.dart';
+import 'package:brainsync/pages/form/login_form.dart';
 import 'package:brainsync/services/navigation_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:brainsync/services/alert_service.dart';
-import 'package:brainsync/common_widgets/custom_form_field.dart';
 import 'package:get_it/get_it.dart';
 import 'package:sign_in_button/sign_in_button.dart';
 
@@ -17,9 +13,7 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  String? email, password;
-  String? errorMessage = '';
-  bool isLogin = true;
+  bool _isLoading = false;
 
   final GetIt _getIt = GetIt.instance;
   final GlobalKey<FormState> _loginFormKey = GlobalKey();
@@ -27,14 +21,12 @@ class _LoginPageState extends State<LoginPage> {
 
   User? _user;
 
-  late AuthService _authService;
+
   late NavigationService _navigationService;
-  late AlertService _alertService;
 
   @override
   void initState() {
     super.initState();
-    _authService = _getIt.get<AuthService>();
     _navigationService = _getIt.get<NavigationService>();
     _alertService = _getIt.get<AlertService>();
     _auth.authStateChanges().listen((event) {
@@ -47,31 +39,39 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: true,
-      body: _buildUI(),
+      resizeToAvoidBottomInset: false,
+      backgroundColor: Colors.white, // Set the background color here
+      body: _isLoading ? buildLoadingScreen() : buildUI(), // Show loading screen if _isLoading is true
     );
   }
 
-  Widget _buildUI() {
+  Widget buildUI() {
     return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 16.0,
-          vertical: 20.0,
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            _headerText(),
-            _loginForm(),
-            _createAnAccount(),
-          ],
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Column(
+            children: [
+              headerText(),
+              LoginForm(
+                setLoading: (bool isLoading) {
+                  setState(() {
+                    _isLoading = isLoading;
+                  });
+                },
+                navigateToHome: () {
+                  _navigationService.pushReplacementName("/home");
+                },
+              ),
+              createAnAccount(),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _headerText() {
+  Widget headerText() {
     return SizedBox(
       width: MediaQuery.sizeOf(context).width,
       child: Column(
@@ -93,6 +93,18 @@ class _LoginPageState extends State<LoginPage> {
               color: Colors.brown[800],
             ),
           ),
+          SizedBox(height: 10),
+          Image.asset(
+            "assets/img/study.png",
+            alignment: Alignment.topCenter,
+            fit: BoxFit.fitWidth,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget createAnAccount() {
           const SizedBox(height: 10),
           Container(
             width: double.infinity,  // Matches the width of the form fields
@@ -248,6 +260,14 @@ class _LoginPageState extends State<LoginPage> {
           },
         )
       ],
+    );
+  }
+
+  Widget buildLoadingScreen() {
+    return Center(
+      child: CircularProgressIndicator(
+        color: Colors.brown[300],
+      ),
     );
   }
 }

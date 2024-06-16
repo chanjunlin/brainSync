@@ -35,19 +35,19 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
       onTap: (index) {
         switch (index) {
           case 0:
-            _navigationService.pushName("/home");
+            _navigationService.pushReplacementName("/home");
             break;
           case 1:
-            _navigationService.pushName("/friendsChat");
+            _navigationService.pushReplacementName("/friendsChat");
             break;
           case 2:
-            _navigationService.pushName("/post");
+            _navigationService.pushReplacementName("/post");
             break;
           case 3:
-            _navigationService.pushName("/notifications");
+            _navigationService.pushReplacementName("/notifications");
             break;
           case 4:
-            _navigationService.pushName("/profile");
+            _navigationService.pushReplacementName("/profile");
             break;
         }
       },

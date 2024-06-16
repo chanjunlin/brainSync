@@ -11,12 +11,13 @@ import '../../const.dart';
 import '../../model/user_profile.dart';
 import '../../services/auth_service.dart';
 import '../../services/database_service.dart';
+import '../Chats/chat_page.dart';
 import 'friends.dart';
 
 class VisitProfile extends StatefulWidget {
   final String userId;
 
-  VisitProfile({required this.userId});
+  const VisitProfile({super.key, required this.userId});
 
   @override
   State<VisitProfile> createState() => _VisitProfileState();
@@ -87,7 +88,10 @@ class _VisitProfileState extends State<VisitProfile> {
         }
       });
     } catch (e) {
-      print(e);
+      _alertService.showToast(
+        text: "$e",
+        icon: Icons.error,
+      );
     }
   }
 
@@ -97,25 +101,25 @@ class _VisitProfileState extends State<VisitProfile> {
       appBar: AppBar(
         backgroundColor: Colors.brown[300],
         foregroundColor: Colors.white,
-        title: Text('User Profile'),
+        title: const Text('User Profile'),
       ),
       body: ListView(
         padding: EdgeInsets.zero,
         children: [
           buildTop(),
           buildProfileInfo(),
-          Divider(),
-          buildTabBarSection(), // Add this line
+          const Divider(),
+          buildTabBarSection(),
         ],
       ),
     );
   }
 
   Widget buildTop() {
-    final double coverHeight = 280;
-    final double profileHeight = 144;
-    final double bottom = profileHeight / 2;
-    final double top = coverHeight - profileHeight / 2;
+    const double coverHeight = 280;
+    const double profileHeight = 144;
+    const double bottom = profileHeight / 2;
+    const double top = coverHeight - profileHeight / 2;
 
     return Stack(
       clipBehavior: Clip.none,
@@ -206,26 +210,56 @@ class _VisitProfileState extends State<VisitProfile> {
         );
       };
     } else if (isFriend) {
-      buttonText = 'Remove friend';
-      backgroundColor = Colors.red;
-      textColor = Colors.white;
-      onPressed = () async {
-        CustomDialog.show(
-            context: context,
-            title: "Remove Friend",
-            content: "Do you want to remove friend?",
-            cancelText: "Cancel",
-            discardText: "Confirm",
-            toastText: "Friend Removed",
-            onDiscard: () async {
-              await _databaseService.removeFriend(
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          ElevatedButton(
+            onPressed: () async {
+              CustomDialog.show(
+                  context: context,
+                  title: "Remove Friend",
+                  content: "Do you want to remove friend?",
+                  cancelText: "Cancel",
+                  discardText: "Confirm",
+                  toastText: "Friend Removed",
+                  onDiscard: () async {
+                    await _databaseService.removeFriend(
+                        _authService.currentUser!.uid, widget.userId);
+                    setState(() {
+                      isFriend = false;
+                      isFriendRequestSent = false;
+                    });
+                  });
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Remove friend'),
+          ),
+          const SizedBox(width: 16),
+          ElevatedButton(
+            onPressed: () async {
+              final chatExists = await _databaseService.checkChatExist(
                   _authService.currentUser!.uid, widget.userId);
-              setState(() {
-                isFriend = false;
-                isFriendRequestSent = false;
-              });
-            });
-      };
+              if (!chatExists) {
+                await _databaseService.createNewChat(
+                    _authService.currentUser!.uid, widget.userId);
+              }
+              UserProfile? user =
+                  await _databaseService.fetchUserProfile(widget.userId);
+              _navigationService.push(MaterialPageRoute(builder: (context) {
+                return ChatPage(chatUser: user);
+              }));
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blue,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Send Message'),
+          ),
+        ],
+      );
     } else {
       buttonText = 'Add friend';
       backgroundColor = Colors.blue;
@@ -245,11 +279,11 @@ class _VisitProfileState extends State<VisitProfile> {
 
     return ElevatedButton(
       onPressed: onPressed,
-      child: Text(buttonText),
       style: ElevatedButton.styleFrom(
         backgroundColor: backgroundColor, // background color
         foregroundColor: textColor, // text color
       ),
+      child: Text(buttonText),
     );
   }
 
@@ -262,8 +296,8 @@ class _VisitProfileState extends State<VisitProfile> {
             labelColor: Colors.brown[800],
             unselectedLabelColor: Colors.brown[400],
             isScrollable: true,
-            indicatorColor: Colors.brown[800], // Set the color of the tab indicator
-            tabs: [
+            indicatorColor: Colors.brown[800],
+            tabs: const [
               Tab(text: 'Modules'),
               Tab(text: 'Posts'),
               Tab(text: 'Comments'),
@@ -271,12 +305,12 @@ class _VisitProfileState extends State<VisitProfile> {
             ],
           ),
           SizedBox(
-            height: 400, // Adjust as needed
+            height: 400,
             child: TabBarView(
               children: [
                 showModule(),
-                Center(child: Text('Posts Content')),
-                Center(child: Text('Comments Content')),
+                const Center(child: Text('Posts Content')),
+                const Center(child: Text('Comments Content')),
                 showFriendsTab(),
               ],
             ),
@@ -301,12 +335,13 @@ class _VisitProfileState extends State<VisitProfile> {
               color: Colors.brown[800],
             ),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           StreamBuilder<DocumentSnapshot>(
-            stream: _firestore.collection('users').doc(widget.userId).snapshots(),
+            stream:
+                _firestore.collection('users').doc(widget.userId).snapshots(),
             builder: (context, snapshot) {
               if (!snapshot.hasData) {
-                return CircularProgressIndicator();
+                return const CircularProgressIndicator();
               }
 
               var userData = snapshot.data!.data() as Map<String, dynamic>;
@@ -331,8 +366,7 @@ class _VisitProfileState extends State<VisitProfile> {
                         );
                       }).toList(),
                     ),
-                  if (currentModules.isEmpty)
-                    Text('No current modules'),
+                  if (currentModules.isEmpty) const Text('No current modules'),
                   const SizedBox(height: 16),
                   Text(
                     'Completed Modules:',
@@ -342,7 +376,7 @@ class _VisitProfileState extends State<VisitProfile> {
                       color: Colors.brown[800],
                     ),
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   if (completedModules.isNotEmpty)
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -358,8 +392,7 @@ class _VisitProfileState extends State<VisitProfile> {
                         );
                       }).toList(),
                     ),
-                  if (completedModules.isEmpty)
-                    Text('No completed modules'),
+                  if (completedModules.isEmpty) Text('No completed modules'),
                 ],
               );
             },
@@ -372,14 +405,15 @@ class _VisitProfileState extends State<VisitProfile> {
 
   Widget showFriendsTab() {
     return FutureBuilder<List<UserProfile?>>(
-      future: _databaseService.getMutualFriends(_authService.currentUser!.uid, widget.userId),
+      future: _databaseService.getMutualFriends(
+          _authService.currentUser!.uid, widget.userId),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
+          return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
           return Center(child: Text('Error: ${snapshot.error}'));
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return Center(child: Text('No mutual friends'));
+          return const Center(child: Text('No mutual friends'));
         } else {
           return FriendListPage(friendList: snapshot.data!);
         }

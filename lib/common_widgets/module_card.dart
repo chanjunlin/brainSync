@@ -1,5 +1,6 @@
 // lib/widgets/module_card.dart
 import 'package:flutter/material.dart';
+
 import '../model/module.dart';
 
 class ModuleTile extends StatelessWidget {

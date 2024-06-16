@@ -1,3 +1,4 @@
+import 'dart:core';
 import 'dart:io';
 
 import 'package:brainsync/model/chat.dart';
@@ -7,15 +8,12 @@ import 'package:brainsync/services/database_service.dart';
 import 'package:brainsync/services/storage_service.dart';
 import 'package:brainsync/utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
 import 'package:dash_chat_2/dash_chat_2.dart';
+import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
 import '../../model/user_profile.dart';
 import '../../services/auth_service.dart';
-
-import 'dart:core';
-
 import '../../services/media_service.dart';
 
 class ChatPage extends StatefulWidget {
@@ -50,8 +48,8 @@ class _ChatPageState extends State<ChatPage> {
     _storageService = _getIt.get<StorageService>();
 
     currentUser = ChatUser(
-      id: _authService.user!.uid,
-      firstName: _authService.user!.displayName,
+      id: _authService.currentUser!.uid,
+      firstName: _authService.currentUser!.displayName,
     );
     otherUser = widget.chatUser;
     otherChatUser = ChatUser(id: otherUser.uid!);
@@ -72,20 +70,19 @@ class _ChatPageState extends State<ChatPage> {
       children: [
         GestureDetector(
           child: CircleAvatar(
-            radius: 24, // adjust the size to fit your needs
+            radius: 24,
             backgroundImage: NetworkImage(widget.chatUser.pfpURL!),
           ),
           onTap: () {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => VisitProfile(
-                    userId: otherUser),
+                builder: (context) => VisitProfile(userId: otherUser),
               ),
             );
           },
         ),
-        SizedBox(width: 16), // add some space between the avatar and the text
+        const SizedBox(width: 16),
         Text(widget.chatUser.firstName!),
       ],
     );

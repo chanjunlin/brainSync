@@ -47,11 +47,12 @@ class DefaultFirebaseOptions {
     projectId: 'brainsync6325',
     authDomain: 'brainsync6325.firebaseapp.com',
     storageBucket: 'brainsync6325.appspot.com',
+    measurementId: 'G-WKVBY4Z63Y',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyA3hUG8AWkjXxlknxy3RRAej7xqkASsHsQ',
-    appId: '1:669544143843:android:b776510edddf65fa8f9ed6',
+    appId: '1:669544143843:android:25cf25b7485f08f38f9ed6',
     messagingSenderId: '669544143843',
     projectId: 'brainsync6325',
     storageBucket: 'brainsync6325.appspot.com',
@@ -63,6 +64,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '669544143843',
     projectId: 'brainsync6325',
     storageBucket: 'brainsync6325.appspot.com',
+    androidClientId: '669544143843-f060etkffkt2m8qnnmea2367qhlh6l0q.apps.googleusercontent.com',
+    iosClientId: '669544143843-147do1r0grqlenusfnpjjp3s67nb3m3d.apps.googleusercontent.com',
     iosBundleId: 'com.example.brainsync',
   );
 
@@ -72,6 +75,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '669544143843',
     projectId: 'brainsync6325',
     storageBucket: 'brainsync6325.appspot.com',
+    androidClientId: '669544143843-f060etkffkt2m8qnnmea2367qhlh6l0q.apps.googleusercontent.com',
+    iosClientId: '669544143843-147do1r0grqlenusfnpjjp3s67nb3m3d.apps.googleusercontent.com',
     iosBundleId: 'com.example.brainsync',
   );
 
@@ -82,6 +87,7 @@ class DefaultFirebaseOptions {
     projectId: 'brainsync6325',
     authDomain: 'brainsync6325.firebaseapp.com',
     storageBucket: 'brainsync6325.appspot.com',
+    measurementId: 'G-MW6K1945E2',
   );
 
 }
