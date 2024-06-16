@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http/http.dart';
 import 'package:timeago/timeago.dart' as timeago;
+import 'package:badword_guard/badword_guard.dart';
 
 import '../services/auth_service.dart';
 
@@ -39,6 +40,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
 
   String? currentUser, commentUser;
 
+  final LanguageChecker _languageChecker = LanguageChecker();
   @override
   void initState() {
     _authService = _getIt.get<AuthService>();
@@ -68,6 +70,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
   Future<void> _addComment() async {
     if (_commentController.text.isNotEmpty) {
       DocumentSnapshot? user = await _databaseService.fetchCurrentUser();
+
       await FirebaseFirestore.instance
           .collection('posts')
           .doc(widget.postId)
@@ -76,7 +79,6 @@ class _PostDetailPageState extends State<PostDetailPage> {
         'content': _commentController.text,
         'timestamp': Timestamp.now(),
         'authorName': "${user!.get("firstName")} ${user!.get("lastName")}",
-        //change here
       });
       _commentController.clear();
     }
@@ -206,3 +208,4 @@ class _PostDetailPageState extends State<PostDetailPage> {
     );
   }
 }
+

@@ -1,7 +1,9 @@
 import 'package:brainsync/pages/form/login_form.dart';
 import 'package:brainsync/services/navigation_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});

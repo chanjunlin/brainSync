@@ -25,12 +25,15 @@ class _HomeState extends State<Home> {
   late User? user;
 
   String? name;
+  String searchQuery = "";
+  bool isSearching = false;
 
   late AuthService _authService;
   late NavigationService _navigationService;
   late DatabaseService _databaseService;
 
   final GetIt _getIt = GetIt.instance;
+  final userId = FirebaseAuth.instance.currentUser!.uid;
 
   @override
   void initState() {
@@ -43,6 +46,34 @@ class _HomeState extends State<Home> {
     timeago.setLocaleMessages('custom', CustomShortMessages());
   }
 
+  Future<void> likePost (BuildContext context, String postid,) async {
+    try {
+      await FirebaseFirestore.instance.collection('posts').doc(postid).update(
+        {
+          'likes': FieldValue.arrayUnion([userId])
+        },
+      );
+    } on FirebaseException {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Error liking post'))
+      );
+    }
+  } 
+
+  Future<void> dislikePost (BuildContext context, String postid,) async {
+    try {
+      await FirebaseFirestore.instance.collection('posts').doc(postid).update(
+        {
+          'likes': FieldValue.arrayRemove([userId])
+      },
+      );
+    } on FirebaseException {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Error liking post'))
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -51,7 +82,33 @@ class _HomeState extends State<Home> {
       appBar: AppBar(
         backgroundColor: Colors.brown[300],
         foregroundColor: Colors.white,
-        title: const Text("BrainSync"),
+        title: !isSearching
+            ? const Text("BrainSync")
+            : TextField(
+                onChanged: (value) {
+                  setState(() {
+                    searchQuery = value;
+                  });
+                },
+                style: const TextStyle(color: Colors.white),
+                decoration: const InputDecoration(
+                  hintText: "Search...",
+                  hintStyle: TextStyle(color: Colors.white),
+                ),
+              ),
+        actions: [
+          IconButton(
+            onPressed: () {
+              setState(() {
+                isSearching = !isSearching;
+                if (!isSearching) {
+                  searchQuery = "";
+                }
+              });
+            },
+            icon: Icon(isSearching ? Icons.close : Icons.search),
+          )
+        ],
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
@@ -66,7 +123,12 @@ class _HomeState extends State<Home> {
             return const Center(child: Text("Something went wrong"));
           }
 
-          final posts = snapshot.data?.docs ?? [];
+          final posts = snapshot.data?.docs.where((post) {
+            if (searchQuery.isEmpty) return true;
+            final data = post.data() as Map<String, dynamic>;
+            final title = data['title'] as String;
+            return title.toLowerCase().startsWith(searchQuery.toLowerCase());
+          }).toList() ?? [];
 
           return ListView.builder(
             itemCount: posts.length,
@@ -75,6 +137,9 @@ class _HomeState extends State<Home> {
               final timestamp = post['timestamp'] as Timestamp;
               final date = timestamp.toDate();
               final formattedDate = timeago.format(date, locale: 'custom');
+              final likes = post['likes'] ?? [];
+              final isLiked = likes.contains(userId);
+              final likeCount = likes.length;
 
               return Card(
                 color: Colors.white, // Complementary color to brown
@@ -83,7 +148,8 @@ class _HomeState extends State<Home> {
                       color: Colors.brown,
                       width: 1.0,
                     ),
-                    borderRadius: BorderRadius.zero),
+                    borderRadius: BorderRadius.zero
+                    ),
                 margin: const EdgeInsets.symmetric(vertical: 0, horizontal: 0),
                 child: InkWell(
                   onTap: () {
@@ -100,10 +166,8 @@ class _HomeState extends State<Home> {
                       ),
                     );
                   },
-                  child: Container(
-                    width: double.infinity,
+                  child: Padding(
                     padding: const EdgeInsets.all(10),
-                    height: 100,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -134,6 +198,28 @@ class _HomeState extends State<Home> {
                             color: Colors.brown[800],
                           ),
                         ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                           children: [
+                            IconButton(
+                              icon: Icon(
+                                isLiked ? Icons.thumb_up : Icons.thumb_up_outlined,
+                                  color: isLiked ? Colors.brown[300] : Colors.grey,
+                              ),
+                               onPressed: () {
+                                  if (isLiked) {
+                                    dislikePost(context, posts[index].id);
+                                 } else {
+                                     likePost(context, posts[index].id);
+                                 }
+                              },
+                           ),
+                           const SizedBox(width: 5,),
+                           Text('$likeCount', style: TextStyle(
+                            color: Colors.brown[800],
+                           ))
+                         ]
+                        )
                       ],
                     ),
                   ),

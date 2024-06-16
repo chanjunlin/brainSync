@@ -32,10 +32,10 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   final GetIt _getIt = GetIt.instance;
 
-  late NavigationService _navigationService;
   late AuthService _authService;
   late AlertService _alertService;
   late StreamSubscription<User?> user;
+  late NavigationService _navigationService;
 
   @override
   void initState() {

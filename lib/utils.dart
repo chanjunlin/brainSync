@@ -21,6 +21,7 @@ Future<void> registerServices() async {
   getIt.registerSingleton<AuthService>(
     AuthService(),
   );
+
   getIt.registerSingleton<NavigationService>(
     NavigationService(),
   );
