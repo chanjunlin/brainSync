@@ -1,9 +1,15 @@
+import 'package:brainsync/auth.dart';
 import 'package:brainsync/pages/form/login_form.dart';
 import 'package:brainsync/services/navigation_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import 'package:sign_in_button/sign_in_button.dart';
+
+import '../../common_widgets/custom_form_field.dart';
+import '../../const.dart';
+import '../../services/alert_service.dart';
+import '../../services/auth_service.dart';
+import 'forget_password.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -23,12 +29,15 @@ class _LoginPageState extends State<LoginPage> {
 
 
   late NavigationService _navigationService;
+  late AlertService _alertService;
+  late AuthService _authService;
 
   @override
   void initState() {
     super.initState();
     _navigationService = _getIt.get<NavigationService>();
     _alertService = _getIt.get<AlertService>();
+    _authService = _getIt.get<AuthService>();
     _auth.authStateChanges().listen((event) {
       setState(() {
         _user = event;
@@ -106,7 +115,7 @@ class _LoginPageState extends State<LoginPage> {
 
   Widget createAnAccount() {
           const SizedBox(height: 10),
-          Container(
+          return Container(
             width: double.infinity,  // Matches the width of the form fields
             child: Image.asset(
               "assets/img/study.png",
