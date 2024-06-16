@@ -9,6 +9,7 @@ class UserProfile {
   List<String?>? friendReqList;
   List<String?>? currentModules;
   List<String?>? completedModules;
+  List<String?>? chats;
 
   UserProfile({
     required this.uid,
@@ -21,6 +22,7 @@ class UserProfile {
     required this.profileCoverURL,
     required this.completedModules,
     required this.currentModules,
+    required this.chats,
   });
 
   UserProfile.fromJson(Map<String, dynamic> json) {
@@ -50,6 +52,11 @@ class UserProfile {
     } else {
       currentModules = [];
     }
+    if (json['chats'] != null) {
+      currentModules = List<String>.from(json['chats']);
+    } else {
+      currentModules = [];
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -64,6 +71,7 @@ class UserProfile {
     data['friendReqList'] = friendReqList;
     data['completedModule'] = completedModules;
     data['currentModule'] = currentModules;
+    data['chats'] = chats;
     return data;
   }
 }

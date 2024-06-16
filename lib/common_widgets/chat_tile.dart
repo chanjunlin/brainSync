@@ -1,30 +1,29 @@
 import 'package:flutter/material.dart';
 
-import '../model/user_profile.dart';
+class CustomChatTile extends StatelessWidget {
+  final String title;
+  final String? subtitle;
+  final Widget leading;
+  // final Widget trailing;
+  final VoidCallback onTap;
 
-class ChatTile extends StatelessWidget {
-  final UserProfile userProfile;
-  final Function onTap;
-
-  const ChatTile({
-    super.key,
-    required this.userProfile,
+  const CustomChatTile({
+    Key? key,
+    required this.title,
+    required this.subtitle,
+    required this.leading,
+    // required this.trailing,
     required this.onTap,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      onTap: () {
-        onTap();
-      },
-      dense: false,
-      leading: CircleAvatar(
-        backgroundImage: NetworkImage(userProfile.pfpURL!),
-      ),
-      title: Text(
-        userProfile.firstName!,
-      ),
+      onTap: onTap,
+      leading: leading,
+      title: Text(title),
+      subtitle: Text(subtitle!),
+      // trailing: trailing,
     );
   }
 }

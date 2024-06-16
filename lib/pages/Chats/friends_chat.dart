@@ -1,7 +1,13 @@
-import 'package:brainsync/auth.dart';
+import 'dart:async';
+
+import 'package:brainsync/services/alert_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
+import '../../common_widgets/bottomBar.dart';
+import '../../common_widgets/chat_tile.dart';
+import '../../const.dart';
 import '../../model/user_profile.dart';
 import '../../services/auth_service.dart';
 import '../../services/database_service.dart';
@@ -10,166 +16,223 @@ import 'chat_page.dart';
 
 class FriendsChats extends StatefulWidget {
   @override
-  _FriendsChatsState createState() => _FriendsChatsState();
+  FriendsChatsState createState() => FriendsChatsState();
 }
 
-class _FriendsChatsState extends State<FriendsChats> {
-  // variables
+class FriendsChatsState extends State<FriendsChats> {
   final GetIt _getIt = GetIt.instance;
 
-  late NavigationService _navigationService;
-  late DatabaseService _databaseService;
+  late AlertService _alertService;
   late AuthService _authService;
+  late DatabaseService _databaseService;
+  late NavigationService _navigationService;
 
-  bool hasChats = false;
+  List<String>? chats;
+  String? userProfilePfp, firstName, lastName;
+  StreamSubscription<DocumentSnapshot>? profileSubscription;
+  StreamSubscription<QuerySnapshot>? chatsSubscription;
+  Map<String, String> chatSubtitles = {};
+  Map<String, Timestamp?> lastMessageTimestamps = {};
 
   @override
   void initState() {
     super.initState();
     _authService = _getIt.get<AuthService>();
-    _navigationService = _getIt.get<NavigationService>();
+    _alertService = _getIt.get<AlertService>();
     _databaseService = _getIt.get<DatabaseService>();
-    getFriends();
+    _navigationService = _getIt.get<NavigationService>();
+    loadProfile();
+    listenToChats();
   }
 
-  Future<void> getFriends() async {
-    _allFriends = await _databaseService.getFriends();
-    setState(() {
-      _filteredFriends = _allFriends;
+  @override
+  void dispose() {
+    profileSubscription?.cancel();
+    chatsSubscription?.cancel();
+    super.dispose();
+  }
+
+  void loadProfile() async {
+    try {
+      DocumentSnapshot? userProfile = await _databaseService.fetchCurrentUser();
+      if (userProfile != null && userProfile.exists) {
+        setState(() {
+          userProfilePfp = userProfile.get('pfpURL') ?? PLACEHOLDER_PFP;
+          firstName = userProfile.get('firstName') ?? 'Name';
+          lastName = userProfile.get('lastName') ?? 'Name';
+          chats = List<String>.from(userProfile.get("chats") ?? []);
+        });
+        profileSubscription =
+            userProfile.reference.snapshots().listen((updatedSnapshot) {
+          if (updatedSnapshot.exists) {
+            setState(() {
+              userProfilePfp = updatedSnapshot.get('pfpURL') ?? PLACEHOLDER_PFP;
+              firstName = updatedSnapshot.get('firstName') ?? 'Name';
+              lastName = updatedSnapshot.get('lastName') ?? 'Name';
+              chats = List<String>.from(updatedSnapshot.get("chats") ?? []);
+            });
+          }
+        });
+      } else {
+        _alertService.showToast(
+            text: "User profile not found", icon: Icons.error_outline_rounded);
+      }
+    } catch (e) {
+      _alertService.showToast(
+          text: "Error loading profile: $e", icon: Icons.error_outline_rounded);
+    }
+  }
+
+  void listenToChats() {
+    chatsSubscription =
+        _databaseService.getAllUserChatsStream().listen((querySnapshot) {
+      if (querySnapshot.docs.isNotEmpty) {
+        for (var doc in querySnapshot.docs) {
+          String chatId = doc.id;
+          dynamic lastMessageData = doc.get('lastMessage');
+          Timestamp? lastMessageTimestamp =
+              lastMessageData != null ? lastMessageData['sentAt'] : null;
+          if (lastMessageTimestamp != null) {
+            if (lastMessageTimestamps[chatId] == null ||
+                lastMessageTimestamps[chatId]!.compareTo(lastMessageTimestamp) <
+                    0) {
+              setState(() {
+                if (!chats!.contains(chatId)) {
+                  chats!.add(chatId);
+                }
+                lastMessageTimestamps[chatId] = lastMessageTimestamp;
+              });
+              updateChatSubtitle(chatId, lastMessageData['content']);
+            }
+          }
+        }
+      } else {
+        setState(() {
+          chats = [];
+        });
+      }
     });
   }
 
-  TextEditingController _searchController = TextEditingController();
-  List<UserProfile?> _allFriends = [];
-  List<UserProfile?> _filteredFriends =
-      []; // Filtered list based on search query
-
-  Future<void> checkChats() async {
-    String currentUserId = _authService.user!.uid;
-    for (UserProfile? friend in _allFriends) {
-      String? friendId = friend?.uid;
-      bool chatExists =
-          await _databaseService.checkChatExist(currentUserId, friendId!);
-      if (chatExists) {
-        setState(() {
-          hasChats = true;
-        });
-        break;
-      }
-    }
+  void updateChatSubtitle(String chatId, String content) {
+    setState(() {
+      chatSubtitles[chatId] = content;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Friends & Chats'),
+        title: const Text('Friends & Chats'),
+        backgroundColor: Colors.brown[300],
+        foregroundColor: Colors.white,
+        automaticallyImplyLeading: false,
       ),
-      body: Column(
-        children: [
-          IconButton(
-            onPressed: () {
-              showSearch(
-                context: context,
-                delegate: CustomSearch(
-                  allFriends: _allFriends,
-                ),
-              );
-            },
-            icon: const Icon(Icons.search),
-          ),
-
-        ],
-      ),
-    );
-  }
-}
-
-class CustomSearch extends SearchDelegate {
-  final List<UserProfile?> allFriends; // Add a parameter for allFriends
-  final GetIt _getIt = GetIt.instance;
-
-  late DatabaseService _databaseService;
-  late AuthService _authService;
-  late NavigationService _navigationService;
-
-  CustomSearch({required this.allFriends}) {
-    _databaseService = _getIt.get<DatabaseService>();
-    _authService = _getIt.get<AuthService>();
-    _navigationService = _getIt.get<NavigationService>();
-  }
-
-  @override
-  List<Widget> buildActions(BuildContext context) {
-    return [
-      IconButton(
-        onPressed: () {
-          query = '';
-        },
-        icon: const Icon(Icons.clear),
-      ),
-    ];
-  }
-
-  @override
-  Widget buildLeading(BuildContext context) {
-    return IconButton(
-      icon: const Icon(Icons.arrow_back),
-      onPressed: () {
-        close(context, null);
-      },
-    );
-  }
-
-  @override
-  Widget buildResults(BuildContext context) {
-    List<UserProfile> matchQuery = [];
-    for (var person in allFriends) {
-      if (person!.firstName!.toLowerCase().contains(query.toLowerCase())) {
-        matchQuery.add(person);
-      }
-    }
-    return ListView.builder(
-      itemCount: matchQuery.length,
-      itemBuilder: (context, index) {
-        var result = matchQuery[index];
-        return ListTile(
-          title: Text(result.firstName ?? 'No Name'),
-        );
-      },
-    );
-  }
-
-  @override
-  Widget buildSuggestions(BuildContext context) {
-    List<UserProfile> matchQuery = [];
-    for (var person in allFriends) {
-      if (person!.firstName!.toLowerCase().contains(query.toLowerCase())) {
-        matchQuery.add(person);
-      }
-    }
-    return ListView.builder(
-      itemCount: matchQuery.length,
-      itemBuilder: (context, index) {
-        var result = matchQuery[index];
-        return ListTile(
-          title: Text(result.firstName ?? 'No Name'),
-          onTap: () async {
-            final chatExists = await _databaseService.checkChatExist(
-                _authService.user!.uid, result.uid!);
-            if (!chatExists) {
-              await _databaseService.createNewChat(
-                  _authService.user!.uid, result.uid!);
-            }
-            _navigationService
-                .push(MaterialPageRoute(builder: (context) {
-              return ChatPage(
-                chatUser: result,
-              );
-            }));
-          },
-        );
-      },
+      body: chats != null
+          ? SingleChildScrollView(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (chats!.isEmpty)
+                    const Center(
+                      child: Text(
+                        'No chats available.',
+                        style: TextStyle(fontSize: 16),
+                      ),
+                    )
+                  else
+                    ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: chats!.length,
+                      itemBuilder: (context, index) {
+                        String chatId = chats![index];
+                        return FutureBuilder<DocumentSnapshot?>(
+                          future: _databaseService.getChatDetails(chatId),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return const Center(
+                                  child: CircularProgressIndicator());
+                            } else if (snapshot.hasError) {
+                              return Center(
+                                  child: Text('Error: ${snapshot.error}'));
+                            } else if (snapshot.hasData &&
+                                snapshot.data != null) {
+                              DocumentSnapshot<Object?> chatDetails =
+                                  snapshot.data!;
+                              String chatSubtitle = chatSubtitles[chatId] ?? "";
+                              List<dynamic> participantsIds =
+                                  chatDetails.get('participantsIds') ?? [];
+                              String otherUserId = participantsIds.firstWhere(
+                                (id) => id != _authService.currentUser!.uid,
+                                orElse: () => null,
+                              );
+                              List<dynamic> participantsNames =
+                                  chatDetails.get('participantsNames') ?? [];
+                              String otherUserName =
+                                  participantsNames.firstWhere(
+                                (name) =>
+                                    name !=
+                                    _authService.currentUser!.displayName,
+                                orElse: () => "",
+                              );
+                              return FutureBuilder<DocumentSnapshot?>(
+                                future: _databaseService.fetchUser(otherUserId),
+                                builder: (context, userSnapshot) {
+                                  if (userSnapshot.connectionState ==
+                                      ConnectionState.waiting) {
+                                    return const Center(
+                                        child: CircularProgressIndicator());
+                                  } else if (userSnapshot.hasError) {
+                                    return Center(
+                                        child: Text(
+                                            'Error: ${userSnapshot.error}'));
+                                  } else if (userSnapshot.hasData &&
+                                      userSnapshot.data != null) {
+                                    UserProfile otherUser =
+                                        UserProfile.fromJson(userSnapshot.data!
+                                            .data() as Map<String, dynamic>);
+                                    return CustomChatTile(
+                                      leading: CircleAvatar(
+                                        radius: 20,
+                                        backgroundImage: NetworkImage(
+                                            otherUser.pfpURL ??
+                                                PLACEHOLDER_PFP),
+                                      ),
+                                      title: otherUserName,
+                                      subtitle: chatSubtitle,
+                                      onTap: () {
+                                        _navigationService.push(
+                                          MaterialPageRoute(builder: (context) {
+                                            return ChatPage(
+                                                chatUser: otherUser);
+                                          }),
+                                        );
+                                      },
+                                    );
+                                  } else {
+                                    return const Center(
+                                        child: Text('User data not found'));
+                                  }
+                                },
+                              );
+                            } else {
+                              return const Center(
+                                child: Text('Chat details not found'),
+                              );
+                            }
+                          },
+                        );
+                      },
+                    ),
+                ],
+              ),
+            )
+          : const Center(child: CircularProgressIndicator()),
+      bottomNavigationBar: const CustomBottomNavBar(initialIndex: 1),
     );
   }
 }

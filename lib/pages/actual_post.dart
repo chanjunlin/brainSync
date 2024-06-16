@@ -41,7 +41,6 @@ class _PostDetailPageState extends State<PostDetailPage> {
   String? currentUser, commentUser;
 
   final LanguageChecker _languageChecker = LanguageChecker();
-
   @override
   void initState() {
     _authService = _getIt.get<AuthService>();
@@ -209,3 +208,4 @@ class _PostDetailPageState extends State<PostDetailPage> {
     );
   }
 }
+

@@ -55,6 +55,8 @@ class _NotificationsState extends State<Notifications> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
+        backgroundColor: Colors.brown[300],
+        foregroundColor: Colors.white,
         title: const Text('Notifications'),
       ),
       body: buildFriendRequests(),
@@ -70,7 +72,7 @@ class _NotificationsState extends State<Notifications> {
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
-            color: Colors.grey, // Adjust color as needed
+            color: Colors.grey,
           ),
         ),
       );
@@ -103,7 +105,6 @@ class _NotificationsState extends State<Notifications> {
         return Card(
           child: ListTile(
             onTap: () {
-              // Redirect to the profile page of the user who sent the request
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -119,7 +120,7 @@ class _NotificationsState extends State<Notifications> {
               icon: const Icon(Icons.check),
               onPressed: () async {
                 await _databaseService.acceptFriendRequest(
-                    uid, _authService.user!.uid);
+                    uid, _authService.currentUser!.uid);
                 setState(() {
                   friendReqList!.remove(uid);
                 });
@@ -136,7 +137,7 @@ class _NotificationsState extends State<Notifications> {
   }
 
   Widget buildNoNotificationsMessage() {
-    return Center(
+    return const Center(
       child: Text(
         'No notifications',
         style: TextStyle(
@@ -149,7 +150,6 @@ class _NotificationsState extends State<Notifications> {
 
   void loadProfile() async {
     try {
-      print(friendReqList);
       friendRequestStream = _databaseService
           .getUserProfile(_authService.currentUser!.uid)
           .listen((userProfile) {
@@ -162,21 +162,23 @@ class _NotificationsState extends State<Notifications> {
             firstName = data['firstName'] ?? 'First';
             lastName = data['lastName'] ?? 'Last';
             bio = data['bio'] ?? 'No bio available';
-
-            // Ensure correct casting and initialization of friendReqList
             friendReqList = List<String>.from(data['friendReqList'] ?? []);
             List friendList = data['friendList'] ?? [];
-
             isFriend = friendList.contains(_authService.currentUser!.uid);
             isFriendRequestSent =
                 friendReqList!.contains(_authService.currentUser!.uid);
           });
         } else {
-          print('User profile not found');
+          _alertService.showToast(
+              text: "User profile not found",
+              icon: Icons.error_outline_rounded);
         }
       });
     } catch (e) {
-      print(e);
+      _alertService.showToast(
+        text: '$e',
+        icon: Icons.error,
+      );
     }
   }
 }

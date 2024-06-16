@@ -7,13 +7,24 @@ import '../const.dart';
 import '../model/user_profile.dart';
 
 class AuthService {
-  String lastName = "", selectedYear = "";
-  List<String?> friendReqList = [], friendList = [];
+  CollectionReference<UserProfile>? _usersCollection;
 
-  User? _user;
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   final FirebaseFirestore _firebaseFirestore = FirebaseFirestore.instance;
-  CollectionReference<UserProfile>? _usersCollection;
+
+  List<String?> friendReqList = [],
+      friendList = [],
+      completedModules = [],
+      currentModules = [],
+      chats = [];
+
+  String lastName = "", selectedYear = "";
+
+  User? _user;
+
+  User? get currentUser => _firebaseAuth.currentUser;
+
+  User? get user => _user;
 
   AuthService() {
     setUpCollectionReferences();
@@ -22,15 +33,11 @@ class AuthService {
   void setUpCollectionReferences() {
     _usersCollection =
         _firebaseFirestore.collection('users').withConverter<UserProfile>(
-          fromFirestore: (snapshots, _) =>
-              UserProfile.fromJson(snapshots.data()!),
-          toFirestore: (userProfile, _) => userProfile.toJson(),
-        );
+              fromFirestore: (snapshots, _) =>
+                  UserProfile.fromJson(snapshots.data()!),
+              toFirestore: (userProfile, _) => userProfile.toJson(),
+            );
   }
-
-  User? get user => _user;
-
-  User? get currentUser => _firebaseAuth.currentUser;
 
   Future<bool> login(String email, String password) async {
     try {
@@ -46,8 +53,7 @@ class AuthService {
         }
       }
     } catch (e) {
-      print(e);
-      throw e;
+      rethrow;
     }
     return false;
   }
@@ -58,14 +64,14 @@ class AuthService {
       if (googleUser == null) return;
 
       final GoogleSignInAuthentication googleAuth =
-      await googleUser.authentication;
+          await googleUser.authentication;
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 
       final UserCredential userCredential =
-      await _firebaseAuth.signInWithCredential(credential);
+          await _firebaseAuth.signInWithCredential(credential);
       _user = userCredential.user;
 
       if (userCredential.user != null) {
@@ -81,18 +87,19 @@ class AuthService {
               friendList: friendList,
               friendReqList: friendReqList,
               year: selectedYear,
-              completedModules: [],
-              currentModules: [],
+              completedModules: completedModules,
+              currentModules: currentModules,
+              chats: chats,
             ),
           );
         } else {
           UserProfile userProfile =
-          await getUserProfile(userCredential.user!.uid);
+              await getUserProfile(userCredential.user!.uid);
           await userCredential.user!.updateDisplayName(userProfile.firstName);
         }
       }
     } catch (e) {
-      print("Error signing in with Google: $e");
+      rethrow;
     }
   }
 
@@ -125,8 +132,7 @@ class AuthService {
         return "true";
       }
     } catch (e) {
-      print(e);
-      return e.toString();
+      rethrow;
     }
     return "false";
   }
@@ -144,7 +150,7 @@ class AuthService {
   Future<UserProfile> getUserProfile(String uid) async {
     try {
       DocumentSnapshot<Map<String, dynamic>> userProfileSnapshot =
-      await _firebaseFirestore.collection('users').doc(uid).get();
+          await _firebaseFirestore.collection('users').doc(uid).get();
       if (userProfileSnapshot.exists) {
         return UserProfile.fromJson(userProfileSnapshot.data()!);
       } else {
@@ -169,19 +175,11 @@ class AuthService {
   Future<bool> checkIfUserExists(String uid) async {
     try {
       final DocumentSnapshot<Map<String, dynamic>> userData =
-      await _firebaseFirestore.collection('users').doc(uid).get();
+          await _firebaseFirestore.collection('users').doc(uid).get();
       return userData.exists;
     } catch (e) {
       print('Error checking if user exists: $e');
       return false;
     }
   }
-
-  // void authChangeStreamListener(User? user) {
-  //   if (user != null) {
-  //     _user = user;
-  //   } else {
-  //     _user = null;
-  //   }
-  // }
 }
