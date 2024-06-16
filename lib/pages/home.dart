@@ -35,6 +35,8 @@ class _HomeState extends State<Home> {
   final GetIt _getIt = GetIt.instance;
   final userId = FirebaseAuth.instance.currentUser!.uid;
 
+  Map<String, bool> _bookmarks = {};
+
   @override
   void initState() {
     super.initState();
@@ -72,6 +74,32 @@ class _HomeState extends State<Home> {
         const SnackBar(content: Text('Error liking post'))
       );
     }
+  }
+
+  Future<void> bookmark(String postId, bool isBookmark) async {
+    try {
+      final postRef = FirebaseFirestore.instance.collection('posts').doc(postId);
+      await postRef.update({
+        'isBookmarked': !isBookmark,
+      });
+
+      setState(() {
+        _bookmarks[postId] = !isBookmark; // Update bookmark state
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Error bookmarking post')),
+      );
+    }
+  }
+
+  Future<int> getCommentCount(String postId) async {
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection('posts')
+        .doc(postId)
+        .collection('comments')
+        .get();
+    return querySnapshot.docs.length;
   }
 
   @override
@@ -134,12 +162,15 @@ class _HomeState extends State<Home> {
             itemCount: posts.length,
             itemBuilder: (context, index) {
               final post = posts[index].data() as Map<String, dynamic>;
+              final postId = posts[index].id;
               final timestamp = post['timestamp'] as Timestamp;
               final date = timestamp.toDate();
               final formattedDate = timeago.format(date, locale: 'custom');
               final likes = post['likes'] ?? [];
               final isLiked = likes.contains(userId);
               final likeCount = likes.length;
+              final commentCount = post['commentCount'] ?? 0;
+              final isBookmarked = _bookmarks[postId] ?? false;
 
               return Card(
                 color: Colors.white, // Complementary color to brown
@@ -217,7 +248,43 @@ class _HomeState extends State<Home> {
                            const SizedBox(width: 5,),
                            Text('$likeCount', style: TextStyle(
                             color: Colors.brown[800],
-                           ))
+                           )
+                           ),
+                           const SizedBox(width: 90,),
+                           IconButton(
+                            icon: const Icon(Icons.comment,
+                            color: Color.fromARGB(255, 161, 136, 127),
+                            ),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => PostDetailPage(
+                                    postId: posts[index].id,
+                                    title: post['title'],
+                                    timestamp: date,
+                                    content: post['content'],
+                                    authorName: post['authorName'],
+                                    ),
+                                  ),
+                               );
+                            },
+                           ),
+                           const SizedBox(width: 5,),
+                           Text('$commentCount', style: TextStyle(
+                            color: Colors.brown[800],
+                           )
+                           ),
+                           const SizedBox(width: 90,),
+                           IconButton(
+                              icon: Icon(
+                                Icons.bookmark,
+                                color: isBookmarked ? Colors.brown[300] : Colors.grey,
+                              ),
+                              onPressed: () {
+                                bookmark(postId, isBookmarked);
+                              },
+                            ),
                          ]
                         )
                       ],

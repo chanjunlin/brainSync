@@ -74,23 +74,35 @@ class _PostDetailPageState extends State<PostDetailPage> {
         return;
       }
 
-      String filteredComment = _checker.filterBadWords(_commentController.text);
+      String filteredComment = _checker.filterBadWords(_commentController.text); //comment saved under filtered comment
 
       final user = await _databaseService.fetchCurrentUser();
       final userId = user!.get("uid");
 
-      await FirebaseFirestore.instance
-          .collection('posts')
-          .doc(widget.postId)
-          .collection('comments')
-          .add({
-        'content': filteredComment,
-        'timestamp': Timestamp.now(),
-        'authorId': userId, // Only store the user ID
+      final postRef = FirebaseFirestore.instance.collection('posts').doc(widget.postId);
+      await FirebaseFirestore.instance.runTransaction((transaction) async {
+      DocumentSnapshot postSnapshot = await transaction.get(postRef);
+      if (!postSnapshot.exists) {
+        throw Exception("Post does not exist!");
+      }
+
+      transaction.update(postRef, {
+        'commentCount': FieldValue.increment(1),
       });
-      _commentController.clear();
-    }
+
+      transaction.set(
+        postRef.collection('comments').doc(),
+        {
+          'content': filteredComment,
+          'timestamp': Timestamp.now(),
+          'authorId': userId,
+        },
+      );
+    });
+
+    _commentController.clear();
   }
+}
 
   @override
   Widget build(BuildContext context) {
