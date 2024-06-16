@@ -5,15 +5,11 @@ import 'package:brainsync/services/auth_service.dart';
 import 'package:brainsync/services/navigation_service.dart';
 import 'package:brainsync/utils.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 Future<void> main() async {
-  // WidgetsFlutterBinding.ensureInitialized();
-  // await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform,);
-  // runApp(const MyApp());
   await setup();
   runApp(MyApp());
 }
@@ -43,13 +39,12 @@ class _MyAppState extends State<MyApp> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _navigationService = _getIt.get<NavigationService>();
     _authService = _getIt.get<AuthService>();
     _alertService = _getIt.get<AlertService>();
     user = FirebaseAuth.instance.authStateChanges().listen(
-          (user) {
+      (user) {
         if (user == null) {
           print("signed out");
         } else {
@@ -77,7 +72,8 @@ class _MyAppState extends State<MyApp> {
         ),
         textTheme: GoogleFonts.montserratTextTheme(),
       ),
-      initialRoute: _authService.currentUser == null ? "/login" : "/home", // Use AuthService instead of FirebaseAuth
+      initialRoute: _authService.currentUser == null ? "/login" : "/home",
+      // Use AuthService instead of FirebaseAuth
       routes: _navigationService.routes,
     );
   }

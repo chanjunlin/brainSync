@@ -152,24 +152,24 @@ class _ChatHomePageState extends State<ChatHomePage> {
             itemBuilder: (context, index) {
               UserProfile? user = users[index].data();
               if (user != null) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 10.0),
-                  child: ChatTile(
-                    userProfile: user,
-                    onTap: () async {
-                      final chatExists = await _databaseService.checkChatExist(
-                          _authService.user!.uid, user.uid!);
-                      if (!chatExists) {
-                        await _databaseService.createNewChat(
-                            _authService.user!.uid, user.uid!);
-                      }
-                      _navigationService
-                          .push(MaterialPageRoute(builder: (context) {
-                        return ChatPage(chatUser: user);
-                      }));
-                    },
-                  ),
-                );
+                // return Padding(
+                //   padding: const EdgeInsets.symmetric(vertical: 10.0),
+                //   child: ChatTile(
+                //     user: "ASD",
+                //     onTap: () async {
+                //       final chatExists = await _databaseService.checkChatExist(
+                //           _authService.user!.uid, user.uid!);
+                //       if (!chatExists) {
+                //         await _databaseService.createNewChat(
+                //             _authService.user!.uid, user.uid!);
+                //       }
+                //       _navigationService
+                //           .push(MaterialPageRoute(builder: (context) {
+                //         return ChatPage(chatUser: user);
+                //       }));
+                //     },
+                //   ),
+                // );
               } else {
                 return const SizedBox(); // Return an empty SizedBox if user is null
               }

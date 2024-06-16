@@ -7,17 +7,24 @@ import '../const.dart';
 import '../model/user_profile.dart';
 
 class AuthService {
-  String lastName = "", selectedYear = "";
-  List<String?> friendReqList = [],
-      friendList = [],
-      currentModules = [],
-      completedModules = [],
-      chats = [];
+  CollectionReference<UserProfile>? _usersCollection;
 
-  User? _user;
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   final FirebaseFirestore _firebaseFirestore = FirebaseFirestore.instance;
-  CollectionReference<UserProfile>? _usersCollection;
+
+  List<String?> friendReqList = [],
+      friendList = [],
+      completedModules = [],
+      currentModules = [],
+      chats = [];
+
+  String lastName = "", selectedYear = "";
+
+  User? _user;
+
+  User? get currentUser => _firebaseAuth.currentUser;
+
+  User? get user => _user;
 
   AuthService() {
     setUpCollectionReferences();
@@ -31,10 +38,6 @@ class AuthService {
               toFirestore: (userProfile, _) => userProfile.toJson(),
             );
   }
-
-  User? get user => _user;
-
-  User? get currentUser => _firebaseAuth.currentUser;
 
   Future<bool> login(String email, String password) async {
     try {
@@ -50,8 +53,7 @@ class AuthService {
         }
       }
     } catch (e) {
-      print(e);
-      throw e;
+      rethrow;
     }
     return false;
   }
@@ -97,7 +99,7 @@ class AuthService {
         }
       }
     } catch (e) {
-      print("Error signing in with Google: $e");
+      rethrow;
     }
   }
 
@@ -130,8 +132,7 @@ class AuthService {
         return "true";
       }
     } catch (e) {
-      print(e);
-      return e.toString();
+      rethrow;
     }
     return "false";
   }
@@ -181,12 +182,4 @@ class AuthService {
       return false;
     }
   }
-
-// void authChangeStreamListener(User? user) {
-//   if (user != null) {
-//     _user = user;
-//   } else {
-//     _user = null;
-//   }
-// }
 }
