@@ -4,17 +4,15 @@ class CustomChatTile extends StatelessWidget {
   final String title;
   final String? subtitle;
   final Widget leading;
-  // final Widget trailing;
   final VoidCallback onTap;
 
   const CustomChatTile({
-    Key? key,
+    super.key,
     required this.title,
     required this.subtitle,
     required this.leading,
-    // required this.trailing,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +21,6 @@ class CustomChatTile extends StatelessWidget {
       leading: leading,
       title: Text(title),
       subtitle: Text(subtitle!),
-      // trailing: trailing,
     );
   }
 }

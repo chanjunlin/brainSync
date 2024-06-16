@@ -1,5 +1,5 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:brainsync/model/message.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Chat {
   String? id;
@@ -29,10 +29,20 @@ class Chat {
       id: json['id'],
       participantsIds: List<String>.from(json['participantsIds']),
       participantsNames: List<String>.from(json['participantsNames']),
-      messages: json['messages'] != null ? List.from(json['messages']).map((m) => Message.fromJson(m)).toList() : [],
-      lastMessage: json['lastMessage'] != null ? Message.fromJson(json['lastMessage']) : null,
-      createdAt: json['createdAt'] != null ? Timestamp.fromMillisecondsSinceEpoch(json['createdAt'].millisecondsSinceEpoch) : null,
-      updatedAt: json['updatedAt'] != null ? Timestamp.fromMillisecondsSinceEpoch(json['updatedAt'].millisecondsSinceEpoch) : null,
+      messages: json['messages'] != null
+          ? List.from(json['messages']).map((m) => Message.fromJson(m)).toList()
+          : [],
+      lastMessage: json['lastMessage'] != null
+          ? Message.fromJson(json['lastMessage'])
+          : null,
+      createdAt: json['createdAt'] != null
+          ? Timestamp.fromMillisecondsSinceEpoch(
+              json['createdAt'].millisecondsSinceEpoch)
+          : null,
+      updatedAt: json['updatedAt'] != null
+          ? Timestamp.fromMillisecondsSinceEpoch(
+              json['updatedAt'].millisecondsSinceEpoch)
+          : null,
       isGroupChat: json['isGroupChat'] ?? false,
       unreadCount: json['unreadCount'] ?? 0,
     );

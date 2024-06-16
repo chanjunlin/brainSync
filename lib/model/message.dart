@@ -15,15 +15,17 @@ class Message {
     required this.sentAt,
   });
 
-  // JSON deserialization (from Firestore document)
   Message.fromJson(Map<String, dynamic> json) {
     senderID = json['senderID'];
     content = json['content'];
-    sentAt = json['sentAt'] != null ? Timestamp.fromMillisecondsSinceEpoch(json['sentAt'].millisecondsSinceEpoch) : null;
-    messageType = MessageType.values.firstWhere((type) => type.name == json['messageType']);
+    sentAt = json['sentAt'] != null
+        ? Timestamp.fromMillisecondsSinceEpoch(
+            json['sentAt'].millisecondsSinceEpoch)
+        : null;
+    messageType = MessageType.values
+        .firstWhere((type) => type.name == json['messageType']);
   }
 
-  // JSON serialization (to Firestore document)
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
     data['senderID'] = senderID;

@@ -1,9 +1,7 @@
 import 'package:brainsync/pages/form/login_form.dart';
 import 'package:brainsync/services/navigation_service.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -29,8 +27,8 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      backgroundColor: Colors.white, // Set the background color here
-      body: _isLoading ? buildLoadingScreen() : buildUI(), // Show loading screen if _isLoading is true
+      backgroundColor: Colors.white,
+      body: _isLoading ? buildLoadingScreen() : buildUI(),
     );
   }
 
@@ -82,7 +80,7 @@ class _LoginPageState extends State<LoginPage> {
               color: Colors.brown[800],
             ),
           ),
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
           Image.asset(
             "assets/img/study.png",
             alignment: Alignment.topCenter,

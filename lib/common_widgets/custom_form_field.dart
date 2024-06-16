@@ -10,7 +10,7 @@ class CustomFormField extends StatefulWidget {
   final Widget? suffixIcon; // Added suffixIcon parameter
 
   const CustomFormField({
-    Key? key,
+    super.key,
     required this.labelText,
     required this.hintText,
     required this.height,
@@ -18,13 +18,13 @@ class CustomFormField extends StatefulWidget {
     required this.onSaved,
     this.obscureText = false,
     this.suffixIcon, // Initialize suffixIcon
-  }) : super(key: key);
+  });
 
   @override
-  _CustomFormFieldState createState() => _CustomFormFieldState();
+  CustomFormFieldState createState() => CustomFormFieldState();
 }
 
-class _CustomFormFieldState extends State<CustomFormField> {
+class CustomFormFieldState extends State<CustomFormField> {
   bool _obscureText = true;
 
   @override

@@ -64,8 +64,8 @@ class CustomDialog {
                     alertService.showToast(
                       text: toastText,
                     );
-                    Navigator.of(context).pop(); // Close the dialog
-                    onDiscard(); // Perform the discard action
+                    Navigator.of(context).pop();
+                    onDiscard();
                   },
                 ),
               ],

@@ -1,4 +1,3 @@
-// lib/widgets/module_card.dart
 import 'package:flutter/material.dart';
 
 import '../model/module.dart';
@@ -8,6 +7,7 @@ class ModuleTile extends StatelessWidget {
   final Function onTap;
 
   ModuleTile({
+    super.key,
     required this.module,
     required this.onTap,
   });
@@ -20,7 +20,7 @@ class ModuleTile extends StatelessWidget {
       },
       child: Card(
         elevation: 4,
-        margin: EdgeInsets.all(8),
+        margin: const EdgeInsets.all(8),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -29,9 +29,10 @@ class ModuleTile extends StatelessWidget {
             children: [
               Text(
                 module.code,
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
               Flexible(
                 child: Text(module.title, style: TextStyle(fontSize: 14)),
               ),

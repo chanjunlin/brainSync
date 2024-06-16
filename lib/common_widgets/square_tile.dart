@@ -3,13 +3,13 @@ import 'package:flutter/material.dart';
 class SquareTile extends StatelessWidget {
   final String imagePath;
   final void Function() onTap;
-  final String? label; // Add an optional label parameter
+  final String? label;
 
   const SquareTile({
     super.key,
     required this.imagePath,
     required this.onTap,
-    this.label, // Accept the optional label parameter
+    this.label,
   });
 
   @override
@@ -25,7 +25,7 @@ class SquareTile extends StatelessWidget {
       style: ElevatedButton.styleFrom(
         foregroundColor: Colors.white,
         backgroundColor: Colors.brown[300],
-        minimumSize: const Size(200, 50), // Adjust as needed
+        minimumSize: const Size(200, 50),
         side: const BorderSide(color: Colors.grey),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),

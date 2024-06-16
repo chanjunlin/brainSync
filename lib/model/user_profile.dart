@@ -1,77 +1,62 @@
 class UserProfile {
-  String? uid;
+  String? bio;
   String? firstName;
   String? lastName;
   String? pfpURL;
   String? profileCoverURL;
+  String? uid;
   String? year;
+
+  List<String?>? chats;
+  List<String?>? completedModules;
+  List<String?>? currentModules;
   List<String?>? friendList;
   List<String?>? friendReqList;
-  List<String?>? currentModules;
-  List<String?>? completedModules;
-  List<String?>? chats;
 
   UserProfile({
-    required this.uid,
-    required this.firstName,
-    required this.lastName,
-    required this.pfpURL,
-    required this.year,
-    required this.friendList,
-    required this.friendReqList,
-    required this.profileCoverURL,
-    required this.completedModules,
-    required this.currentModules,
-    required this.chats,
+    this.bio,
+    this.firstName,
+    this.lastName,
+    this.pfpURL,
+    this.profileCoverURL,
+    this.uid,
+    this.year,
+    this.chats,
+    this.completedModules,
+    this.currentModules,
+    this.friendList,
+    this.friendReqList,
   });
 
   UserProfile.fromJson(Map<String, dynamic> json) {
-    uid = json['uid'];
+    bio = json['bio'];
     firstName = json['firstName'];
     lastName = json['lastName'];
     pfpURL = json['pfpURL'];
     profileCoverURL = json['profileCoverURL'];
+    uid = json['uid'];
     year = json['year'];
-    if (json['friendList'] != null) {
-      friendList = List<String>.from(json['friendList']);
-    } else {
-      friendList = [];
-    }
-    if (json['friendReqList'] != null) {
-      friendReqList = List<String>.from(json['friendReqList']);
-    } else {
-      friendReqList = [];
-    }
-    if (json['completedModules'] != null) {
-      completedModules = List<String>.from(json['completedModules']);
-    } else {
-      completedModules = [];
-    }
-    if (json['currentModules'] != null) {
-      currentModules = List<String>.from(json['currentModules']);
-    } else {
-      currentModules = [];
-    }
-    if (json['chats'] != null) {
-      currentModules = List<String>.from(json['chats']);
-    } else {
-      currentModules = [];
-    }
+    chats = json['chats'] != null ? List<String>.from(json['chats']) : [];
+    completedModules = json['completedModules'] != null ? List<String>.from(json['completedModules']) : [];
+    currentModules = json['currentModules'] != null ? List<String>.from(json['currentModules']) : [];
+    friendList = json['friendList'] != null ? List<String>.from(json['friendList']) : [];
+    friendReqList = json['friendReqList'] != null ? List<String>.from(json['friendReqList']) : [];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
+    data['bio'] = bio;
     data['firstName'] = firstName;
     data['lastName'] = lastName;
     data['pfpURL'] = pfpURL;
     data['profileCoverURL'] = profileCoverURL;
     data['uid'] = uid;
     data['year'] = year;
+    data['chats'] = chats;
+    data['completedModules'] = completedModules;
+    data['currentModules'] = currentModules;
     data['friendList'] = friendList;
     data['friendReqList'] = friendReqList;
-    data['completedModule'] = completedModules;
-    data['currentModule'] = currentModules;
-    data['chats'] = chats;
     return data;
   }
 }

@@ -7,13 +7,13 @@ import '../services/navigation_service.dart';
 class CustomBottomNavBar extends StatefulWidget {
   final int initialIndex;
 
-  const CustomBottomNavBar({Key? key, this.initialIndex = 0}) : super(key: key);
+  const CustomBottomNavBar({super.key, this.initialIndex = 0});
 
   @override
-  _CustomBottomNavBarState createState() => _CustomBottomNavBarState();
+  CustomBottomNavBarState createState() => CustomBottomNavBarState();
 }
 
-class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
+class CustomBottomNavBarState extends State<CustomBottomNavBar> {
   final NavigationService _navigationService =
       GetIt.instance<NavigationService>();
 

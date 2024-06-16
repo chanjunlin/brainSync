@@ -61,12 +61,6 @@ class _NavBarState extends State<NavBar> {
             ),
           ),
           ListTile(
-            title: Text("See all users"),
-            onTap: () {
-              _authService.signOut();
-            },
-          ),
-          ListTile(
             title: Text("See all mods"),
             onTap: () {
               _navigationService.pushName("/nusMods");
