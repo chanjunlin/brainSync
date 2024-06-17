@@ -60,7 +60,7 @@ class StorageService {
     required String firstName,
     required String lastName,
   }) async {
-    String userId = _authService.user!.uid;
+    String userId = _authService.currentUser!.uid;
     String? downloadProfileURL;
     String? downloadCoverURL;
     if (profileFile != null) {

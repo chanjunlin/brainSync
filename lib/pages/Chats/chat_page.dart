@@ -42,11 +42,18 @@ class _ChatPageState extends State<ChatPage> {
   @override
   void initState() {
     super.initState();
+    _initializeServices();
+    _initializeUsers();
+  }
+
+  void _initializeServices() {
     _authService = _getIt.get<AuthService>();
     _databaseService = _getIt.get<DatabaseService>();
     _mediaService = _getIt.get<MediaService>();
     _storageService = _getIt.get<StorageService>();
+  }
 
+  void _initializeUsers() {
     currentUser = ChatUser(
       id: _authService.currentUser!.uid,
       firstName: _authService.currentUser!.displayName,
@@ -59,6 +66,8 @@ class _ChatPageState extends State<ChatPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.brown[300],
+        foregroundColor: Colors.white,
         title: header(),
       ),
       body: _buildUI(),
@@ -66,85 +75,131 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   Widget header() {
-    return Row(
-      children: [
-        GestureDetector(
-          child: CircleAvatar(
-            radius: 24,
-            backgroundImage: NetworkImage(widget.chatUser.pfpURL!),
+    return Padding(
+      padding: const EdgeInsets.only(right: 8.0, top: 4.0, bottom: 4.0),
+      child: Row(
+        children: [
+          GestureDetector(
+            child: CircleAvatar(
+              radius: 24,
+              backgroundImage: NetworkImage(widget.chatUser.pfpURL ?? ''),
+            ),
+            onTap: () => _navigateToProfile(),
           ),
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => VisitProfile(userId: otherUser),
-              ),
-            );
-          },
-        ),
-        const SizedBox(width: 16),
-        Text(widget.chatUser.firstName!),
-      ],
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.chatUser.firstName ?? 'User',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                if (widget.chatUser.lastName != null)
+                  Text(
+                    widget.chatUser.lastName!,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.white70,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          IconButton(
+            icon: Icon(Icons.more_vert, color: Colors.white),
+            onPressed: () {
+              // Handle more options
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _navigateToProfile() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => VisitProfile(userId: otherUser),
+      ),
     );
   }
 
   Widget _buildUI() {
     return StreamBuilder(
-        stream: _databaseService.getChatData(
-          currentUser!.id,
-          otherUser.uid!,
-        ),
-        builder: (context, snapshot) {
-          Chat? chat = snapshot.data?.data();
-          List<ChatMessage> messages = [];
-          if (chat != null && chat.messages != null) {
-            messages = _generateChatMessagesList(
-              chat.messages!,
-            );
-          }
-          return DashChat(
-            messageOptions: const MessageOptions(
-              showOtherUsersAvatar: true,
-              showTime: true,
-            ),
-            inputOptions: InputOptions(
-              alwaysShowSend: true,
-              trailing: [
-                mediaMessageButton(),
-              ],
-            ),
-            currentUser: currentUser!,
-            onSend: _sendMessage,
-            messages: messages,
-          );
-        });
+      stream: _databaseService.getChatData(
+        currentUser!.id,
+        otherUser.uid!,
+      ),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return Center(child: Text('Error loading chat'));
+        }
+        Chat? chat = snapshot.data?.data();
+        List<ChatMessage> messages = [];
+        if (chat != null && chat.messages != null) {
+          messages = _generateChatMessagesList(chat.messages!);
+        }
+        return DashChat(
+          messageOptions: MessageOptions(
+            currentUserContainerColor: Colors.teal[200],
+            containerColor: Colors.teal.shade400,
+            showOtherUsersAvatar: true,
+            showTime: true,
+          ),
+          inputOptions: InputOptions(
+            alwaysShowSend: true,
+            trailing: [mediaMessageButton()],
+          ),
+          currentUser: currentUser!,
+          onSend: _sendMessage,
+          messages: messages,
+        )
+        ;
+      },
+    );
   }
 
   Future<void> _sendMessage(ChatMessage chatMessage) async {
-    if (chatMessage.medias?.isNotEmpty ?? false) {
-      if (chatMessage.medias!.first.type == MediaType.image) {
+    try {
+      if (chatMessage.medias?.isNotEmpty ?? false) {
+        if (chatMessage.medias!.first.type == MediaType.image) {
+          Message message = Message(
+            senderID: chatMessage.user.id,
+            content: chatMessage.medias!.first.url,
+            messageType: MessageType.Image,
+            sentAt: Timestamp.fromDate(chatMessage.createdAt),
+          );
+          await _databaseService.sendChatMessage(
+            currentUser!.id,
+            otherUser.uid!,
+            message,
+          );
+        }
+      } else {
         Message message = Message(
-          senderID: chatMessage.user.id,
-          content: chatMessage.medias!.first.url,
-          messageType: MessageType.Image,
-          sentAt: Timestamp.fromDate(chatMessage.createdAt),
-        );
-        await _databaseService.sendChatMessage(
-            currentUser!.id, otherUser.uid!, message);
-      }
-    } else {
-      Message message = Message(
           senderID: currentUser!.id,
           content: chatMessage.text,
           messageType: MessageType.Text,
-          sentAt: Timestamp.fromDate(
-            chatMessage.createdAt,
-          ));
-      await _databaseService.sendChatMessage(
-        currentUser!.id,
-        otherUser.uid!,
-        message,
-      );
+          sentAt: Timestamp.fromDate(chatMessage.createdAt),
+        );
+        await _databaseService.sendChatMessage(
+          currentUser!.id,
+          otherUser.uid!,
+          message,
+        );
+      }
+    } catch (e) {
+      // Handle error
+      print('Error sending message: $e');
     }
   }
 
@@ -170,9 +225,7 @@ class _ChatPageState extends State<ChatPage> {
         );
       }
     }).toList();
-    chatMessages.sort((a, b) {
-      return b.createdAt.compareTo(a.createdAt);
-    });
+    chatMessages.sort((a, b) => b.createdAt.compareTo(a.createdAt));
     return chatMessages;
   }
 
@@ -181,24 +234,7 @@ class _ChatPageState extends State<ChatPage> {
       onPressed: () async {
         File? file = await _mediaService.getImageFromGallery();
         if (file != null) {
-          String chatID = generateChatID(
-            uid1: currentUser!.id,
-            uid2: otherUser.uid!,
-          );
-          String? downloadURL = await _storageService.uploadImageToChat(
-            file: file,
-            chatID: chatID,
-          );
-          if (downloadURL != null) {
-            ChatMessage chatMessage = ChatMessage(
-                user: currentUser!,
-                createdAt: DateTime.now(),
-                medias: [
-                  ChatMedia(
-                      url: downloadURL, fileName: "", type: MediaType.image),
-                ]);
-            _sendMessage(chatMessage);
-          }
+          await _uploadAndSendMediaMessage(file);
         }
       },
       icon: Icon(
@@ -206,5 +242,35 @@ class _ChatPageState extends State<ChatPage> {
         color: Theme.of(context).colorScheme.primary,
       ),
     );
+  }
+
+  Future<void> _uploadAndSendMediaMessage(File file) async {
+    try {
+      String chatID = generateChatID(
+        uid1: currentUser!.id,
+        uid2: otherUser.uid!,
+      );
+      String? downloadURL = await _storageService.uploadImageToChat(
+        file: file,
+        chatID: chatID,
+      );
+      if (downloadURL != null) {
+        ChatMessage chatMessage = ChatMessage(
+          user: currentUser!,
+          createdAt: DateTime.now(),
+          medias: [
+            ChatMedia(
+              url: downloadURL,
+              fileName: "",
+              type: MediaType.image,
+            ),
+          ],
+        );
+        await _sendMessage(chatMessage);
+      }
+    } catch (e) {
+      // Handle error
+      print('Error uploading media: $e');
+    }
   }
 }

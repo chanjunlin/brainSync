@@ -54,6 +54,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
   void loadProfile() async {
     try {
       DocumentSnapshot? userProfile = await _databaseService.fetchCurrentUser();
+      print('here');
       if (userProfile != null && userProfile.exists) {
         setState(() {
           userProfileCover =
@@ -77,7 +78,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
         await _storageService.saveData(
           coverFile: selectedCoverImage,
           profileFile: selectedProfileImage,
-          uid: _authService.user!.uid,
+          uid: _authService.currentUser!.uid,
           firstName: _firstNameController.text,
           lastName: _lastNameController.text,
         );
