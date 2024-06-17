@@ -66,6 +66,12 @@ class _NavBarState extends State<NavBar> {
               _navigationService.pushName("/nusMods");
             },
           ),
+          ListTile(
+            title: Text("Saved"),
+            onTap: () {
+              _navigationService.pushName("/saved");
+            },
+          )
         ],
       ),
     );

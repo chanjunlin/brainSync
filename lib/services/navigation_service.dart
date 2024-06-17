@@ -1,5 +1,6 @@
 import 'package:brainsync/pages/Administation/login.dart';
 import 'package:brainsync/pages/Administation/register.dart';
+import 'package:brainsync/pages/Modules/saved.dart';
 import 'package:brainsync/pages/Profile/edit_profile.dart';
 import 'package:brainsync/pages/Profile/profile2.dart';
 import 'package:brainsync/pages/Profile/show_everyone.dart';
@@ -30,6 +31,7 @@ class NavigationService {
     "/notifications": (context) => Notifications(),
     "/allUsers": (context) => ShowEveryone(),
     "/nusMods": (context) => ModuleListPage(),
+    "/saved" : (context) => Saved(),
   };
 
   Map<String, Widget Function(BuildContext)> get routes {

@@ -77,21 +77,28 @@ class _HomeState extends State<Home> {
   }
 
   Future<void> bookmark(String postId, bool isBookmark) async {
-    try {
-      final postRef = FirebaseFirestore.instance.collection('posts').doc(postId);
-      await postRef.update({
-        'isBookmarked': !isBookmark,
-      });
+  try {
+    final userRef = FirebaseFirestore.instance.collection('users').doc(userId);
 
-      setState(() {
-        _bookmarks[postId] = !isBookmark; // Update bookmark state
+    if (isBookmark) {
+      await userRef.update({
+        'bookmarks': FieldValue.arrayRemove([postId])
       });
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Error bookmarking post')),
-      );
+    } else {
+      await userRef.update({
+        'bookmarks': FieldValue.arrayUnion([postId])
+      });
     }
+
+    setState(() {
+      _bookmarks[postId] = !isBookmark; // Update bookmark state
+    });
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Error bookmarking post')),
+    );
   }
+}
 
   Future<int> getCommentCount(String postId) async {
     final querySnapshot = await FirebaseFirestore.instance
@@ -296,7 +303,7 @@ class _HomeState extends State<Home> {
           );
         },
       ),
-      bottomNavigationBar: CustomBottomNavBar(initialIndex: 0),
+      bottomNavigationBar: const CustomBottomNavBar(initialIndex: 0),
     );
   }
 

@@ -11,14 +11,14 @@ import 'package:badword_guard/badword_guard.dart';
 
 import '../services/auth_service.dart';
 
-class PostDetailPage extends StatefulWidget {
+class PostDetailPagetest extends StatefulWidget {
   final String postId;
   final String title;
   final String content;
   final DateTime timestamp;
   final String authorName;
 
-  PostDetailPage({
+  PostDetailPagetest({
     Key? key,
     required this.postId,
     required this.title,
@@ -31,7 +31,7 @@ class PostDetailPage extends StatefulWidget {
   _PostDetailPageState createState() => _PostDetailPageState();
 }
 
-class _PostDetailPageState extends State<PostDetailPage> {
+class _PostDetailPageState extends State<PostDetailPagetest> {
   final GetIt _getIt = GetIt.instance;
 
   late AuthService _authService;
