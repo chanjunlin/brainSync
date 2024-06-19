@@ -22,7 +22,7 @@ class SignUpForm extends StatefulWidget {
 }
 
 class SignUpFormState extends State<SignUpForm> {
-  String? firstName, lastName, email, password, repassword, selectedYear;
+  String? bio, firstName, lastName, email, password, repassword, selectedYear;
   List<String>? friendList,
       friendReqList,
       currentModules,
@@ -35,8 +35,6 @@ class SignUpFormState extends State<SignUpForm> {
   late AuthService _authService;
   late NavigationService _navigationService;
   late AlertService _alertService;
-  late MediaService _mediaService;
-  late StorageService _storageService;
   late DatabaseService _databaseService;
 
   bool isLoading = false;
@@ -47,8 +45,6 @@ class SignUpFormState extends State<SignUpForm> {
     _authService = _getIt.get<AuthService>();
     _navigationService = _getIt.get<NavigationService>();
     _alertService = _getIt.get<AlertService>();
-    _storageService = _getIt.get<StorageService>();
-    _mediaService = _getIt.get<MediaService>();
     _databaseService = _getIt.get<DatabaseService>();
   }
 
@@ -222,16 +218,15 @@ class SignUpFormState extends State<SignUpForm> {
                                     completedModules: currentModules,
                                     currentModules: completedModules,
                                     chats: chats,
+                                    bio: bio,
                                   ),
                                 );
                                 await _authService.sendEmailVerification();
-                                // Update UI or navigate to a screen to inform the user to check their email
                                 _alertService.showToast(
                                   text:
                                       "Registered successfully! Please check your email for verification.",
                                   icon: Icons.check,
                                 );
-                                // Navigate to login screen or any other screen
                                 _navigationService
                                     .pushReplacementName("/login");
                               } else {
@@ -253,7 +248,7 @@ class SignUpFormState extends State<SignUpForm> {
                         }
                       },
                 child: isLoading
-                    ? CircularProgressIndicator(
+                    ? const CircularProgressIndicator(
                         valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                       )
                     : const Text('Sign Up'),
