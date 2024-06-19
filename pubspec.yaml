@@ -88,6 +88,7 @@ flutter:
     - assets/img/lock1.png
     - assets/img/people.png
     - assets/img/google.png
+    - assets/img/brain.png
 
 
   # An image asset can refer to one or more resolution-specific "variants", see
