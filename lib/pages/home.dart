@@ -45,6 +45,7 @@ class _HomeState extends State<Home> {
     _databaseService = _getIt.get<DatabaseService>();
     user = _authService.currentUser;
     loadProfile();
+    loadBookmarks();
     timeago.setLocaleMessages('custom', CustomShortMessages());
   }
 
@@ -59,9 +60,9 @@ class _HomeState extends State<Home> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Error liking post'))
       );
-    }
+    }                                                                       
   } 
-
+  
   Future<void> dislikePost (BuildContext context, String postid,) async {
     try {
       await FirebaseFirestore.instance.collection('posts').doc(postid).update(
@@ -77,21 +78,42 @@ class _HomeState extends State<Home> {
   }
 
   Future<void> bookmark(String postId, bool isBookmark) async {
-    try {
-      final postRef = FirebaseFirestore.instance.collection('posts').doc(postId);
-      await postRef.update({
-        'isBookmarked': !isBookmark,
-      });
+  try {
+    final userRef = FirebaseFirestore.instance.collection('users').doc(userId);
 
-      setState(() {
-        _bookmarks[postId] = !isBookmark; // Update bookmark state
+    if (isBookmark) {
+      await userRef.update({
+        'bookmarks': FieldValue.arrayRemove([postId])
       });
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Error bookmarking post')),
-      );
+    } else {
+      await userRef.update({
+        'bookmarks': FieldValue.arrayUnion([postId])
+      });
     }
+
+    setState(() {
+      _bookmarks[postId] = !isBookmark;
+    });
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Error bookmarking post')),
+    );
   }
+}
+
+Future<void> loadBookmarks() async {
+  final userRef = FirebaseFirestore.instance.collection('users').doc(userId);
+  final userSnapshot = await userRef.get();
+
+  if (userSnapshot.exists) {
+    List<String> bookmarks = List<String>.from(userSnapshot.data()?['bookmarks'] ?? []);
+    setState(() {
+      for (var postId in bookmarks) {
+        _bookmarks[postId] = true;
+      }
+    });
+  }
+}
 
   Future<int> getCommentCount(String postId) async {
     final querySnapshot = await FirebaseFirestore.instance
@@ -296,7 +318,7 @@ class _HomeState extends State<Home> {
           );
         },
       ),
-      bottomNavigationBar: CustomBottomNavBar(initialIndex: 0),
+      bottomNavigationBar: const CustomBottomNavBar(initialIndex: 0),
     );
   }
 
