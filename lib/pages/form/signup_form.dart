@@ -8,9 +8,7 @@ import '../../const.dart';
 import '../../services/alert_service.dart';
 import '../../services/auth_service.dart';
 import '../../services/database_service.dart';
-import '../../services/media_service.dart';
 import '../../services/navigation_service.dart';
-import '../../services/storage_service.dart';
 
 class SignUpForm extends StatefulWidget {
   const SignUpForm({
@@ -23,11 +21,13 @@ class SignUpForm extends StatefulWidget {
 
 class SignUpFormState extends State<SignUpForm> {
   String? bio, firstName, lastName, email, password, repassword, selectedYear;
-  List<String>? friendList,
+  List<String>? chats,
+      friendList,
       friendReqList,
       currentModules,
       completedModules,
-      chats;
+      myComments,
+      myPosts;
 
   final GetIt _getIt = GetIt.instance;
   final GlobalKey<FormState> _signupFormKey = GlobalKey();
@@ -74,7 +74,6 @@ class SignUpFormState extends State<SignUpForm> {
                         firstName = value;
                       });
                     },
-                    // prefixIcon: Icon(Icons.person),
                   ),
                 ),
                 SizedBox(width: 16),
@@ -105,7 +104,6 @@ class SignUpFormState extends State<SignUpForm> {
                   email = value;
                 });
               },
-              // prefixIcon: Icon(Icons.email),
             ),
             CustomFormField(
               labelText: "Password",
@@ -118,7 +116,6 @@ class SignUpFormState extends State<SignUpForm> {
                   password = value;
                 });
               },
-              // prefixIcon: Icon(Icons.lock),
             ),
             CustomFormField(
               labelText: "Retype Password",
@@ -131,7 +128,6 @@ class SignUpFormState extends State<SignUpForm> {
                   repassword = value;
                 });
               },
-              // prefixIcon: Icon(Icons.lock),
             ),
             DropdownButtonFormField<String>(
               decoration: InputDecoration(
@@ -144,7 +140,7 @@ class SignUpFormState extends State<SignUpForm> {
                 focusedBorder: const OutlineInputBorder(
                   borderRadius: BorderRadius.all(Radius.circular(10)),
                   borderSide: BorderSide(
-                    color: Colors.brown, // Set the color to brown when focused
+                    color: Colors.brown,
                   ),
                 ),
                 labelStyle: TextStyle(
@@ -207,18 +203,20 @@ class SignUpFormState extends State<SignUpForm> {
                               if (result == "true") {
                                 await _databaseService.createUserProfile(
                                   userProfile: UserProfile(
-                                    uid: _authService.user!.uid,
+                                    bio: bio,
                                     firstName: firstName,
                                     lastName: lastName,
                                     pfpURL: PLACEHOLDER_PFP,
                                     profileCoverURL: PLACEHOLDER_PROFILE_COVER,
+                                    uid: _authService.user!.uid,
+                                    year: selectedYear,
+                                    chats: chats,
+                                    currentModules: completedModules,
+                                    completedModules: currentModules,
                                     friendList: friendList,
                                     friendReqList: friendReqList,
-                                    year: selectedYear,
-                                    completedModules: currentModules,
-                                    currentModules: completedModules,
-                                    chats: chats,
-                                    bio: bio,
+                                    myComments: myComments,
+                                    myPosts: myPosts,
                                   ),
                                 );
                                 await _authService.sendEmailVerification();

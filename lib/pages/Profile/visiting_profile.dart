@@ -72,8 +72,8 @@ class _VisitProfileState extends State<VisitProfile> {
             firstName = profile['firstName'] ?? 'First';
             lastName = profile['lastName'] ?? 'Last';
             bio = profile['bio'] ?? 'No bio available';
-            currentModules = profile["currentModule"] ?? [];
-            completedModules = profile["completedModule"] ?? [];
+            currentModules = profile["currentModules"] ?? [];
+            completedModules = profile["completedModules"] ?? [];
             friendReqList = profile['friendReqList'] ?? [];
             friendList = profile['friendList'] ?? [];
             isFriend = friendList!.contains(_authService.currentUser!.uid);
@@ -345,8 +345,8 @@ class _VisitProfileState extends State<VisitProfile> {
               }
 
               var userData = snapshot.data!.data() as Map<String, dynamic>;
-              var currentModules = userData['currentModule'] ?? [];
-              var completedModules = userData['completedModule'] ?? [];
+              var currentModules = userData['currentModules'] ?? [];
+              var completedModules = userData['completedModules'] ?? [];
 
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -392,7 +392,8 @@ class _VisitProfileState extends State<VisitProfile> {
                         );
                       }).toList(),
                     ),
-                  if (completedModules.isEmpty) Text('No completed modules'),
+                  if (completedModules.isEmpty)
+                    const Text('No completed modules'),
                 ],
               );
             },

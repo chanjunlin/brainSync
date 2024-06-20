@@ -12,6 +12,10 @@ class UserProfile {
   List<String?>? currentModules;
   List<String?>? friendList;
   List<String?>? friendReqList;
+  List<String?>? myComments;
+  List<String?>? myPosts;
+  List<String?>? myLikedComments;
+  List<String?>? myLikedPosts;
 
   UserProfile({
     this.bio,
@@ -26,6 +30,10 @@ class UserProfile {
     this.currentModules,
     this.friendList,
     this.friendReqList,
+    this.myComments,
+    this.myLikedComments,
+    this.myPosts,
+    this.myLikedPosts,
   });
 
   UserProfile.fromJson(Map<String, dynamic> json) {
@@ -37,10 +45,26 @@ class UserProfile {
     uid = json['uid'];
     year = json['year'];
     chats = json['chats'] != null ? List<String>.from(json['chats']) : [];
-    completedModules = json['completedModules'] != null ? List<String>.from(json['completedModules']) : [];
-    currentModules = json['currentModules'] != null ? List<String>.from(json['currentModules']) : [];
-    friendList = json['friendList'] != null ? List<String>.from(json['friendList']) : [];
-    friendReqList = json['friendReqList'] != null ? List<String>.from(json['friendReqList']) : [];
+    completedModules = json['completedModules'] != null
+        ? List<String>.from(json['completedModules'])
+        : [];
+    currentModules = json['currentModules'] != null
+        ? List<String>.from(json['currentModules'])
+        : [];
+    friendList =
+        json['friendList'] != null ? List<String>.from(json['friendList']) : [];
+    friendReqList = json['friendReqList'] != null
+        ? List<String>.from(json['friendReqList'])
+        : [];
+    myComments =
+        json['myComments'] != null ? List<String>.from(json['myComments']) : [];
+    myLikedComments = json['myLikedComments'] != null
+        ? List<String>.from(json['myLikedComments'])
+        : [];
+    myPosts = json['myPost'] != null ? List<String>.from(json['myPosts']) : [];
+    myLikedPosts = json['myLikedPosts'] != null
+        ? List<String>.from(json['myLikedPosts'])
+        : [];
   }
 
   Map<String, dynamic> toJson() {
@@ -57,6 +81,11 @@ class UserProfile {
     data['currentModules'] = currentModules;
     data['friendList'] = friendList;
     data['friendReqList'] = friendReqList;
+    data['myComments'] = myComments;
+    data['myLikedComments'] = myLikedComments;
+    data['myPosts'] = myPosts;
+    data['myLikedPosts'] = myLikedPosts;
+
     return data;
   }
 }

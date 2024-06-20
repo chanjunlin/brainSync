@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:brainsync/model/post.dart';
 import 'package:brainsync/model/user_profile.dart';
 import 'package:brainsync/services/alert_service.dart';
 import 'package:brainsync/utils.dart';
@@ -7,6 +8,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get_it/get_it.dart';
 
 import '../model/chat.dart';
+import '../model/comment.dart';
 import '../model/message.dart';
 import 'auth_service.dart';
 
@@ -15,7 +17,7 @@ class DatabaseService {
   final GetIt _getIt = GetIt.instance;
 
   CollectionReference<UserProfile>? _usersCollection;
-  CollectionReference? _chatCollection;
+  CollectionReference? _chatCollection, _postCollection;
 
   late AlertService _alertService;
   late AuthService _authService;
@@ -39,6 +41,11 @@ class DatabaseService {
         .withConverter<Chat>(
             fromFirestore: (snapshots, _) => Chat.fromJson(snapshots.data()!),
             toFirestore: (chat, _) => chat.toJson());
+    _postCollection = _firebaseFirestore
+        .collection('posts')
+        .withConverter<Post>(
+            fromFirestore: (snapshots, _) => Post.fromJson(snapshots.data()!),
+            toFirestore: (post, _) => post.toJson());
   }
 
   // Create a new user
@@ -389,6 +396,129 @@ class DatabaseService {
       }
     } catch (e) {
       print(e);
+    }
+  }
+
+  // POST METHODS
+
+  // Creating a post
+  Future<void> createNewPost({required Post post}) async {
+    try {
+      DocumentReference postRef = await _postCollection!.doc();
+      DocumentReference newPost = await _postCollection!.doc(postRef.id);
+      newPost.set(post);
+      newPost.update(
+        {
+          'id': FieldValue.arrayUnion([postRef.id])
+        },
+      );
+    } catch (e) {}
+  }
+
+  // Bookmarking a post
+  Future<void> addBookmark(String postId, bool isBookmark) async {
+    try {
+      final userId = _authService.currentUser!.uid;
+      final userRef = _usersCollection!.doc(userId);
+
+      if (isBookmark) {
+        await userRef.update({
+          'bookmarks': FieldValue.arrayRemove([postId])
+        });
+      } else {
+        await userRef.update({
+          'bookmarks': FieldValue.arrayUnion([postId])
+        });
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  // Liking a post
+  Future<void> likePost(String postID) async {
+    try {
+      final userID = _authService.currentUser!.uid;
+      await _postCollection!.doc(postID).update(
+        {
+          'likes': FieldValue.arrayUnion([userID]),
+        },
+      );
+      await _usersCollection!.doc(userID).update({
+        'myLikedPosts': FieldValue.arrayUnion([postID]),
+      });
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  // Unliking a post
+  Future<void> dislikePost(String postID) async {
+    try {
+      final userID = _authService.currentUser!.uid;
+      await _postCollection!.doc(postID).update(
+        {
+          'likes': FieldValue.arrayRemove([userID])
+        },
+      );
+      await _usersCollection!.doc(userID).update({
+        'myLikedPosts': FieldValue.arrayRemove([postID]),
+      });
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  // Adding a comment
+  Future<void> addNewcomment(String postID, Comment comment) async {
+    try {
+      final postRef = _postCollection!.doc(postID);
+      final userID = _authService.currentUser!.uid;
+
+      await _firebaseFirestore.runTransaction((transaction) async {
+        DocumentSnapshot postSnapshot = await transaction.get(postRef);
+        if (!postSnapshot.exists) {
+          print("Post does not exist!");
+        }
+        transaction.update(postRef, {
+          "commentCount": FieldValue.increment(1),
+        });
+        await postRef.collection('comments').add(comment.toJson());
+      });
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  // Liking a comment
+  Future<void> likeComment(
+      String postID, String commentID, String userID) async {
+    try {
+      final postRef = _postCollection!.doc(postID);
+      final commentRef = postRef.collection("comments").doc(commentID);
+      final String combinedRef = "$postID/$commentID";
+      await commentRef.update({
+        'likes': FieldValue.arrayUnion([userID])
+      });
+      await _usersCollection!.doc(userID).update({
+        'myLikedComments': FieldValue.arrayUnion([combinedRef]),
+      });
+    } catch (e) {
+      print("Error liking comment");
+    }
+  }
+
+  // Disliking a comment
+  Future<void> dislikeComment(
+      String postID, String commentID, String userId) async {
+    try {
+      final postRef = _postCollection!.doc(postID);
+      final commentRef = postRef.collection("comments").doc(commentID);
+      await commentRef.update({
+        'likes': FieldValue.arrayRemove([userId])
+      });
+    } catch (e) {
+      print("Error liking comment");
     }
   }
 }

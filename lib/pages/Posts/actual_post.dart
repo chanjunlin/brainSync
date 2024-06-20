@@ -1,3 +1,4 @@
+import 'package:badword_guard/badword_guard.dart';
 import 'package:brainsync/services/alert_service.dart';
 import 'package:brainsync/services/database_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -5,8 +6,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:timeago/timeago.dart' as timeago;
-import 'package:badword_guard/badword_guard.dart';
 
+import '../../model/comment.dart';
 import '../../services/auth_service.dart';
 import '../Profile/visiting_profile.dart';
 
@@ -31,7 +32,6 @@ class PostDetailPage extends StatefulWidget {
 }
 
 class _PostDetailPageState extends State<PostDetailPage> {
-
   final GetIt _getIt = GetIt.instance;
   final userId = FirebaseAuth.instance.currentUser!.uid;
 
@@ -51,7 +51,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
   }
 
   final TextEditingController _commentController = TextEditingController();
-  final LanguageChecker _checker = LanguageChecker();
+  final LanguageChecker checker = LanguageChecker();
 
   void loadProfile() async {
     final user = await _databaseService.fetchCurrentUser();
@@ -66,78 +66,36 @@ class _PostDetailPageState extends State<PostDetailPage> {
 
   Future<void> addComment() async {
     if (_commentController.text.isNotEmpty) {
-      if (_checker.containsBadLanguage(_commentController.text)) {
+      if (checker.containsBadLanguage(_commentController.text)) {
         _alertService.showToast(
           text: "Comment contains inappropriate content!",
           icon: Icons.error,
         );
         return;
       }
-
-      String filteredComment = _checker.filterBadWords(_commentController.text); //comment saved under filtered comment
-
-      final user = await _databaseService.fetchCurrentUser();
-      final userId = user!.get("uid");
-
-      final postRef = FirebaseFirestore.instance.collection('posts').doc(widget.postId);
-      await FirebaseFirestore.instance.runTransaction((transaction) async {
-        DocumentSnapshot postSnapshot = await transaction.get(postRef);
-      if (!postSnapshot.exists) {
-        throw Exception("Post does not exist!");
-      }
-
-      transaction.update(postRef, {
-        'commentCount': FieldValue.increment(1),
-      });
-
-      transaction.set(
-        postRef.collection('comments').doc(),
-        {
-          'content': filteredComment,
-          'timestamp': Timestamp.now(),
-          'authorId': userId,
-          'likes': [],
-        },
+      String filteredComment = checker.filterBadWords(_commentController.text);
+      await _databaseService.addNewcomment(
+        widget.postId,
+        Comment(
+          authorID: _authService.currentUser!.uid,
+          content: filteredComment,
+          likes: [],
+          timestamp: Timestamp.now(),
+        ),
       );
-    });
-
-    _commentController.clear();
+      _commentController.clear();
+    }
   }
-}
 
-Future<void> likeComment(BuildContext context, String postId, String commentId, String userId) async {
-  try {
-    await FirebaseFirestore.instance
-        .collection('posts')
-        .doc(postId)
-        .collection('comments')
-        .doc(commentId)
-        .update({
-      'likes': FieldValue.arrayUnion([userId])
-    });
-  } on FirebaseException {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Error liking comment'))
-    );
+  Future<void> likeComment(
+      String postId, String commentId, String userId) async {
+    await _databaseService.likeComment(postId, commentId, userId);
   }
-}
 
-Future<void> dislikeComment(BuildContext context, String postId, String commentId, String userId) async {
-  try {
-    await FirebaseFirestore.instance
-        .collection('posts')
-        .doc(postId)
-        .collection('comments')
-        .doc(commentId)
-        .update({
-      'likes': FieldValue.arrayRemove([userId])
-    });
-  } on FirebaseException {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Error disliking comment'))
-    );
+  Future<void> dislikeComment(
+      String postId, String commentId, String userId) async {
+    await _databaseService.dislikeComment(postId, commentId, userId);
   }
-}
 
   @override
   Widget build(BuildContext context) {
@@ -212,11 +170,11 @@ Future<void> dislikeComment(BuildContext context, String postId, String commentI
                     itemCount: comments.length,
                     itemBuilder: (context, index) {
                       final comment =
-                      comments[index].data() as Map<String, dynamic>;
+                          comments[index].data() as Map<String, dynamic>;
                       final timestamp = comment['timestamp'] as Timestamp;
                       final date = timestamp.toDate();
                       final formattedDate =
-                      timeago.format(date, locale: 'custom');
+                          timeago.format(date, locale: 'custom');
                       final authorId = comment['authorId'] as String;
                       final likes = comment['likes'] ?? [];
                       final isLiked = likes.contains(userId);
@@ -243,7 +201,7 @@ Future<void> dislikeComment(BuildContext context, String postId, String commentI
                           }
 
                           final userData =
-                          userSnapshot.data!.data() as Map<String, dynamic>;
+                              userSnapshot.data!.data() as Map<String, dynamic>;
                           final authorName =
                               "${userData['firstName']} ${userData['lastName']}";
 
@@ -251,14 +209,14 @@ Future<void> dislikeComment(BuildContext context, String postId, String commentI
                             onTap: authorId == _authService.currentUser!.uid
                                 ? null
                                 : () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      VisitProfile(userId: authorId),
-                                ),
-                              );
-                            },
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            VisitProfile(userId: authorId),
+                                      ),
+                                    );
+                                  },
                             child: Container(
                               margin: const EdgeInsets.symmetric(vertical: 8.0),
                               padding: const EdgeInsets.all(12.0),
@@ -273,10 +231,12 @@ Future<void> dislikeComment(BuildContext context, String postId, String commentI
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
-                                        authorId == _authService.currentUser!.uid
+                                        authorId ==
+                                                _authService.currentUser!.uid
                                             ? "Me"
                                             : authorName,
                                         style: TextStyle(
@@ -287,8 +247,8 @@ Future<void> dislikeComment(BuildContext context, String postId, String commentI
                                       Text(
                                         formattedDate,
                                         style: TextStyle(
-                                        fontSize: 12,
-                                        color: Colors.brown[500],
+                                          fontSize: 12,
+                                          color: Colors.brown[500],
                                         ),
                                       ),
                                     ],
@@ -298,35 +258,44 @@ Future<void> dislikeComment(BuildContext context, String postId, String commentI
                                     comment['content'],
                                     style: TextStyle(color: Colors.brown[700]),
                                   ),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    TextButton.icon(
-                                      icon: Icon(
-                                        Icons.reply,
-                                        color: Colors.brown[300],
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      TextButton.icon(
+                                        icon: Icon(
+                                          Icons.reply,
+                                          color: Colors.brown[300],
+                                        ),
+                                        label: Text(
+                                          'Reply',
+                                          style: TextStyle(
+                                            color: Colors.black,
+                                          ),
+                                        ),
+                                        onPressed: () {},
                                       ),
-                                      label: Text('Reply', style: TextStyle(
-                                        color: Colors.black,
-                                      ),),
-                                      onPressed: () {},
-                                    ),
-                                    IconButton(
-                                      icon: Icon(
-                                        isLiked ? Icons.thumb_up : Icons.thumb_up_alt_outlined,
-                                        color: isLiked ? Colors.brown[300] : Colors.grey,
+                                      IconButton(
+                                        icon: Icon(
+                                          isLiked
+                                              ? Icons.thumb_up
+                                              : Icons.thumb_up_alt_outlined,
+                                          color: isLiked
+                                              ? Colors.brown[300]
+                                              : Colors.grey,
+                                        ),
+                                        onPressed: () {
+                                          if (isLiked) {
+                                            dislikeComment(widget.postId,
+                                                comments[index].id, userId);
+                                          } else {
+                                            likeComment(widget.postId,
+                                                comments[index].id, userId);
+                                          }
+                                        },
                                       ),
-                                      onPressed: () {
-                                        if (isLiked) {
-                                          dislikeComment(context, widget.postId, comments[index].id, userId);
-                                        } else {
-                                          likeComment(context,  widget.postId, comments[index].id, userId);
-                                        }
-                                      },
-                                    ),
-                                    Text('$likeCount'),
-                                  ],
-                                ),
+                                      Text('$likeCount'),
+                                    ],
+                                  ),
                                 ],
                               ),
                             ),

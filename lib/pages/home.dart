@@ -11,7 +11,8 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
-import '../services/navigation_service.dart';
+import '../const.dart';
+import '../services/alert_service.dart';
 import 'Posts/actual_post.dart';
 
 class Home extends StatefulWidget {
@@ -22,15 +23,18 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  late User? user;
-
-  String? name;
-  String searchQuery = "";
   bool isSearching = false;
 
+  String searchQuery = "";
+
+  List? friendReqList, currentModules, completedModules;
+
+  String? userProfilePfp, userProfileCover, firstName, lastName;
+
+  late AlertService _alertService;
   late AuthService _authService;
-  late NavigationService _navigationService;
   late DatabaseService _databaseService;
+  late User? user;
 
   final GetIt _getIt = GetIt.instance;
   final userId = FirebaseAuth.instance.currentUser!.uid;
@@ -40,88 +44,42 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
+    _alertService = _getIt.get<AlertService>();
     _authService = _getIt.get<AuthService>();
-    _navigationService = _getIt.get<NavigationService>();
     _databaseService = _getIt.get<DatabaseService>();
     user = _authService.currentUser;
     loadProfile();
-    loadBookmarks();
     timeago.setLocaleMessages('custom', CustomShortMessages());
   }
 
-  Future<void> likePost (BuildContext context, String postid,) async {
+  Future<void> likePost(BuildContext context, String postId) async {
     try {
-      await FirebaseFirestore.instance.collection('posts').doc(postid).update(
-        {
-          'likes': FieldValue.arrayUnion([userId])
-        },
-      );
-    } on FirebaseException {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Error liking post'))
-      );
-    }                                                                       
-  } 
-  
-  Future<void> dislikePost (BuildContext context, String postid,) async {
+      await _databaseService.likePost(postId);
+    } catch (e) {
+      _alertService.showToast(text: "Error liking post", icon: Icons.error);
+    }
+  }
+
+  Future<void> dislikePost(BuildContext context, String postId) async {
     try {
-      await FirebaseFirestore.instance.collection('posts').doc(postid).update(
-        {
-          'likes': FieldValue.arrayRemove([userId])
-      },
-      );
-    } on FirebaseException {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Error liking post'))
-      );
+      await _databaseService.dislikePost(postId);
+    } catch (e) {
+      _alertService.showToast(text: "Error disliking post", icon: Icons.error);
     }
   }
 
   Future<void> bookmark(String postId, bool isBookmark) async {
-  try {
-    final userRef = FirebaseFirestore.instance.collection('users').doc(userId);
-
-    if (isBookmark) {
-      await userRef.update({
-        'bookmarks': FieldValue.arrayRemove([postId])
+    try {
+      await _databaseService.addBookmark(postId, isBookmark);
+      setState(() {
+        _bookmarks[postId] = !isBookmark;
       });
-    } else {
-      await userRef.update({
-        'bookmarks': FieldValue.arrayUnion([postId])
-      });
+    } catch (e) {
+      _alertService.showToast(
+        text: "Error bookmarking post",
+        icon: Icons.error,
+      );
     }
-
-    setState(() {
-      _bookmarks[postId] = !isBookmark;
-    });
-  } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Error bookmarking post')),
-    );
-  }
-}
-
-Future<void> loadBookmarks() async {
-  final userRef = FirebaseFirestore.instance.collection('users').doc(userId);
-  final userSnapshot = await userRef.get();
-
-  if (userSnapshot.exists) {
-    List<String> bookmarks = List<String>.from(userSnapshot.data()?['bookmarks'] ?? []);
-    setState(() {
-      for (var postId in bookmarks) {
-        _bookmarks[postId] = true;
-      }
-    });
-  }
-}
-
-  Future<int> getCommentCount(String postId) async {
-    final querySnapshot = await FirebaseFirestore.instance
-        .collection('posts')
-        .doc(postId)
-        .collection('comments')
-        .get();
-    return querySnapshot.docs.length;
   }
 
   @override
@@ -174,11 +132,14 @@ Future<void> loadBookmarks() async {
           }
 
           final posts = snapshot.data?.docs.where((post) {
-            if (searchQuery.isEmpty) return true;
-            final data = post.data() as Map<String, dynamic>;
-            final title = data['title'] as String;
-            return title.toLowerCase().startsWith(searchQuery.toLowerCase());
-          }).toList() ?? [];
+                if (searchQuery.isEmpty) return true;
+                final data = post.data() as Map<String, dynamic>;
+                final title = data['title'] as String;
+                return title
+                    .toLowerCase()
+                    .startsWith(searchQuery.toLowerCase());
+              }).toList() ??
+              [];
 
           return ListView.builder(
             itemCount: posts.length,
@@ -195,14 +156,13 @@ Future<void> loadBookmarks() async {
               final isBookmarked = _bookmarks[postId] ?? false;
 
               return Card(
-                color: Colors.white, // Complementary color to brown
+                color: Colors.white,
                 shape: const RoundedRectangleBorder(
                     side: BorderSide(
                       color: Colors.brown,
                       width: 1.0,
                     ),
-                    borderRadius: BorderRadius.zero
-                    ),
+                    borderRadius: BorderRadius.zero),
                 margin: const EdgeInsets.symmetric(vertical: 0, horizontal: 0),
                 child: InkWell(
                   onTap: () {
@@ -252,62 +212,81 @@ Future<void> loadBookmarks() async {
                           ),
                         ),
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                           children: [
-                            IconButton(
-                              icon: Icon(
-                                isLiked ? Icons.thumb_up : Icons.thumb_up_outlined,
-                                  color: isLiked ? Colors.brown[300] : Colors.grey,
-                              ),
-                               onPressed: () {
-                                  if (isLiked) {
-                                    dislikePost(context, posts[index].id);
-                                 } else {
-                                     likePost(context, posts[index].id);
-                                 }
-                              },
-                           ),
-                           const SizedBox(width: 5,),
-                           Text('$likeCount', style: TextStyle(
-                            color: Colors.brown[800],
-                           )
-                           ),
-                           const SizedBox(width: 90,),
-                           IconButton(
-                            icon: const Icon(Icons.comment,
-                            color: Color.fromARGB(255, 161, 136, 127),
-                            ),
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => PostDetailPage(
-                                    postId: posts[index].id,
-                                    title: post['title'],
-                                    timestamp: date,
-                                    content: post['content'],
-                                    authorName: post['authorName'],
-                                    ),
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                IconButton(
+                                  icon: Icon(
+                                    isLiked
+                                        ? Icons.thumb_up
+                                        : Icons.thumb_up_outlined,
+                                    color: isLiked
+                                        ? Colors.brown[300]
+                                        : Colors.grey,
                                   ),
-                               );
-                            },
-                           ),
-                           const SizedBox(width: 5,),
-                           Text('$commentCount', style: TextStyle(
-                            color: Colors.brown[800],
-                           )
-                           ),
-                           const SizedBox(width: 90,),
-                           IconButton(
-                              icon: Icon(
-                                Icons.bookmark,
-                                color: isBookmarked ? Colors.brown[300] : Colors.grey,
-                              ),
-                              onPressed: () {
-                                bookmark(postId, isBookmarked);
-                              },
+                                  onPressed: () {
+                                    if (isLiked) {
+                                      dislikePost(context, posts[index].id);
+                                    } else {
+                                      likePost(context, posts[index].id);
+                                    }
+                                  },
+                                ),
+                                const SizedBox(width: 5),
+                                Text('$likeCount',
+                                    style: TextStyle(color: Colors.brown[800])),
+                              ],
                             ),
-                         ]
+                            Expanded(
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  IconButton(
+                                    icon: const Icon(
+                                      Icons.comment,
+                                      color: Color.fromARGB(255, 161, 136, 127),
+                                    ),
+                                    onPressed: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => PostDetailPage(
+                                            postId: posts[index].id,
+                                            title: post['title'],
+                                            timestamp: date,
+                                            content: post['content'],
+                                            authorName: post['authorName'],
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                  const SizedBox(width: 5),
+                                  Text('$commentCount',
+                                      style:
+                                          TextStyle(color: Colors.brown[800])),
+                                ],
+                              ),
+                            ),
+                            Row(
+                              children: [
+                                IconButton(
+                                  icon: Icon(
+                                    isBookmarked
+                                        ? Icons.bookmark
+                                        : Icons.bookmark_added_outlined,
+                                    color: isBookmarked
+                                        ? Colors.brown[400]
+                                        : Colors.grey,
+                                  ),
+                                  onPressed: () {
+                                    bookmark(postId, isBookmarked);
+                                  },
+                                ),
+                              ],
+                            ),
+                          ],
                         )
                       ],
                     ),
@@ -325,10 +304,18 @@ Future<void> loadBookmarks() async {
   void loadProfile() async {
     try {
       DocumentSnapshot? userProfile = await _databaseService.fetchCurrentUser();
-      print(userProfile);
       if (userProfile != null && userProfile.exists) {
+        List<String> bookmarks =
+            List<String>.from(userProfile.get('bookmarks') ?? []);
         setState(() {
-          name = userProfile.get('firstName') ?? 'Name';
+          userProfilePfp = userProfile.get('pfpURL') ?? PLACEHOLDER_PFP;
+          userProfileCover =
+              userProfile.get('profileCoverURL') ?? PLACEHOLDER_PROFILE_COVER;
+          firstName = userProfile.get('firstName') ?? 'Name';
+          lastName = userProfile.get('lastName') ?? 'Name';
+          for (var postId in bookmarks) {
+            _bookmarks[postId] = true;
+          }
         });
       } else {
         print('User profile not found');

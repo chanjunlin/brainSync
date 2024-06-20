@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:brainsync/model/chat.dart';
 import 'package:brainsync/model/message.dart';
-import 'package:brainsync/pages/Profile/visit_profile.dart';
 import 'package:brainsync/services/database_service.dart';
 import 'package:brainsync/services/storage_service.dart';
 import 'package:brainsync/utils.dart';
@@ -15,6 +14,8 @@ import 'package:get_it/get_it.dart';
 import '../../model/user_profile.dart';
 import '../../services/auth_service.dart';
 import '../../services/media_service.dart';
+import '../../services/navigation_service.dart';
+import '../Profile/visiting_profile.dart';
 
 class ChatPage extends StatefulWidget {
   final UserProfile chatUser;
@@ -34,6 +35,7 @@ class _ChatPageState extends State<ChatPage> {
   late AuthService _authService;
   late DatabaseService _databaseService;
   late MediaService _mediaService;
+  late NavigationService _navigationService;
   late StorageService _storageService;
 
   late UserProfile otherUser;
@@ -50,6 +52,7 @@ class _ChatPageState extends State<ChatPage> {
     _authService = _getIt.get<AuthService>();
     _databaseService = _getIt.get<DatabaseService>();
     _mediaService = _getIt.get<MediaService>();
+    _navigationService = _getIt.get<NavigationService>();
     _storageService = _getIt.get<StorageService>();
   }
 
@@ -70,67 +73,62 @@ class _ChatPageState extends State<ChatPage> {
         foregroundColor: Colors.white,
         title: header(),
       ),
-      body: _buildUI(),
+      body: buildUI(),
     );
   }
 
   Widget header() {
     return Padding(
       padding: const EdgeInsets.only(right: 8.0, top: 4.0, bottom: 4.0),
-      child: Row(
-        children: [
-          GestureDetector(
-            child: CircleAvatar(
+      child: GestureDetector(
+          onTap: () {
+            _navigationService.push(MaterialPageRoute(builder: (context) {
+              return VisitProfile(userId: widget.chatUser.uid!);
+            }));
+          },
+        child: Row(
+          children: [
+            CircleAvatar(
               radius: 24,
               backgroundImage: NetworkImage(widget.chatUser.pfpURL ?? ''),
             ),
-            onTap: () => _navigateToProfile(),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  widget.chatUser.firstName ?? 'User',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-                if (widget.chatUser.lastName != null)
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   Text(
-                    widget.chatUser.lastName!,
+                    widget.chatUser.firstName ?? 'User',
                     style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.white70,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
                     ),
                   ),
-              ],
+                  if (widget.chatUser.lastName != null)
+                    Text(
+                      widget.chatUser.lastName!,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.white70,
+                      ),
+                    ),
+                ],
+              ),
             ),
-          ),
-          IconButton(
-            icon: Icon(Icons.more_vert, color: Colors.white),
-            onPressed: () {
-              // Handle more options
-            },
-          ),
-        ],
+            IconButton(
+              icon: Icon(Icons.more_vert, color: Colors.white),
+              onPressed: () {
+                // Handle more options
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  void _navigateToProfile() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => VisitProfile(userId: otherUser),
-      ),
-    );
-  }
-
-  Widget _buildUI() {
+  Widget buildUI() {
     return StreamBuilder(
       stream: _databaseService.getChatData(
         currentUser!.id,
@@ -150,8 +148,8 @@ class _ChatPageState extends State<ChatPage> {
         }
         return DashChat(
           messageOptions: MessageOptions(
-            currentUserContainerColor: Colors.teal[200],
-            containerColor: Colors.teal.shade400,
+            currentUserContainerColor: Colors.brown[400],
+            containerColor: Colors.brown.shade100,
             showOtherUsersAvatar: true,
             showTime: true,
           ),
@@ -162,8 +160,7 @@ class _ChatPageState extends State<ChatPage> {
           currentUser: currentUser!,
           onSend: _sendMessage,
           messages: messages,
-        )
-        ;
+        );
       },
     );
   }
@@ -269,7 +266,6 @@ class _ChatPageState extends State<ChatPage> {
         await _sendMessage(chatMessage);
       }
     } catch (e) {
-      // Handle error
       print('Error uploading media: $e');
     }
   }

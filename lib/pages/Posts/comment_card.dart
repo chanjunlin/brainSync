@@ -17,7 +17,7 @@ class CommentCard extends StatelessWidget {
     return Card(
       color: Colors.white,
       elevation: 3,
-      margin: EdgeInsets.symmetric(vertical: 8),
+      margin: const EdgeInsets.symmetric(vertical: 8),
       child: ListTile(
         title: Text(
           authorName,

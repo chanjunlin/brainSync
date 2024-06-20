@@ -1,15 +1,18 @@
 import 'dart:async';
 import 'dart:core';
 
+import 'package:badword_guard/badword_guard.dart';
 import 'package:brainsync/common_widgets/dialog.dart';
 import 'package:brainsync/model/module.dart';
+import 'package:brainsync/model/post.dart';
 import 'package:brainsync/services/alert_service.dart';
 import 'package:brainsync/services/api_service.dart';
 import 'package:brainsync/services/auth_service.dart';
+import 'package:brainsync/services/database_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import 'package:badword_guard/badword_guard.dart';
+
 import '../../services/navigation_service.dart';
 
 class PostsPage extends StatefulWidget {
@@ -18,7 +21,6 @@ class PostsPage extends StatefulWidget {
 }
 
 class _PostsPageState extends State<PostsPage> {
-
   String? userProfilePfp, name;
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _contentController = TextEditingController();
@@ -28,19 +30,20 @@ class _PostsPageState extends State<PostsPage> {
 
   late AlertService _alertService;
   late AuthService _authService;
+  late DatabaseService _databaseService;
   late NavigationService _navigationService;
 
   late Future<List<Module>> futureModules;
   List<Module> filteredModules = [];
   Timer? _debounce;
 
-
   @override
   void initState() {
     super.initState();
     _alertService = _getIt.get<AlertService>();
-    _navigationService = _getIt.get<NavigationService>();
     _authService = _getIt.get<AuthService>();
+    _databaseService = _getIt.get<DatabaseService>();
+    _navigationService = _getIt.get<NavigationService>();
     futureModules = ApiService.fetchModules();
     _titleController.addListener(onTitleChanged);
   }
@@ -77,7 +80,6 @@ class _PostsPageState extends State<PostsPage> {
   Future<void> createPost() async {
     if (_formKey.currentState!.validate()) {
       String content = _contentController.text;
-      
       if (_checker.containsBadLanguage(content)) {
         _alertService.showToast(
           text: "Post contains inappropriate content!",
@@ -85,19 +87,18 @@ class _PostsPageState extends State<PostsPage> {
         );
         return;
       }
-
       String filteredContent = _checker.filterBadWords(content);
-
-      await FirebaseFirestore.instance.collection('posts').add({
-        'title': _titleController.text,
-        'content': filteredContent,
-        'timestamp': Timestamp.now(),
-        'authorName': _authService.currentUser!.uid,
-      });
+      await _databaseService.createNewPost(
+        post: Post(
+          authorName: _authService.currentUser!.uid,
+          content: filteredContent,
+          title: _titleController.text,
+          timestamp: Timestamp.now(),
+        ),
+      );
 
       _titleController.clear();
       _contentController.clear();
-
       _alertService.showToast(
         text: "Post created successfully!",
         icon: Icons.check,
