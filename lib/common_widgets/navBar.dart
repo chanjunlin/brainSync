@@ -88,8 +88,8 @@ class _NavBarState extends State<NavBar> {
           firstName = userProfile.get('firstName') ?? 'Name';
           lastName = userProfile.get('lastName') ?? 'Name';
           friendReqList = userProfile.get("friendReqList") ?? [];
-          currentModules = userProfile.get("currentModule") ?? [];
-          completedModules = userProfile.get("completedModule") ?? [];
+          currentModules = userProfile.get("currentModules") ?? [];
+          completedModules = userProfile.get("completedModules") ?? [];
         });
       } else {
         print('User profile not found');
