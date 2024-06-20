@@ -406,13 +406,39 @@ class DatabaseService {
     try {
       DocumentReference postRef = await _postCollection!.doc();
       DocumentReference newPost = await _postCollection!.doc(postRef.id);
+      final userId = _authService.currentUser!.uid;
+      final userRef = _usersCollection!.doc(userId);
+
       newPost.set(post);
       newPost.update(
         {
           'id': FieldValue.arrayUnion([postRef.id])
         },
       );
+      userRef.update(
+        {
+          'myPosts': FieldValue.arrayUnion([postRef.id])
+        }
+      );
     } catch (e) {}
+  }
+
+  // Fetching posts
+  Future<DocumentSnapshot> fetchPost(String postId) async {
+    try {
+      DocumentSnapshot postSnapshot = await FirebaseFirestore.instance
+          .collection('posts')
+          .doc(postId)
+          .get();
+      if (postSnapshot.exists) {
+        return postSnapshot;
+      } else {
+        throw Exception("Post not found");
+      }
+    } catch (e) {
+      print('Error fetching posts: $e');
+      throw e;
+    }
   }
 
   // Bookmarking a post

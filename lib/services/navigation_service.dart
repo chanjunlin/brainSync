@@ -2,7 +2,7 @@ import 'package:brainsync/pages/Administation/login.dart';
 import 'package:brainsync/pages/Administation/register.dart';
 import 'package:brainsync/pages/Modules/saved.dart';
 import 'package:brainsync/pages/Profile/edit_profile.dart';
-import 'package:brainsync/pages/Profile/profile2.dart';
+import 'package:brainsync/pages/Profile/profile.dart';
 import 'package:brainsync/pages/Profile/show_everyone.dart';
 import 'package:brainsync/pages/home.dart';
 import 'package:brainsync/pages/notifications.dart';
@@ -20,7 +20,7 @@ class NavigationService {
     "/login": (context) => LoginPage(),
     "/register": (context) => RegisterPage(),
     "/home": (context) => Home(),
-    "/profile": (context) => Profile2(),
+    "/profile": (context) => Profile(),
     "/editProfile": (context) => EditProfilePage(),
     "/post": (context) => PostsPage(),
     "/friendsChat": (context) => FriendsChats(),
