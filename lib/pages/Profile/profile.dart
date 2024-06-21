@@ -1,20 +1,20 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:flutter/material.dart';
-import 'package:get_it/get_it.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-
 import 'package:brainsync/common_widgets/bottomBar.dart';
+import 'package:brainsync/const.dart';
+import 'package:brainsync/model/user_profile.dart';
+import 'package:brainsync/pages/Profile/show_my_friends.dart';
+import 'package:brainsync/pages/Profile/show_my_modules.dart';
+import 'package:brainsync/pages/Profile/show_my_posts.dart';
 import 'package:brainsync/services/alert_service.dart';
 import 'package:brainsync/services/auth_service.dart';
 import 'package:brainsync/services/database_service.dart';
-import 'package:brainsync/services/media_service.dart';
 import 'package:brainsync/services/navigation_service.dart';
-import 'package:brainsync/services/storage_service.dart';
-import 'package:brainsync/const.dart';
-import 'package:brainsync/model/user_profile.dart';
-import 'edit_profile.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
+
 import 'friends.dart';
 
 class Profile extends StatefulWidget {
@@ -29,18 +29,25 @@ class _ProfileState extends State<Profile> {
   final double profileHeight = 144;
   final GetIt _getIt = GetIt.instance;
 
-  int _selectedIndex = 0;
   Uint8List? pickedImage;
   File? selectedImage;
-  String? userProfilePfp, userProfileCover, firstName, lastName;
-  List? friendReqList;
+
+  String? bio, firstName, lastName, pfpURL, profileCoverURL, uid, year;
+
+  List<String?>? chats,
+      completedModules,
+      currentModules,
+      friendList,
+      friendReqList,
+      myComments,
+      myPosts,
+      myLikedComments,
+      myLikedPosts;
 
   late AlertService _alertService;
   late AuthService _authService;
   late DatabaseService _databaseService;
-  late MediaService _mediaService;
   late NavigationService _navigationService;
-  late StorageService _storageService;
   late DocumentSnapshot user;
 
   @override
@@ -49,10 +56,48 @@ class _ProfileState extends State<Profile> {
     _authService = _getIt.get<AuthService>();
     _navigationService = _getIt.get<NavigationService>();
     _alertService = _getIt.get<AlertService>();
-    _storageService = _getIt.get<StorageService>();
-    _mediaService = _getIt.get<MediaService>();
     _databaseService = _getIt.get<DatabaseService>();
     loadProfile();
+  }
+
+  void loadProfile() async {
+    try {
+      DocumentSnapshot? userProfile = await _databaseService.fetchCurrentUser();
+      if (userProfile!.exists) {
+        var profile = userProfile.data() as Map<String, dynamic>;
+        setState(() {
+          bio = profile['bio'] ?? 'No bio available';
+          firstName = profile['firstName'] ?? 'First';
+          lastName = profile['lastName'] ?? 'Last';
+          pfpURL = profile['pfpURL'] ?? PLACEHOLDER_PFP;
+          profileCoverURL =
+              profile['profileCoverURL'] ?? PLACEHOLDER_PROFILE_COVER;
+          uid = profile['uid'];
+          year = profile["year"];
+          completedModules =
+              List<String?>.from(profile["completedModules"] ?? []);
+          currentModules = List<String?>.from(profile["currentModules"] ?? []);
+          friendList = List<String?>.from(profile['friendList'] ?? []);
+          friendReqList = List<String?>.from(profile['friendReqList'] ?? []);
+          myComments = List<String?>.from(profile['myComments'] ?? []);
+          myPosts = List<String?>.from(profile['myPosts'] ?? []);
+          myLikedComments =
+              List<String?>.from(profile['myLikedComments'] ?? []);
+          myLikedPosts = List<String?>.from(profile['myLikedPosts'] ?? []);
+          friendReqList!.contains(_authService.currentUser!.uid);
+        });
+      } else {
+        _alertService.showToast(
+          text: "User profile not found",
+          icon: Icons.error,
+        );
+      }
+    } catch (e) {
+      _alertService.showToast(
+        text: "$e",
+        icon: Icons.error,
+      );
+    }
   }
 
   @override
@@ -63,10 +108,7 @@ class _ProfileState extends State<Profile> {
         children: [
           buildTop(),
           buildProfileInfo(),
-          const Divider(),
-          // showFriends(),
-          buildActions(),
-          buildFriendRequests(),
+          buildTabBarSection(),
         ],
       ),
       bottomNavigationBar: const CustomBottomNavBar(initialIndex: 4),
@@ -101,7 +143,7 @@ class _ProfileState extends State<Profile> {
       width: double.infinity,
       color: Colors.grey,
       child: Image.network(
-        userProfileCover ?? PLACEHOLDER_PROFILE_COVER,
+        profileCoverURL ?? PLACEHOLDER_PROFILE_COVER,
         fit: BoxFit.cover,
       ),
     );
@@ -113,7 +155,7 @@ class _ProfileState extends State<Profile> {
       backgroundColor: Colors.grey,
       backgroundImage: selectedImage != null
           ? FileImage(selectedImage!)
-          : NetworkImage(userProfilePfp ?? PLACEHOLDER_PFP) as ImageProvider,
+          : NetworkImage(pfpURL ?? PLACEHOLDER_PFP) as ImageProvider,
     );
   }
 
@@ -121,7 +163,6 @@ class _ProfileState extends State<Profile> {
     return IconButton(
       onPressed: () async {
         await _authService.signOut();
-
         _alertService.showToast(
           text: "Successfully logged out!",
           icon: Icons.check,
@@ -143,14 +184,6 @@ class _ProfileState extends State<Profile> {
             fontWeight: FontWeight.bold,
             fontSize: 24,
             color: Colors.brown[800],
-          ),
-        ),
-        const SizedBox(height: 10),
-        Text(
-          'What Year',
-          style: TextStyle(
-            fontSize: 16,
-            color: Colors.brown[700],
           ),
         ),
         const SizedBox(height: 16),
@@ -211,7 +244,7 @@ class _ProfileState extends State<Profile> {
     } else {
       return Column(
         children:
-            friendReqList!.map((uid) => buildFriendRequestTile(uid)).toList(),
+            friendReqList!.map((uid) => buildFriendRequestTile(uid!)).toList(),
       );
     }
   }
@@ -252,23 +285,47 @@ class _ProfileState extends State<Profile> {
     );
   }
 
-  void loadProfile() async {
-    try {
-      DocumentSnapshot? userProfile = await _databaseService.fetchCurrentUser();
-      if (userProfile != null && userProfile.exists) {
-        setState(() {
-          userProfilePfp = userProfile.get('pfpURL') ?? PLACEHOLDER_PFP;
-          userProfileCover =
-              userProfile.get('profileCoverURL') ?? PLACEHOLDER_PROFILE_COVER;
-          firstName = userProfile.get('firstName') ?? 'Name';
-          lastName = userProfile.get('lastName') ?? 'Name';
-          friendReqList = userProfile.get("friendReqList") ?? [];
-        });
-      } else {
-        print('User profile not found');
-      }
-    } catch (e) {
-      print('Error loading profile: $e');
-    }
+  Widget buildTabBarSection() {
+    return DefaultTabController(
+      length: 3,
+      child: Column(
+        children: [
+          TabBar(
+            labelColor: Colors.brown[800],
+            unselectedLabelColor: Colors.brown[400],
+            tabs: const [
+              Tab(text: 'Modules'),
+              Tab(text: 'Posts'),
+              Tab(text: 'Friends'),
+            ],
+          ),
+          SizedBox(
+            height: 500,
+            child: TabBarView(
+              children: [
+                showModule(),
+                showPost(),
+                showFriends(),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget showModule() {
+    return ShowModule(
+      currentModules: currentModules,
+      completedModules: completedModules,
+    );
+  }
+
+  Widget showPost() {
+    return ShowMyPosts(myPosts: myPosts);
+  }
+
+  Widget showFriends() {
+    return ShowMyFriends();
   }
 }

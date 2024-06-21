@@ -1,9 +1,8 @@
+import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:brainsync/services/alert_service.dart';
 import 'package:brainsync/services/auth_service.dart';
 import 'package:brainsync/services/database_service.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
-import 'package:get_it/get_it.dart';
 
 class ModulePage extends StatefulWidget {
   final Future<Map<String, dynamic>> moduleInfo;
@@ -18,15 +17,7 @@ class ModulePage extends StatefulWidget {
 }
 
 class _ModulePageState extends State<ModulePage> {
-  String? acadYear,
-      preclusion,
-      description,
-      title,
-      department,
-      faculty,
-      prerequisite,
-      moduleCredit,
-      moduleCode;
+  String? acadYear, preclusion, description, title, department, faculty, prerequisite, moduleCredit, moduleCode;
 
   final GetIt _getIt = GetIt.instance;
   late AuthService _authService;
@@ -45,37 +36,46 @@ class _ModulePageState extends State<ModulePage> {
     _authService = _getIt.get<AuthService>();
     _alertService = _getIt.get<AlertService>();
     _databaseService = _getIt.get<DatabaseService>();
-    userId = _authService.currentUser!.uid;
+    userId = _authService.currentUser?.uid;
 
-    if (mounted) {
-      widget.moduleInfo.then((moduleData) {
+    widget.moduleInfo.then((moduleData) {
+      if (mounted) {
         initialiseValues(moduleData);
-      });
-    }
+      }
+    });
   }
 
   @override
-  void dispose() {
-    super.dispose();
+  void didUpdateWidget(ModulePage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Fetch and update module info when widget is updated
+    widget.moduleInfo.then((moduleData) {
+      if (mounted) {
+        initialiseValues(moduleData);
+      }
+    });
   }
 
   void initialiseValues(Map<String, dynamic> moduleData) async {
-    acadYear = moduleData["acadYear"];
-    title = moduleData["title"];
-    department = moduleData["department"];
-    faculty = moduleData["faculty"];
-    preclusion = moduleData["preclusion"];
-    description = moduleData["description"];
-    prerequisite = moduleData["prerequisite"];
-    moduleCredit = moduleData["moduleCredit"];
-    moduleCode = moduleData["moduleCode"];
-    // Perform asynchronous operations outside of setState
-    bool completedValue =
-        await _databaseService.isInCompletedModule(userId!, moduleCode!);
-    bool currentValue =
-        await _databaseService.isInCurrentModule(userId!, moduleCode!);
+    if (!mounted) return;
 
-    // Use setState to update state variables
+    setState(() {
+      acadYear = moduleData["acadYear"];
+      title = moduleData["title"];
+      department = moduleData["department"];
+      faculty = moduleData["faculty"];
+      preclusion = moduleData["preclusion"];
+      description = moduleData["description"];
+      prerequisite = moduleData["prerequisite"];
+      moduleCredit = moduleData["moduleCredit"];
+      moduleCode = moduleData["moduleCode"];
+    });
+
+    bool completedValue = await _databaseService.isInCompletedModule(userId!, moduleCode!);
+    bool currentValue = await _databaseService.isInCurrentModule(userId!, moduleCode!);
+
+    if (!mounted) return;
+
     setState(() {
       completed = completedValue;
       current = currentValue;
@@ -85,11 +85,14 @@ class _ModulePageState extends State<ModulePage> {
   Future<void> addToSchedule() async {
     try {
       await _databaseService.addModuleToUserSchedule(userId!, moduleCode!);
-      setState(() {
-        modulesAdded = true;
-      });
+      if (mounted) {
+        setState(() {
+          modulesAdded = true;
+          current = true; // Set current to true after adding to schedule
+        });
+      }
       _alertService.showToast(
-        text: "Module added",
+        text: "Module added to schedule",
         icon: Icons.check,
       );
     } catch (error) {
@@ -100,7 +103,26 @@ class _ModulePageState extends State<ModulePage> {
     }
   }
 
-  Future<void> removeFromSchedule() async {}
+  Future<void> removeFromSchedule() async {
+    try {
+      await _databaseService.removeModule(userId!, moduleCode!);
+      if (mounted) {
+        setState(() {
+          modulesAdded = false;
+          current = false;
+        });
+      }
+      _alertService.showToast(
+        text: "Module removed from schedule",
+        icon: Icons.check,
+      );
+    } catch (error) {
+      _alertService.showToast(
+        text: "Failed to remove module",
+        icon: Icons.error,
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -118,14 +140,12 @@ class _ModulePageState extends State<ModulePage> {
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else if (snapshot.hasData) {
-            var moduleData = snapshot.data!;
-            initialiseValues(moduleData);
             return Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildHeader(),
+                  buildHeader(),
                   const SizedBox(height: 8),
                   buildTitle(),
                   const SizedBox(height: 16),
@@ -142,65 +162,78 @@ class _ModulePageState extends State<ModulePage> {
     );
   }
 
-  Widget _buildHeader() {
+  Widget buildHeader() {
     if (completed == null || current == null) {
-      // Return a button indicating loading or a placeholder until data is fetched
-      return Stack(
-        children: [
-          ElevatedButton(
-            onPressed: () {}, // Button disabled until data is fetched
-            child: const Text("Loading..."),
-          ),
-          const Positioned.fill(
-            child: Center(
-              child: CircularProgressIndicator(),
-            ),
-          ),
-        ],
-      );
+      return const Center(child: CircularProgressIndicator());
     }
 
-    // Determine the initial button text
-    String initialButtonText = completed!
-        ? "Module Completed"
-        : (current! ? "Added to schedule" : "Add to schedule");
+    if (completed!) {
+      return buildDisabledButton("Already Completed", Icons.check, Colors.grey);
+    } else if (current!) {
+      return buildActiveButton("Added to Schedule", Icons.done, Colors.green, removeFromSchedule);
+    } else {
+      return buildActiveButton("Add to Schedule", Icons.add, Colors.brown[300]!, addToSchedule);
+    }
+  }
 
+  Widget buildDisabledButton(String text, IconData icon, Color color) {
     return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Expanded(
-          child: Text(
-            moduleCode ?? '',
-            style: const TextStyle(
-              fontSize: 32,
-              fontWeight: FontWeight.bold,
-            ),
+        Text(
+          moduleCode ?? '',
+          style: const TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
           ),
         ),
-        Align(
-          alignment: Alignment.centerRight,
-          child: ElevatedButton.icon(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: completed! ? Colors.grey : Colors.brown[300],
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
+        ElevatedButton.icon(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: color,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
             ),
-            onPressed: completed!
-                ? null // Button disabled if completed
-                : () {
-                    modulesAdded ? removeFromSchedule() : addToSchedule();
-                  },
-            icon: Icon(
-              modulesAdded
-                  ? Icons.done
-                  : (completed! ? Icons.check : Icons.add),
-              color: Colors.white,
+          ),
+          onPressed: null,
+          icon: Icon(
+            icon,
+            color: Colors.white,
+          ),
+          label: Text(
+            text,
+            style: const TextStyle(color: Colors.white),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget buildActiveButton(String text, IconData icon, Color color, VoidCallback onPressed) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          moduleCode ?? '',
+          style: const TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        ElevatedButton.icon(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: color,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
             ),
-            label: Text(
-              // Use the initialButtonText here
-              initialButtonText,
-              style: const TextStyle(color: Colors.white),
-            ),
+          ),
+          onPressed: onPressed,
+          icon: Icon(
+            icon,
+            color: Colors.white,
+          ),
+          label: Text(
+            text,
+            style: const TextStyle(color: Colors.white),
           ),
         ),
       ],
@@ -211,7 +244,7 @@ class _ModulePageState extends State<ModulePage> {
     return Text(
       title ?? '',
       style: const TextStyle(
-        fontSize: 24,
+        fontSize: 18,
         fontWeight: FontWeight.bold,
         color: Colors.brown,
       ),
@@ -233,10 +266,8 @@ class _ModulePageState extends State<ModulePage> {
             ]),
             const SizedBox(height: 16),
             buildDetailSection("Prerequisite & Preclusion", [
-              buildRow("Prerequisite: ",
-                  prerequisite != null ? prerequisite : "Nil", Icons.book),
-              buildRow("Preclusion: ", preclusion != null ? preclusion : "Nil",
-                  Icons.block),
+              buildRow("Prerequisite: ", prerequisite ?? "Nil", Icons.book),
+              buildRow("Preclusion: ", preclusion ?? "Nil", Icons.block),
             ]),
             const SizedBox(height: 16),
             buildDescription(),

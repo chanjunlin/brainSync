@@ -24,24 +24,28 @@ class VisitProfile extends StatefulWidget {
 }
 
 class _VisitProfileState extends State<VisitProfile> {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  bool isFriendRequestSent = false, isFriend = false;
+
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
   final GetIt _getIt = GetIt.instance;
 
-  late AuthService _authService;
   late AlertService _alertService;
+  late AuthService _authService;
   late DatabaseService _databaseService;
   late NavigationService _navigationService;
-
-  String userProfilePfp = PLACEHOLDER_PFP;
-  String userProfileCover = PLACEHOLDER_PROFILE_COVER;
-  String firstName = 'First';
-  String lastName = 'Last';
-  String bio = 'No bio available';
-  bool isFriendRequestSent = false;
-  bool isFriend = false;
-  List? friendReqList, friendList, currentModules, completedModules;
-
   late StreamSubscription<DocumentSnapshot> profileStream;
+
+  String? bio, firstName, lastName, pfpURL, profileCoverURL, uid, year;
+
+  List<String?>? chats,
+      completedModules,
+      currentModules,
+      friendList,
+      friendReqList,
+      myComments,
+      myPosts,
+      myLikedComments,
+      myLikedPosts;
 
   @override
   void initState() {
@@ -66,16 +70,27 @@ class _VisitProfileState extends State<VisitProfile> {
         if (userProfile.exists) {
           var profile = userProfile.data() as Map<String, dynamic>;
           setState(() {
-            userProfilePfp = profile['pfpURL'] ?? PLACEHOLDER_PFP;
-            userProfileCover =
-                profile['profileCoverURL'] ?? PLACEHOLDER_PROFILE_COVER;
+            bio = profile['bio'] ?? 'No bio available';
             firstName = profile['firstName'] ?? 'First';
             lastName = profile['lastName'] ?? 'Last';
-            bio = profile['bio'] ?? 'No bio available';
-            currentModules = profile["currentModules"] ?? [];
-            completedModules = profile["completedModules"] ?? [];
-            friendReqList = profile['friendReqList'] ?? [];
-            friendList = profile['friendList'] ?? [];
+            pfpURL = profile['pfpURL'] ?? PLACEHOLDER_PFP;
+            profileCoverURL =
+                profile['profileCoverURL'] ?? PLACEHOLDER_PROFILE_COVER;
+            uid = profile['uid'];
+            year = profile["year"];
+
+            completedModules =
+                List<String?>.from(profile["completedModules"] ?? []);
+            currentModules =
+                List<String?>.from(profile["currentModules"] ?? []);
+            friendList = List<String?>.from(profile['friendList'] ?? []);
+            friendReqList = List<String?>.from(profile['friendReqList'] ?? []);
+            myComments = List<String?>.from(profile['myComments'] ?? []);
+            myPosts = List<String?>.from(profile['myPosts'] ?? []);
+            myLikedComments =
+                List<String?>.from(profile['myLikedComments'] ?? []);
+            myLikedPosts = List<String?>.from(profile['myLikedPosts'] ?? []);
+
             isFriend = friendList!.contains(_authService.currentUser!.uid);
             isFriendRequestSent =
                 friendReqList!.contains(_authService.currentUser!.uid);
@@ -140,7 +155,7 @@ class _VisitProfileState extends State<VisitProfile> {
       width: double.infinity,
       color: Colors.grey,
       child: Image.network(
-        userProfileCover,
+        profileCoverURL ?? PLACEHOLDER_PROFILE_COVER,
         fit: BoxFit.cover,
       ),
     );
@@ -150,7 +165,7 @@ class _VisitProfileState extends State<VisitProfile> {
     return CircleAvatar(
       radius: 72,
       backgroundColor: Colors.grey,
-      backgroundImage: NetworkImage(userProfilePfp),
+      backgroundImage: NetworkImage(pfpURL ?? PLACEHOLDER_PFP),
     );
   }
 
@@ -170,7 +185,7 @@ class _VisitProfileState extends State<VisitProfile> {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: Text(
-            bio,
+            bio ?? "No bio",
             style: TextStyle(
               fontSize: 16,
               color: Colors.grey[700],
@@ -232,7 +247,7 @@ class _VisitProfileState extends State<VisitProfile> {
                   });
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
+              backgroundColor: Colors.red[400],
               foregroundColor: Colors.white,
             ),
             child: const Text('Remove friend'),
@@ -253,7 +268,7 @@ class _VisitProfileState extends State<VisitProfile> {
               }));
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue,
+              backgroundColor: Colors.brown[300],
               foregroundColor: Colors.white,
             ),
             child: const Text('Send Message'),
@@ -338,24 +353,24 @@ class _VisitProfileState extends State<VisitProfile> {
           const SizedBox(height: 8),
           StreamBuilder<DocumentSnapshot>(
             stream:
-                _firestore.collection('users').doc(widget.userId).snapshots(),
+                firestore.collection('users').doc(widget.userId).snapshots(),
             builder: (context, snapshot) {
               if (!snapshot.hasData) {
-                return const CircularProgressIndicator();
+                return const Center(child: CircularProgressIndicator());
               }
 
               var userData = snapshot.data!.data() as Map<String, dynamic>;
               var currentModules = userData['currentModules'] ?? [];
               var completedModules = userData['completedModules'] ?? [];
 
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (currentModules.isNotEmpty)
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: currentModules.map<Widget>((module) {
+              return Expanded(
+                child: ListView(
+                  padding: EdgeInsets.zero,
+                  children: [
+                    if (currentModules.isNotEmpty)
+                      ...currentModules.map<Widget>((module) {
                         return ListTile(
+                          contentPadding: EdgeInsets.zero,
                           title: Text(
                             '$module',
                             style: TextStyle(
@@ -365,23 +380,22 @@ class _VisitProfileState extends State<VisitProfile> {
                           ),
                         );
                       }).toList(),
+                    if (currentModules.isEmpty)
+                      const Text('No current modules'),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Completed Modules:',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                        color: Colors.brown[800],
+                      ),
                     ),
-                  if (currentModules.isEmpty) const Text('No current modules'),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Completed Modules:',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
-                      color: Colors.brown[800],
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  if (completedModules.isNotEmpty)
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: completedModules.map<Widget>((module) {
+                    const SizedBox(height: 8),
+                    if (completedModules.isNotEmpty)
+                      ...completedModules.map<Widget>((module) {
                         return ListTile(
+                          contentPadding: EdgeInsets.zero,
                           title: Text(
                             '$module',
                             style: TextStyle(
@@ -391,10 +405,10 @@ class _VisitProfileState extends State<VisitProfile> {
                           ),
                         );
                       }).toList(),
-                    ),
-                  if (completedModules.isEmpty)
-                    const Text('No completed modules'),
-                ],
+                    if (completedModules.isEmpty)
+                      const Text('No completed modules'),
+                  ],
+                ),
               );
             },
           ),

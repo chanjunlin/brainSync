@@ -350,7 +350,7 @@ class DatabaseService {
     DocumentReference userDoc =
         _firebaseFirestore.collection('users').doc(userId);
     await userDoc.update({
-      'currentModule': FieldValue.arrayUnion([moduleCode])
+      'currentModules': FieldValue.arrayUnion([moduleCode])
     });
   }
 
@@ -376,7 +376,7 @@ class DatabaseService {
           await _firebaseFirestore.collection('users').doc(userId).get();
       Map<String, dynamic> userData = userDoc.data() as Map<String, dynamic>;
       List<String> currentModules =
-          List<String>.from(userData['currentModule'] ?? []);
+          List<String>.from(userData['currentModules'] ?? []);
       return currentModules.contains(moduleCode);
     } catch (error) {
       print("Error checking current module: $error");
@@ -389,10 +389,10 @@ class DatabaseService {
     try {
       DocumentSnapshot userDoc =
           await _firebaseFirestore.collection('users').doc(userId).get();
-      List<dynamic>? currentModules = userDoc["currentModule"];
+      List<dynamic>? currentModules = userDoc["currentModules"];
       if (currentModules != null && currentModules.contains(moduleCode)) {
         currentModules.remove(moduleCode);
-        await userDoc.reference.update({'currentModule': currentModules});
+        await userDoc.reference.update({'currentModules': currentModules});
       }
     } catch (e) {
       print(e);
@@ -406,13 +406,35 @@ class DatabaseService {
     try {
       DocumentReference postRef = await _postCollection!.doc();
       DocumentReference newPost = await _postCollection!.doc(postRef.id);
+      final userId = _authService.currentUser!.uid;
+      final userRef = _usersCollection!.doc(userId);
+
       newPost.set(post);
       newPost.update(
         {
           'id': FieldValue.arrayUnion([postRef.id])
         },
       );
+      userRef.update({
+        'myPosts': FieldValue.arrayUnion([postRef.id])
+      });
     } catch (e) {}
+  }
+
+  // Fetching posts
+  Future<QuerySnapshot> fetchPost(List<String> postId) async {
+    try {
+      QuerySnapshot postSnapshot = await FirebaseFirestore.instance
+          .collection('posts')
+          .where(FieldPath.documentId, whereIn: postId)
+          .orderBy('timestamp', descending: true)
+          .get();
+
+      return postSnapshot;
+    } catch (e) {
+      print('Error fetching posts: $e');
+      throw e;
+    }
   }
 
   // Bookmarking a post
@@ -521,4 +543,5 @@ class DatabaseService {
       print("Error liking comment");
     }
   }
+
 }

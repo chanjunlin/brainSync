@@ -2,8 +2,7 @@ import 'package:brainsync/pages/Administation/login.dart';
 import 'package:brainsync/pages/Administation/register.dart';
 import 'package:brainsync/pages/Modules/saved.dart';
 import 'package:brainsync/pages/Profile/edit_profile.dart';
-import 'package:brainsync/pages/Profile/profile2.dart';
-import 'package:brainsync/pages/Profile/show_everyone.dart';
+import 'package:brainsync/pages/Profile/profile.dart';
 import 'package:brainsync/pages/home.dart';
 import 'package:brainsync/pages/notifications.dart';
 import 'package:brainsync/testing.dart';
@@ -17,18 +16,17 @@ class NavigationService {
   late GlobalKey<NavigatorState> _navigatorKey;
 
   final Map<String, Widget Function(BuildContext)> _routes = {
-    "/login": (context) => LoginPage(),
-    "/register": (context) => RegisterPage(),
-    "/home": (context) => Home(),
-    "/profile": (context) => Profile2(),
-    "/editProfile": (context) => EditProfilePage(),
+    "/login": (context) => const LoginPage(),
+    "/register": (context) => const RegisterPage(),
+    "/home": (context) => const Home(),
+    "/profile": (context) => const Profile(),
+    "/editProfile": (context) => const EditProfilePage(),
     "/post": (context) => PostsPage(),
     "/friendsChat": (context) => FriendsChats(),
-    "/testing": (context) => Testing(),
-    "/notifications": (context) => Notifications(),
-    "/allUsers": (context) => ShowEveryone(),
-    "/nusMods": (context) => ModuleListPage(),
-    "/saved" : (context) => Saved(),
+    "/testing": (context) => const Testing(),
+    "/notifications": (context) => const Notifications(),
+    "/nusMods": (context) => const ModuleListPage(),
+    "/saved" : (context) => const Saved(),
   };
 
   Map<String, Widget Function(BuildContext)> get routes {
