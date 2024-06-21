@@ -4,7 +4,8 @@ import 'dart:typed_data';
 import 'package:brainsync/common_widgets/bottomBar.dart';
 import 'package:brainsync/const.dart';
 import 'package:brainsync/model/user_profile.dart';
-import 'package:brainsync/pages/Profile/show_module.dart';
+import 'package:brainsync/pages/Profile/show_my_friends.dart';
+import 'package:brainsync/pages/Profile/show_my_modules.dart';
 import 'package:brainsync/pages/Profile/show_my_posts.dart';
 import 'package:brainsync/services/alert_service.dart';
 import 'package:brainsync/services/auth_service.dart';
@@ -28,7 +29,6 @@ class _ProfileState extends State<Profile> {
   final double profileHeight = 144;
   final GetIt _getIt = GetIt.instance;
 
-  int _selectedIndex = 0;
   Uint8List? pickedImage;
   File? selectedImage;
 
@@ -108,8 +108,7 @@ class _ProfileState extends State<Profile> {
         children: [
           buildTop(),
           buildProfileInfo(),
-          const Divider(),
-          buildTabBarSection(), // Add this line
+          buildTabBarSection(),
         ],
       ),
       bottomNavigationBar: const CustomBottomNavBar(initialIndex: 4),
@@ -288,7 +287,7 @@ class _ProfileState extends State<Profile> {
 
   Widget buildTabBarSection() {
     return DefaultTabController(
-      length: 4,
+      length: 3,
       child: Column(
         children: [
           TabBar(
@@ -297,18 +296,16 @@ class _ProfileState extends State<Profile> {
             tabs: const [
               Tab(text: 'Modules'),
               Tab(text: 'Posts'),
-              Tab(text: 'Comments'),
               Tab(text: 'Friends'),
             ],
           ),
           SizedBox(
-            height: 400,
+            height: 500,
             child: TabBarView(
               children: [
                 showModule(),
                 showPost(),
-                const Center(child: Text('Comments Content')),
-                showFriendsTab(),
+                showFriends(),
               ],
             ),
           ),
@@ -325,25 +322,10 @@ class _ProfileState extends State<Profile> {
   }
 
   Widget showPost() {
-    print("here");
     return ShowMyPosts(myPosts: myPosts);
   }
 
-  Widget showFriendsTab() {
-    return FutureBuilder<List<UserProfile?>>(
-      future: _databaseService.getFriends(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        } else if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
-        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Center(child: Text('No friends'));
-        } else {
-          // Use FriendListPage with the loaded friendList
-          return FriendListPage(friendList: snapshot.data!);
-        }
-      },
-    );
+  Widget showFriends() {
+    return ShowMyFriends();
   }
 }

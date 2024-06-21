@@ -67,36 +67,41 @@ class _VisitProfileState extends State<VisitProfile> {
     try {
       profileStream =
           _databaseService.getUserProfile(widget.userId).listen((userProfile) {
-            if (userProfile.exists) {
-              var profile = userProfile.data() as Map<String, dynamic>;
-              setState(() {
-                bio = profile['bio'] ?? 'No bio available';
-                firstName = profile['firstName'] ?? 'First';
-                lastName = profile['lastName'] ?? 'Last';
-                pfpURL = profile['pfpURL'] ?? PLACEHOLDER_PFP;
-                profileCoverURL =
-                    profile['profileCoverURL'] ?? PLACEHOLDER_PROFILE_COVER;
-                uid = profile['uid'];
-                year = profile["year"];
-                completedModules = profile["completedModules"] ?? [];
-                currentModules = profile["currentModules"] ?? [];
-                friendList = profile['friendList'] ?? [];
-                friendReqList = profile['friendReqList'] ?? [];
-                myComments = profile['friendReqList'] ?? [];
-                myPosts = profile['friendReqList'] ?? [];
-                myLikedComments = profile['friendReqList'] ?? [];
-                myLikedPosts = profile['friendReqList'] ?? [];
-                isFriend = friendList!.contains(_authService.currentUser!.uid);
-                isFriendRequestSent =
-                    friendReqList!.contains(_authService.currentUser!.uid);
-              });
-            } else {
-              _alertService.showToast(
-                text: "User profile not found",
-                icon: Icons.error,
-              );
-            }
+        if (userProfile.exists) {
+          var profile = userProfile.data() as Map<String, dynamic>;
+          setState(() {
+            bio = profile['bio'] ?? 'No bio available';
+            firstName = profile['firstName'] ?? 'First';
+            lastName = profile['lastName'] ?? 'Last';
+            pfpURL = profile['pfpURL'] ?? PLACEHOLDER_PFP;
+            profileCoverURL =
+                profile['profileCoverURL'] ?? PLACEHOLDER_PROFILE_COVER;
+            uid = profile['uid'];
+            year = profile["year"];
+
+            completedModules =
+                List<String?>.from(profile["completedModules"] ?? []);
+            currentModules =
+                List<String?>.from(profile["currentModules"] ?? []);
+            friendList = List<String?>.from(profile['friendList'] ?? []);
+            friendReqList = List<String?>.from(profile['friendReqList'] ?? []);
+            myComments = List<String?>.from(profile['myComments'] ?? []);
+            myPosts = List<String?>.from(profile['myPosts'] ?? []);
+            myLikedComments =
+                List<String?>.from(profile['myLikedComments'] ?? []);
+            myLikedPosts = List<String?>.from(profile['myLikedPosts'] ?? []);
+
+            isFriend = friendList!.contains(_authService.currentUser!.uid);
+            isFriendRequestSent =
+                friendReqList!.contains(_authService.currentUser!.uid);
           });
+        } else {
+          _alertService.showToast(
+            text: "User profile not found",
+            icon: Icons.error,
+          );
+        }
+      });
     } catch (e) {
       _alertService.showToast(
         text: "$e",
@@ -257,7 +262,7 @@ class _VisitProfileState extends State<VisitProfile> {
                     _authService.currentUser!.uid, widget.userId);
               }
               UserProfile? user =
-              await _databaseService.fetchUserProfile(widget.userId);
+                  await _databaseService.fetchUserProfile(widget.userId);
               _navigationService.push(MaterialPageRoute(builder: (context) {
                 return ChatPage(chatUser: user);
               }));
@@ -348,7 +353,7 @@ class _VisitProfileState extends State<VisitProfile> {
           const SizedBox(height: 8),
           StreamBuilder<DocumentSnapshot>(
             stream:
-            firestore.collection('users').doc(widget.userId).snapshots(),
+                firestore.collection('users').doc(widget.userId).snapshots(),
             builder: (context, snapshot) {
               if (!snapshot.hasData) {
                 return const Center(child: CircularProgressIndicator());
@@ -360,13 +365,12 @@ class _VisitProfileState extends State<VisitProfile> {
 
               return Expanded(
                 child: ListView(
-                  padding: EdgeInsets.zero, // Ensure no extra padding
+                  padding: EdgeInsets.zero,
                   children: [
                     if (currentModules.isNotEmpty)
                       ...currentModules.map<Widget>((module) {
                         return ListTile(
                           contentPadding: EdgeInsets.zero,
-                          // Remove padding from ListTile
                           title: Text(
                             '$module',
                             style: TextStyle(
@@ -392,7 +396,6 @@ class _VisitProfileState extends State<VisitProfile> {
                       ...completedModules.map<Widget>((module) {
                         return ListTile(
                           contentPadding: EdgeInsets.zero,
-                          // Remove padding from ListTile
                           title: Text(
                             '$module',
                             style: TextStyle(

@@ -415,26 +415,22 @@ class DatabaseService {
           'id': FieldValue.arrayUnion([postRef.id])
         },
       );
-      userRef.update(
-        {
-          'myPosts': FieldValue.arrayUnion([postRef.id])
-        }
-      );
+      userRef.update({
+        'myPosts': FieldValue.arrayUnion([postRef.id])
+      });
     } catch (e) {}
   }
 
   // Fetching posts
-  Future<DocumentSnapshot> fetchPost(String postId) async {
+  Future<QuerySnapshot> fetchPost(List<String> postId) async {
     try {
-      DocumentSnapshot postSnapshot = await FirebaseFirestore.instance
+      QuerySnapshot postSnapshot = await FirebaseFirestore.instance
           .collection('posts')
-          .doc(postId)
+          .where(FieldPath.documentId, whereIn: postId)
+          .orderBy('timestamp', descending: true)
           .get();
-      if (postSnapshot.exists) {
-        return postSnapshot;
-      } else {
-        throw Exception("Post not found");
-      }
+
+      return postSnapshot;
     } catch (e) {
       print('Error fetching posts: $e');
       throw e;
@@ -547,4 +543,5 @@ class DatabaseService {
       print("Error liking comment");
     }
   }
+
 }
