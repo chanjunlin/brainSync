@@ -29,39 +29,47 @@ class _ShowMyPostsState extends State<ShowMyPosts> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: FutureBuilder<QuerySnapshot>(
-        future: _databaseService
-            .fetchPost(widget.myPosts!.whereType<String>().toList()),
-        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
+    if (widget.myPosts == null || widget.myPosts!.isEmpty) {
+      return const Scaffold(
+        body: Center(
+          child: Text('No posts found'),
+        ),
+      );
+    } else {
+      return Scaffold(
+        body: FutureBuilder<QuerySnapshot>(
+          future: _databaseService
+              .fetchPost(widget.myPosts!.whereType<String>().toList()),
+          builder:
+              (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-          if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          }
+            if (snapshot.hasError) {
+              return Center(child: Text('Error: ${snapshot.error}'));
+            }
 
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return const Center(child: Text('No posts found'));
-          }
+            if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+              return const Center(child: Text('No posts found'));
+            }
+            List<DocumentSnapshot> posts = snapshot.data!.docs;
+            return ListView.builder(
+              padding: EdgeInsets.zero,
+              itemCount: posts.length,
+              itemBuilder: (context, index) {
+                var postData = posts[index].data() as Map<String, dynamic>;
 
-          List<DocumentSnapshot> posts = snapshot.data!.docs;
-
-          return ListView.builder(
-            padding: EdgeInsets.zero,
-            itemCount: posts.length,
-            itemBuilder: (context, index) {
-              var postData = posts[index].data() as Map<String, dynamic>;
-              return PostCard(
-                postId: posts[index].id,
-                postData: postData,
-                onLikeChanged: () => setState(() {}),
-              );
-            },
-          );
-        },
-      ),
-    );
+                return PostCard(
+                  postId: posts[index].id,
+                  postData: postData,
+                  onLikeChanged: () => setState(() {}),
+                );
+              },
+            );
+          },
+        ),
+      );
+    }
   }
 }

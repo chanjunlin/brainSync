@@ -424,12 +424,13 @@ class DatabaseService {
   // Fetching posts
   Future<QuerySnapshot> fetchPost(List<String> postId) async {
     try {
+      print(postId);
       QuerySnapshot postSnapshot = await FirebaseFirestore.instance
           .collection('posts')
           .where(FieldPath.documentId, whereIn: postId)
           .orderBy('timestamp', descending: true)
           .get();
-
+      print(postSnapshot);
       return postSnapshot;
     } catch (e) {
       print('Error fetching posts: $e');
