@@ -59,6 +59,8 @@ class StorageService {
     required String uid,
     required String firstName,
     required String lastName,
+    required String year,
+    required String bio,
   }) async {
     String userId = _authService.currentUser!.uid;
     String? downloadProfileURL;
@@ -78,6 +80,8 @@ class StorageService {
     Map<String, dynamic> updateData = {
       'firstName': firstName,
       'lastName': lastName,
+      'year': year,
+      'bio': bio,
     };
     if (downloadProfileURL != null) {
       updateData['pfpURL'] = downloadProfileURL;

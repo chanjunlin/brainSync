@@ -26,7 +26,7 @@ class _ModuleListPageState extends State<ModuleListPage> {
   @override
   void initState() {
     super.initState();
-    acadYear = _getCurrentAcadYear();
+    acadYear = getCurrentAcadYear();
     futureModules = ApiService.fetchModules();
     searchController = TextEditingController();
     _navigationService = _getIt.get<NavigationService>();
@@ -39,7 +39,7 @@ class _ModuleListPageState extends State<ModuleListPage> {
     super.dispose();
   }
 
-  String _getCurrentAcadYear() {
+  String getCurrentAcadYear() {
     final DateTime now = DateTime.now();
     final DateTime midJuly = DateTime(now.year, 7, 15); // Assuming mid-July is the 15th
     final int startYear = now.isBefore(midJuly) ? now.year - 1 : now.year;

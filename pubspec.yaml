@@ -59,6 +59,7 @@ dependencies:
   badword_guard: ^1.0.0
   sign_in_with_apple: ^6.1.0
   sign_in_button: ^3.2.0
+  debounce_throttle: ^2.0.0
 
 dev_dependencies:
   flutter_test:

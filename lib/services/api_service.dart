@@ -1,11 +1,11 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '../main.dart';
 import '../model/module.dart';
 
 class ApiService {
   static const String baseUrl = "api.nusmods.com";
   static const String apiVersion = "v2";
-  static const String academicYear = "2023-2024";
 
   static Future<Map<String, dynamic>> fetchModuleInfo(
       String acadYear, String? moduleCode) async {
@@ -39,5 +39,13 @@ class ApiService {
     } catch (e) {
       throw Exception('Error: $e');
     }
+  }
+
+  String getCurrentAcadYear() {
+    final DateTime now = DateTime.now();
+    final DateTime midJuly = DateTime(now.year, 7, 15); // Assuming mid-July is the 15th
+    final int startYear = now.isBefore(midJuly) ? now.year - 1 : now.year;
+    final int endYear = startYear + 1;
+    return '$startYear-$endYear';
   }
 }

@@ -1,9 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:brainsync/common_widgets/bottomBar.dart';
 import 'package:brainsync/const.dart';
-import 'package:brainsync/model/user_profile.dart';
 import 'package:brainsync/pages/Profile/show_my_friends.dart';
 import 'package:brainsync/pages/Profile/show_my_modules.dart';
 import 'package:brainsync/pages/Profile/show_my_posts.dart';
@@ -15,7 +13,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
-import 'friends.dart';
+import '../../common_widgets/bottomBar.dart';
+import '../../main.dart';
 
 class Profile extends StatefulWidget {
   const Profile({super.key});
@@ -24,13 +23,15 @@ class Profile extends StatefulWidget {
   State<Profile> createState() => _ProfileState();
 }
 
-class _ProfileState extends State<Profile> {
+class _ProfileState extends State<Profile> with RouteAware {
   final double coverHeight = 280;
   final double profileHeight = 144;
   final GetIt _getIt = GetIt.instance;
 
   Uint8List? pickedImage;
   File? selectedImage;
+
+  int? currentCredits;
 
   String? bio, firstName, lastName, pfpURL, profileCoverURL, uid, year;
 
@@ -50,6 +51,8 @@ class _ProfileState extends State<Profile> {
   late NavigationService _navigationService;
   late DocumentSnapshot user;
 
+  late Future<void> loadedProfile;
+
   @override
   void initState() {
     super.initState();
@@ -57,10 +60,30 @@ class _ProfileState extends State<Profile> {
     _navigationService = _getIt.get<NavigationService>();
     _alertService = _getIt.get<AlertService>();
     _databaseService = _getIt.get<DatabaseService>();
-    loadProfile();
+    loadedProfile = loadProfile();
   }
 
-  void loadProfile() async {
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    routeObserver.subscribe(
+        this as RouteAware, ModalRoute.of(context)! as PageRoute);
+  }
+
+  @override
+  void dispose() {
+    routeObserver.unsubscribe(this as RouteAware);
+    super.dispose();
+  }
+
+  @override
+  void didPopNext() {
+    setState(() {
+      loadedProfile = loadProfile();
+    });
+  }
+
+  Future<void> loadProfile() async {
     try {
       DocumentSnapshot? userProfile = await _databaseService.fetchCurrentUser();
       if (userProfile!.exists) {
@@ -77,6 +100,7 @@ class _ProfileState extends State<Profile> {
           completedModules =
               List<String?>.from(profile["completedModules"] ?? []);
           currentModules = List<String?>.from(profile["currentModules"] ?? []);
+          currentCredits = profile['currentCredits'] ?? 0;
           friendList = List<String?>.from(profile['friendList'] ?? []);
           friendReqList = List<String?>.from(profile['friendReqList'] ?? []);
           myComments = List<String?>.from(profile['myComments'] ?? []);
@@ -103,11 +127,29 @@ class _ProfileState extends State<Profile> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      body: FutureBuilder<void>(
+        future: loadedProfile,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return const Center(child: Text('Error loading profile'));
+          } else {
+            return buildProfile();
+          }
+        },
+      ),
+    );
+  }
+
+  Widget buildProfile() {
+    return Scaffold(
       body: ListView(
         padding: EdgeInsets.zero,
         children: [
           buildTop(),
           buildProfileInfo(),
+          const Divider(),
           buildTabBarSection(),
         ],
       ),
@@ -118,7 +160,6 @@ class _ProfileState extends State<Profile> {
   Widget buildTop() {
     final double bottom = profileHeight / 2;
     final double top = coverHeight - profileHeight / 2;
-
     return Stack(
       clipBehavior: Clip.none,
       alignment: Alignment.center,
@@ -127,7 +168,10 @@ class _ProfileState extends State<Profile> {
           margin: EdgeInsets.only(bottom: bottom),
           child: buildCoverImage(),
         ),
-        Positioned(top: top, child: buildProfileImage()),
+        Positioned(
+          top: top,
+          child: buildProfileImage(),
+        ),
         Positioned(
           top: top + profileHeight / 2 + 10,
           right: 16,
@@ -187,29 +231,16 @@ class _ProfileState extends State<Profile> {
           ),
         ),
         const SizedBox(height: 16),
+        Text(
+          '$bio',
+          style: TextStyle(
+            fontSize: 20,
+            color: Colors.brown[800],
+          ),
+        ),
+        const SizedBox(height: 16),
         editProfileButton(),
         const SizedBox(height: 16),
-      ],
-    );
-  }
-
-  Widget buildActions() {
-    return Column(
-      children: [
-        const SizedBox(height: 10),
-        ElevatedButton(
-          onPressed: () async {
-            List<UserProfile?> friendList = await _databaseService.getFriends();
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => FriendListPage(friendList: friendList),
-              ),
-            );
-          },
-          child: const Text("See Friends"),
-        ),
-        const SizedBox(height: 10),
       ],
     );
   }
@@ -233,55 +264,6 @@ class _ProfileState extends State<Profile> {
           foregroundColor: Colors.white,
         ),
       ),
-    );
-  }
-
-  Widget buildFriendRequests() {
-    if (friendReqList == null || friendReqList!.isEmpty) {
-      return const Column(
-        children: [Text("No friends")],
-      );
-    } else {
-      return Column(
-        children:
-            friendReqList!.map((uid) => buildFriendRequestTile(uid!)).toList(),
-      );
-    }
-  }
-
-  Widget buildFriendRequestTile(String uid) {
-    return StreamBuilder<DocumentSnapshot<Object?>>(
-      stream: _databaseService.getUserProfile(uid),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const CircularProgressIndicator();
-        }
-        if (snapshot.hasError) {
-          return Text('Error: ${snapshot.error}');
-        }
-        if (!snapshot.hasData || !snapshot.data!.exists) {
-          return const Text('User not found');
-        }
-
-        var userData = snapshot.data!.data() as Map<String, dynamic>;
-
-        return ListTile(
-          leading: CircleAvatar(
-            backgroundImage: NetworkImage(userData['pfpURL']),
-          ),
-          title: Text(userData['firstName']),
-          trailing: IconButton(
-            icon: const Icon(Icons.check),
-            onPressed: () async {
-              await _databaseService.acceptFriendRequest(
-                  uid, _authService.user!.uid);
-              setState(() {
-                friendReqList!.remove(uid);
-              });
-            },
-          ),
-        );
-      },
     );
   }
 

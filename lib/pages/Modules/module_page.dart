@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
-import 'package:get_it/get_it.dart';
 import 'package:brainsync/services/alert_service.dart';
 import 'package:brainsync/services/auth_service.dart';
 import 'package:brainsync/services/database_service.dart';
+import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 
 class ModulePage extends StatefulWidget {
   final Future<Map<String, dynamic>> moduleInfo;
@@ -17,7 +17,15 @@ class ModulePage extends StatefulWidget {
 }
 
 class _ModulePageState extends State<ModulePage> {
-  String? acadYear, preclusion, description, title, department, faculty, prerequisite, moduleCredit, moduleCode;
+  String? acadYear,
+      preclusion,
+      description,
+      title,
+      department,
+      faculty,
+      prerequisite,
+      moduleCredit,
+      moduleCode;
 
   final GetIt _getIt = GetIt.instance;
   late AuthService _authService;
@@ -48,7 +56,6 @@ class _ModulePageState extends State<ModulePage> {
   @override
   void didUpdateWidget(ModulePage oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // Fetch and update module info when widget is updated
     widget.moduleInfo.then((moduleData) {
       if (mounted) {
         initialiseValues(moduleData);
@@ -71,8 +78,11 @@ class _ModulePageState extends State<ModulePage> {
       moduleCode = moduleData["moduleCode"];
     });
 
-    bool completedValue = await _databaseService.isInCompletedModule(userId!, moduleCode!);
-    bool currentValue = await _databaseService.isInCurrentModule(userId!, moduleCode!);
+    String totalCode = '$moduleCode/$moduleCredit';
+    bool completedValue =
+        await _databaseService.isInCompletedModule(userId!, totalCode);
+    bool currentValue =
+        await _databaseService.isInCurrentModule(userId!, totalCode);
 
     if (!mounted) return;
 
@@ -84,11 +94,12 @@ class _ModulePageState extends State<ModulePage> {
 
   Future<void> addToSchedule() async {
     try {
-      await _databaseService.addModuleToUserSchedule(userId!, moduleCode!);
+      String addedModule = '$moduleCode/$moduleCredit';
+      await _databaseService.addModuleToUserSchedule(userId!, addedModule);
       if (mounted) {
         setState(() {
           modulesAdded = true;
-          current = true; // Set current to true after adding to schedule
+          current = true;
         });
       }
       _alertService.showToast(
@@ -105,7 +116,7 @@ class _ModulePageState extends State<ModulePage> {
 
   Future<void> removeFromSchedule() async {
     try {
-      await _databaseService.removeModule(userId!, moduleCode!);
+      await _databaseService.removeModule(userId!, moduleCode!, moduleCredit!);
       if (mounted) {
         setState(() {
           modulesAdded = false;
@@ -163,6 +174,7 @@ class _ModulePageState extends State<ModulePage> {
   }
 
   Widget buildHeader() {
+    print('${moduleCode}  is ${completed}');
     if (completed == null || current == null) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -170,9 +182,11 @@ class _ModulePageState extends State<ModulePage> {
     if (completed!) {
       return buildDisabledButton("Already Completed", Icons.check, Colors.grey);
     } else if (current!) {
-      return buildActiveButton("Added to Schedule", Icons.done, Colors.green, removeFromSchedule);
+      return buildActiveButton(
+          "Added to Schedule", Icons.done, Colors.green, removeFromSchedule);
     } else {
-      return buildActiveButton("Add to Schedule", Icons.add, Colors.brown[300]!, addToSchedule);
+      return buildActiveButton(
+          "Add to Schedule", Icons.add, Colors.brown[300]!, addToSchedule);
     }
   }
 
@@ -208,7 +222,8 @@ class _ModulePageState extends State<ModulePage> {
     );
   }
 
-  Widget buildActiveButton(String text, IconData icon, Color color, VoidCallback onPressed) {
+  Widget buildActiveButton(
+      String text, IconData icon, Color color, VoidCallback onPressed) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [

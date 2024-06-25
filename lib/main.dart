@@ -9,6 +9,9 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
+const String academicYear = "2023-2024";
+
 Future<void> main() async {
   await setup();
   runApp(MyApp());
@@ -46,10 +49,7 @@ class _MyAppState extends State<MyApp> {
     user = FirebaseAuth.instance.authStateChanges().listen(
       (user) {
         if (user == null) {
-          print("signed out");
-        } else {
-          print(user.displayName);
-          print("signed in");
+          _authService.signOut();
         }
       },
     );
@@ -65,6 +65,7 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       navigatorKey: _navigationService.navigatorKey,
+      navigatorObservers: [routeObserver],
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
@@ -73,7 +74,6 @@ class _MyAppState extends State<MyApp> {
         textTheme: GoogleFonts.montserratTextTheme(),
       ),
       initialRoute: _authService.currentUser == null ? "/login" : "/home",
-      // Use AuthService instead of FirebaseAuth
       routes: _navigationService.routes,
     );
   }

@@ -1,19 +1,18 @@
-import 'dart:core';
-
-import 'package:brainsync/common_widgets/bottomBar.dart';
-import 'package:brainsync/common_widgets/navBar.dart';
-import 'package:brainsync/model/time.dart';
-import 'package:brainsync/services/auth_service.dart';
-import 'package:brainsync/services/database_service.dart';
+import 'package:brainsync/common_widgets/home_post_card.dart';
+import 'package:brainsync/model/post.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
+import '../common_widgets/bottomBar.dart';
+import '../common_widgets/navBar.dart';
 import '../const.dart';
+import '../model/time.dart';
 import '../services/alert_service.dart';
-import 'Posts/actual_post.dart';
+import '../services/auth_service.dart';
+import '../services/database_service.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -23,23 +22,20 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  bool isSearching = false;
-
-  String searchQuery = "";
-
-  List? friendReqList, currentModules, completedModules;
-
-  String? userProfilePfp, userProfileCover, firstName, lastName;
-
   late AlertService _alertService;
   late AuthService _authService;
   late DatabaseService _databaseService;
+  late Future<QuerySnapshot> allPosts;
+  late List<DocumentSnapshot> filteredPosts = [];
+  late TextEditingController searchQuery = TextEditingController();
   late User? user;
 
-  final GetIt _getIt = GetIt.instance;
-  final userId = FirebaseAuth.instance.currentUser!.uid;
+  List? friendReqList, currentModules, completedModules;
+  List<dynamic>? bookmarks;
+  String? userProfilePfp, userProfileCover, firstName, lastName;
 
-  Map<String, bool> _bookmarks = {};
+  final GetIt _getIt = GetIt.instance;
+  final String userId = FirebaseAuth.instance.currentUser!.uid;
 
   @override
   void initState() {
@@ -47,39 +43,33 @@ class _HomeState extends State<Home> {
     _alertService = _getIt.get<AlertService>();
     _authService = _getIt.get<AuthService>();
     _databaseService = _getIt.get<DatabaseService>();
+    allPosts = _databaseService.fetchPosts();
     user = _authService.currentUser;
+    searchQuery = TextEditingController();
+    searchQuery.addListener(filterTitles);
     loadProfile();
     timeago.setLocaleMessages('custom', CustomShortMessages());
   }
 
-  Future<void> likePost(BuildContext context, String postId) async {
-    try {
-      await _databaseService.likePost(postId);
-    } catch (e) {
-      _alertService.showToast(text: "Error liking post", icon: Icons.error);
-    }
+  @override
+  void dispose() {
+    searchQuery.dispose();
+    super.dispose();
   }
 
-  Future<void> dislikePost(BuildContext context, String postId) async {
-    try {
-      await _databaseService.dislikePost(postId);
-    } catch (e) {
-      _alertService.showToast(text: "Error disliking post", icon: Icons.error);
-    }
+  void filterTitles() async {
+    final postsSnapshot = await allPosts;
+    List<DocumentSnapshot<Object?>> filteringPosts = postsSnapshot.docs
+        .where((post) => post['title'].toString().contains(searchQuery.text))
+        .toList();
+    setState(() {
+      filteredPosts = filteringPosts;
+    });
   }
 
-  Future<void> bookmark(String postId, bool isBookmark) async {
-    try {
-      await _databaseService.addBookmark(postId, isBookmark);
-      setState(() {
-        _bookmarks[postId] = !isBookmark;
-      });
-    } catch (e) {
-      _alertService.showToast(
-        text: "Error bookmarking post",
-        icon: Icons.error,
-      );
-    }
+  void clearSearch() {
+    searchQuery.clear();
+    filterTitles();
   }
 
   @override
@@ -90,212 +80,80 @@ class _HomeState extends State<Home> {
       appBar: AppBar(
         backgroundColor: Colors.brown[300],
         foregroundColor: Colors.white,
-        title: !isSearching
-            ? const Text("BrainSync")
-            : TextField(
-                onChanged: (value) {
-                  setState(() {
-                    searchQuery = value;
-                  });
-                },
-                style: const TextStyle(color: Colors.white),
-                decoration: const InputDecoration(
-                  hintText: "Search...",
-                  hintStyle: TextStyle(color: Colors.white),
+        title: const Text("BrainSync"),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(60.0),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: TextField(
+              controller: searchQuery,
+              onChanged: (query) => setState(() {}),
+              decoration: InputDecoration(
+                hintText: 'Search for modules with Code or Title',
+                filled: true,
+                fillColor: Colors.white,
+                prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.clear, color: Colors.grey),
+                  onPressed: () {
+                    setState(() {
+                      searchQuery.clear();
+                    });
+                  },
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                    vertical: 15.0, horizontal: 10.0),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(30.0),
+                  borderSide: const BorderSide(color: Colors.grey, width: 1.0),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(30.0),
+                  borderSide: const BorderSide(color: Colors.grey, width: 1.0),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(30.0),
+                  borderSide: const BorderSide(color: Colors.brown, width: 2.0),
                 ),
               ),
-        actions: [
-          IconButton(
-            onPressed: () {
-              setState(() {
-                isSearching = !isSearching;
-                if (!isSearching) {
-                  searchQuery = "";
-                }
-              });
-            },
-            icon: Icon(isSearching ? Icons.close : Icons.search),
-          )
-        ],
+            ),
+          ),
+        ),
       ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection('posts')
-            .orderBy('timestamp', descending: true)
-            .snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasError) {
-            return const Center(child: Text("Something went wrong"));
-          }
-
-          final posts = snapshot.data?.docs.where((post) {
-                if (searchQuery.isEmpty) return true;
-                final data = post.data() as Map<String, dynamic>;
-                final title = data['title'] as String;
-                return title
-                    .toLowerCase()
-                    .startsWith(searchQuery.toLowerCase());
-              }).toList() ??
-              [];
-
-          return ListView.builder(
-            itemCount: posts.length,
-            itemBuilder: (context, index) {
-              final post = posts[index].data() as Map<String, dynamic>;
-              final postId = posts[index].id;
-              final timestamp = post['timestamp'] as Timestamp;
-              final date = timestamp.toDate();
-              final formattedDate = timeago.format(date, locale: 'custom');
-              final likes = post['likes'] ?? [];
-              final isLiked = likes.contains(userId);
-              final likeCount = likes.length;
-              final commentCount = post['commentCount'] ?? 0;
-              final isBookmarked = _bookmarks[postId] ?? false;
-
-              return Card(
-                color: Colors.white,
-                shape: const RoundedRectangleBorder(
-                    side: BorderSide(
-                      color: Colors.brown,
-                      width: 1.0,
-                    ),
-                    borderRadius: BorderRadius.zero),
-                margin: const EdgeInsets.symmetric(vertical: 0, horizontal: 0),
-                child: InkWell(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => PostDetailPage(
-                          postId: posts[index].id,
-                          title: post['title'],
-                          timestamp: date,
-                          content: post['content'],
-                          authorName: post['authorName'],
-                        ),
+      body: Column(
+        children: [
+          Expanded(
+            child: FutureBuilder<QuerySnapshot>(
+              future: allPosts,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (snapshot.hasError) {
+                  return Center(child: Text("Error: ${snapshot.error}"));
+                }
+                List<DocumentSnapshot> posts = filteredPosts.isNotEmpty
+                    ? filteredPosts
+                    : snapshot.data!.docs;
+                return ListView.builder(
+                  itemCount: posts.length,
+                  itemBuilder: (context, index) {
+                    final postData = posts[index].data()! as Post;
+                    bool isBookmark = bookmarks!.contains(posts[index].id);
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 5.0),
+                      child: PostCard(
+                        postId: posts[index].id,
+                        postData: postData,
+                        isBookmark: isBookmark,
                       ),
                     );
                   },
-                  child: Padding(
-                    padding: const EdgeInsets.all(10),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              post['title'],
-                              style: TextStyle(
-                                color: Colors.brown[800],
-                                fontSize: 25,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Text(
-                              formattedDate,
-                              style: TextStyle(color: Colors.brown.shade800),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          post['content'],
-                          style: TextStyle(
-                            fontSize: 15,
-                            color: Colors.brown[800],
-                          ),
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Row(
-                              children: [
-                                IconButton(
-                                  icon: Icon(
-                                    isLiked
-                                        ? Icons.thumb_up
-                                        : Icons.thumb_up_outlined,
-                                    color: isLiked
-                                        ? Colors.brown[300]
-                                        : Colors.grey,
-                                  ),
-                                  onPressed: () {
-                                    if (isLiked) {
-                                      dislikePost(context, posts[index].id);
-                                    } else {
-                                      likePost(context, posts[index].id);
-                                    }
-                                  },
-                                ),
-                                const SizedBox(width: 5),
-                                Text('$likeCount',
-                                    style: TextStyle(color: Colors.brown[800])),
-                              ],
-                            ),
-                            Expanded(
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  IconButton(
-                                    icon: const Icon(
-                                      Icons.comment,
-                                      color: Color.fromARGB(255, 161, 136, 127),
-                                    ),
-                                    onPressed: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => PostDetailPage(
-                                            postId: posts[index].id,
-                                            title: post['title'],
-                                            timestamp: date,
-                                            content: post['content'],
-                                            authorName: post['authorName'],
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                  const SizedBox(width: 5),
-                                  Text('$commentCount',
-                                      style:
-                                          TextStyle(color: Colors.brown[800])),
-                                ],
-                              ),
-                            ),
-                            Row(
-                              children: [
-                                IconButton(
-                                  icon: Icon(
-                                    isBookmarked
-                                        ? Icons.bookmark
-                                        : Icons.bookmark_added_outlined,
-                                    color: isBookmarked
-                                        ? Colors.brown[400]
-                                        : Colors.grey,
-                                  ),
-                                  onPressed: () {
-                                    bookmark(postId, isBookmarked);
-                                  },
-                                ),
-                              ],
-                            ),
-                          ],
-                        )
-                      ],
-                    ),
-                  ),
-                ),
-              );
-            },
-          );
-        },
+                );
+              },
+            ),
+          ),
+        ],
       ),
       bottomNavigationBar: const CustomBottomNavBar(initialIndex: 0),
     );
@@ -305,17 +163,13 @@ class _HomeState extends State<Home> {
     try {
       DocumentSnapshot? userProfile = await _databaseService.fetchCurrentUser();
       if (userProfile != null && userProfile.exists) {
-        List<String> bookmarks =
-            List<String>.from(userProfile.get('bookmarks') ?? []);
         setState(() {
           userProfilePfp = userProfile.get('pfpURL') ?? PLACEHOLDER_PFP;
           userProfileCover =
               userProfile.get('profileCoverURL') ?? PLACEHOLDER_PROFILE_COVER;
           firstName = userProfile.get('firstName') ?? 'Name';
           lastName = userProfile.get('lastName') ?? 'Name';
-          for (var postId in bookmarks) {
-            _bookmarks[postId] = true;
-          }
+          bookmarks = userProfile.get('bookmarks') ?? [];
         });
       } else {
         print('User profile not found');

@@ -1,4 +1,3 @@
-import 'package:brainsync/services/auth_service.dart';
 import 'package:brainsync/services/database_service.dart';
 import 'package:brainsync/services/navigation_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -16,7 +15,6 @@ class NavBar extends StatefulWidget {
 
 class _NavBarState extends State<NavBar> {
   late DatabaseService _databaseService;
-  late AuthService _authService;
   late NavigationService _navigationService;
 
   String? userProfilePfp, userProfileCover, firstName, lastName;
@@ -28,7 +26,6 @@ class _NavBarState extends State<NavBar> {
   void initState() {
     super.initState();
     _databaseService = _getIt.get<DatabaseService>();
-    _authService = _getIt.get<AuthService>();
     _navigationService = _getIt.get<NavigationService>();
     loadProfile();
   }
@@ -37,7 +34,7 @@ class _NavBarState extends State<NavBar> {
   Widget build(BuildContext context) {
     return Drawer(
       child: ListView(
-        padding: EdgeInsets.all(0),
+        padding: const EdgeInsets.all(0),
         children: [
           DrawerHeader(
             decoration: BoxDecoration(
@@ -52,7 +49,7 @@ class _NavBarState extends State<NavBar> {
                       ? NetworkImage(userProfilePfp!)
                       : NetworkImage(PLACEHOLDER_PFP),
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 Text(
                   firstName ?? 'No Name',
                   style: TextStyle(color: Colors.white),
@@ -61,13 +58,13 @@ class _NavBarState extends State<NavBar> {
             ),
           ),
           ListTile(
-            title: Text("See all mods"),
+            title: const Text("See all modules"),
             onTap: () {
               _navigationService.pushName("/nusMods");
             },
           ),
           ListTile(
-            title: Text("Saved"),
+            title: const Text("Bookmark posts"),
             onTap: () {
               _navigationService.pushName("/saved");
             },
