@@ -1,4 +1,6 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:core';
+
+import 'package:brainsync/services/database_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:timeago/timeago.dart' as timeago;
@@ -7,43 +9,56 @@ import '../model/post.dart';
 import '../pages/Posts/actual_post.dart';
 import '../services/alert_service.dart';
 import '../services/auth_service.dart';
-import '../services/database_service.dart';
 
-class PostCard extends StatefulWidget {
-  final String postId;
-  final Post postData;
-  final bool isBookmark;
+class HomePostCard extends StatefulWidget {
+  bool? isBookmark;
+  bool? isLiked;
 
-  const PostCard({
+  DateTime? timeStamp;
+
+  int? commentCount;
+  int? likeCount;
+
+  Post? postData;
+
+  String? authorName;
+  String? content;
+  String? postId;
+  String? title;
+
+  List<dynamic>? likes;
+  List<dynamic>? userBookmarks;
+
+  HomePostCard({
     super.key,
-    required this.postId,
-    required this.postData,
     required this.isBookmark,
+    required this.isLiked,
+    required this.postData,
+    required this.authorName,
+    required this.commentCount,
+    required this.content,
+    required this.likeCount,
+    required this.postId,
+    required this.timeStamp,
+    required this.title,
+    required this.likes,
+    required this.userBookmarks,
   });
 
   @override
-  _PostCardState createState() => _PostCardState();
+  State<HomePostCard> createState() => _HomePostCardState();
 }
 
-class _PostCardState extends State<PostCard> {
+class _HomePostCardState extends State<HomePostCard> {
   final GetIt _getIt = GetIt.instance;
 
   late AlertService _alertService;
   late AuthService _authService;
   late DatabaseService _databaseService;
 
-  late DateTime date;
-  late String title;
-  late String content;
-  late String authorName;
-  late String formattedDate;
-  late Timestamp? timestamp;
-  late int likeCount;
-  late int commentCount;
   late bool isLiked;
   late bool isBookmarked;
-  late List<dynamic?> likes;
-  late List<dynamic> userBookmarks;
+  late String formattedDate;
 
   @override
   void initState() {
@@ -51,17 +66,9 @@ class _PostCardState extends State<PostCard> {
     _alertService = _getIt.get<AlertService>();
     _authService = _getIt.get<AuthService>();
     _databaseService = _getIt.get<DatabaseService>();
-    title = widget.postData.title ?? 'No Title';
-    content = widget.postData.content ?? 'No Content';
-    authorName = widget.postData.authorName ?? 'Unknown Author';
-    timestamp = widget.postData.timestamp;
-    date = timestamp!.toDate();
-    formattedDate = timeago.format(date, locale: 'custom');
-    likes = widget.postData.likes ?? [];
-    likeCount = likes.length;
-    commentCount = widget.postData.commentCount ?? 0;
-    isLiked = likes.contains(_authService.currentUser!.uid);
-    isBookmarked = widget.isBookmark;
+    isLiked = widget.isLiked!;
+    isBookmarked = widget.isBookmark!;
+    formattedDate = timeago.format(widget.timeStamp!, locale: 'custom');
   }
 
   @override
@@ -84,11 +91,11 @@ class _PostCardState extends State<PostCard> {
             context,
             MaterialPageRoute(
               builder: (context) => PostDetailPage(
-                postId: widget.postId,
-                title: title,
-                timestamp: date,
-                content: content,
-                authorName: authorName,
+                postId: widget.postId!,
+                title: widget.title!,
+                timestamp: widget.timeStamp!,
+                content: widget.content!,
+                authorName: widget.authorName!,
               ),
             ),
           );
@@ -103,7 +110,7 @@ class _PostCardState extends State<PostCard> {
                 children: [
                   Flexible(
                     child: Text(
-                      title,
+                      widget.title!,
                       style: TextStyle(
                         color: Colors.brown[800],
                         fontSize: 18,
@@ -123,7 +130,7 @@ class _PostCardState extends State<PostCard> {
               ),
               const SizedBox(height: 6),
               Text(
-                content,
+                widget.content!,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
@@ -139,35 +146,37 @@ class _PostCardState extends State<PostCard> {
                     children: [
                       IconButton(
                         icon: Icon(
-                          isLiked! ? Icons.thumb_up : Icons.thumb_up_outlined,
-                          color: isLiked! ? Colors.brown[300] : Colors.grey,
+                          isLiked ? Icons.thumb_up : Icons.thumb_up_outlined,
+                          color: isLiked ? Colors.brown[300] : Colors.grey,
                         ),
                         onPressed: () async {
-                          if (isLiked!) {
-                            dislikePost(widget.postId);
+                          if (isLiked) {
+                            dislikePost(widget.postId!);
                           } else {
-                            likePost(widget.postId);
+                            likePost(widget.postId!);
                           }
                           setState(() {
-                            isLiked = !isLiked!;
-                            if (isLiked!) {
-                              likeCount = (likeCount ?? 0) + 1;
-                              if (likes != null) {
-                                likes!.add(_authService.currentUser!.uid);
+                            isLiked = !isLiked;
+                            if (isLiked) {
+                              widget.likeCount = (widget.likeCount ?? 0) + 1;
+                              if (widget.likes != null) {
+                                widget.likes!
+                                    .add(_authService.currentUser!.uid);
                               } else {
-                                likes = [_authService.currentUser!.uid];
+                                widget.likes = [_authService.currentUser!.uid];
                               }
                             } else {
-                              likeCount = (likeCount ?? 0) - 1;
-                              if (likes != null) {
-                                likes!.remove(_authService.currentUser!.uid);
+                              widget.likeCount = (widget.likeCount ?? 0) - 1;
+                              if (widget.likes != null) {
+                                widget.likes!
+                                    .remove(_authService.currentUser!.uid);
                               }
                             }
                           });
                         },
                       ),
                       Text(
-                        '$likeCount',
+                        '${widget.likeCount}',
                         style: TextStyle(
                           color: Colors.brown[700],
                           fontSize: 12,
@@ -177,28 +186,13 @@ class _PostCardState extends State<PostCard> {
                   ),
                   Row(
                     children: [
-                      IconButton(
-                        icon: const Icon(
-                          Icons.comment,
-                          color: Color.fromARGB(255, 161, 136, 127),
-                        ),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => PostDetailPage(
-                                postId: widget.postId,
-                                title: title,
-                                timestamp: date,
-                                content: content,
-                                authorName: authorName,
-                              ),
-                            ),
-                          );
-                        },
+                      const Icon(
+                        Icons.comment,
+                        color: Color.fromARGB(255, 161, 136, 127),
                       ),
+                      const SizedBox(width: 10),
                       Text(
-                        '$commentCount',
+                        '${widget.commentCount!}',
                         style: TextStyle(
                           color: Colors.brown[700],
                           fontSize: 12,
@@ -213,10 +207,11 @@ class _PostCardState extends State<PostCard> {
                           isBookmarked
                               ? Icons.bookmark
                               : Icons.bookmark_add_outlined,
-                          color: isLiked ? Colors.brown[300] : Colors.brown[300],
+                          color:
+                              isLiked ? Colors.brown[300] : Colors.brown[300],
                         ),
                         onPressed: () async {
-                          bookmark(widget.postId, isBookmarked);
+                          bookmark(widget.postId!, isBookmarked);
                         },
                       ),
                     ],
