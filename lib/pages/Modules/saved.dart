@@ -1,4 +1,5 @@
 import 'package:brainsync/common_widgets/dialog.dart';
+import 'package:brainsync/model/bookmarchangenotifier.dart';
 import 'package:brainsync/model/time.dart';
 import 'package:brainsync/pages/Posts/actual_post.dart';
 import 'package:brainsync/services/auth_service.dart';
@@ -7,6 +8,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 class Saved extends StatefulWidget {
@@ -17,15 +19,12 @@ class Saved extends StatefulWidget {
 }
 
 class _SavedState extends State<Saved> {
-  
   late User? user;
   late AuthService _authService;
   late DatabaseService _databaseService;
+  late BookmarkProvider _bookmarkProvider;
 
   final GetIt _getIt = GetIt.instance;
-  final userId = FirebaseAuth.instance.currentUser!.uid;
-
-  Map<String, bool> _bookmarks = {};
 
   @override
   void initState() {
@@ -34,12 +33,13 @@ class _SavedState extends State<Saved> {
     _databaseService = _getIt.get<DatabaseService>();
     user = _authService.currentUser;
     timeago.setLocaleMessages('custom', CustomShortMessages());
+    _bookmarkProvider = Provider.of<BookmarkProvider>(context, listen: false);
   }
 
-  Future<void> likePost(BuildContext context, String postid) async {
+  Future<void> likePost(BuildContext context, String postId) async {
     try {
-      await FirebaseFirestore.instance.collection('posts').doc(postid).update({
-        'likes': FieldValue.arrayUnion([userId])
+      await FirebaseFirestore.instance.collection('posts').doc(postId).update({
+        'likes': FieldValue.arrayUnion([_bookmarkProvider.userId])
       });
     } on FirebaseException {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -47,10 +47,10 @@ class _SavedState extends State<Saved> {
     }
   }
 
-  Future<void> dislikePost(BuildContext context, String postid) async {
+  Future<void> dislikePost(BuildContext context, String postId) async {
     try {
-      await FirebaseFirestore.instance.collection('posts').doc(postid).update({
-        'likes': FieldValue.arrayRemove([userId])
+      await FirebaseFirestore.instance.collection('posts').doc(postId).update({
+        'likes': FieldValue.arrayRemove([_bookmarkProvider.userId])
       });
     } on FirebaseException {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -67,56 +67,18 @@ class _SavedState extends State<Saved> {
     return querySnapshot.docs.length;
   }
 
-  Future<void> bookmark(String postId, bool isBookmark) async {
-  try {
-    final userRef = FirebaseFirestore.instance.collection('users').doc(userId);
-
-    if (isBookmark) {
-      await userRef.update({
-        'bookmarks': FieldValue.arrayRemove([postId])
-      });
-    } else {
-      await userRef.update({
-        'bookmarks': FieldValue.arrayUnion([postId])
-      });
-    }
-
-    setState(() {
-      _bookmarks[postId] = !isBookmark;
-    });
-  } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Error bookmarking post')),
-    );
-  }
-}
-
-Future<void> loadBookmarks() async {
-  final userRef = FirebaseFirestore.instance.collection('users').doc(userId);
-  final userSnapshot = await userRef.get();
-
-  if (userSnapshot.exists) {
-    List<String> bookmarks = List<String>.from(userSnapshot.data()?['bookmarks'] ?? []);
-    setState(() {
-      for (var postId in bookmarks) {
-        _bookmarks[postId] = true;
-      }
-    });
-  }
-}
-
   @override
   Widget build(BuildContext context) {
+    final bookmarks = _bookmarkProvider.bookmarks;
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.brown[300],
-        title: const Text("Saved", style: TextStyle(
-          color: Colors.white
-          )),
+        title: const Text("Saved", style: TextStyle(color: Colors.white)),
       ),
       body: StreamBuilder<DocumentSnapshot>(
-        stream: FirebaseFirestore.instance.collection('users').doc(userId).snapshots(),
+        stream: FirebaseFirestore.instance.collection('users').doc(_bookmarkProvider.userId).snapshots(),
         builder: (context, userSnapshot) {
           if (userSnapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -125,30 +87,15 @@ Future<void> loadBookmarks() async {
             return const Center(child: Text('No saved posts'));
           }
 
-          final userDoc = userSnapshot.data!;
-          List<String> bookmarks = List<String>.from(userDoc['bookmarks'] ?? []);
-          if (bookmarks.isEmpty) {
-            return SizedBox(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Image.asset(
-                    "assets/img/brain.png"
-                  ),
-                  const Text('The Silence Is Deafening', style: TextStyle(
-                    color: Color.fromARGB(255, 78, 52, 46)
-                  ),),
-                  const SizedBox(width: 60,),
-                ],
-              ),
-            );
+          List<String> bookmarkIds = bookmarks.keys.where((key) => bookmarks[key] == true).toList();
+          if (bookmarkIds.isEmpty) {
+            return const Center(child: Text('No saved posts'));
           }
 
           return StreamBuilder<QuerySnapshot>(
             stream: FirebaseFirestore.instance
                 .collection('posts')
-                .where(FieldPath.documentId, whereIn: bookmarks)
+                .where(FieldPath.documentId, whereIn: bookmarkIds)
                 .snapshots(),
             builder: (context, postSnapshot) {
               if (postSnapshot.connectionState == ConnectionState.waiting) {
@@ -169,10 +116,10 @@ Future<void> loadBookmarks() async {
                   final date = timestamp.toDate();
                   final formattedDate = timeago.format(date, locale: 'custom');
                   final likes = post['likes'] ?? [];
-                  final isLiked = likes.contains(userId);
+                  final isLiked = likes.contains(_bookmarkProvider.userId);
                   final likeCount = likes.length;
                   final commentCount = post['commentCount'] ?? 0;
-                  final isBookmarked = _bookmarks[postId] ?? true;
+                  final isBookmarked = bookmarks[postId] ?? true;
 
                   return Card(
                     color: Colors.white,
@@ -242,45 +189,40 @@ Future<void> loadBookmarks() async {
                                   },
                                 ),
                                 const SizedBox(width: 5),
-                                Text('$likeCount', style: TextStyle(
-                                  color: Colors.brown[800]
-                                  )
+                                Text('$likeCount', style: TextStyle(color: Colors.brown[800])),
+                                const SizedBox(width: 90),
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.comment,
+                                    color: Color.fromARGB(255, 161, 136, 127),
                                   ),
-                                  const SizedBox(width: 90,),
-                           IconButton(
-                            icon: const Icon(Icons.comment,
-                            color: Color.fromARGB(255, 161, 136, 127),
-                            ),
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => PostDetailPage(
-                                    postId: bookmarkedPosts[index].id,
-                                    title: post['title'],
-                                    timestamp: date,
-                                    content: post['content'],
-                                    authorName: post['authorName'],
-                                    ),
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => PostDetailPage(
+                                          postId: postId,
+                                          title: post['title'],
+                                          timestamp: date,
+                                          content: post['content'],
+                                          authorName: post['authorName'],
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                                const SizedBox(width: 5),
+                                Text('$commentCount', style: TextStyle(color: Colors.brown[800])),
+                                const SizedBox(width: 90),
+                                IconButton(
+                                  icon: Icon(
+                                    Icons.bookmark,
+                                    color: isBookmarked ? Colors.brown[300] : Colors.grey,
                                   ),
-                               );
-                            },
-                           ),
-                           const SizedBox(width: 5,),
-                           Text('$commentCount', style: TextStyle(
-                            color: Colors.brown[800],
-                           )
-                           ),
-                           const SizedBox(width: 90,),
-                           IconButton(
-                              icon: Icon(
-                                Icons.bookmark,
-                                color: Colors.brown[300],
-                              ),
-                              onPressed: () {
-                                bookmark(postId, isBookmarked);
-                              },
-                            ),
+                                  onPressed: () {
+                                    _bookmarkProvider.toggleBookmark(postId);
+                                  },
+                                ),
                               ],
                             ),
                           ],
