@@ -15,7 +15,7 @@ import '../services/auth_service.dart';
 import '../services/database_service.dart';
 
 class Home extends StatefulWidget {
-  const Home({super.key});
+  const Home({Key? key}) : super(key: key);
 
   @override
   State<Home> createState() => _HomeState();
@@ -26,16 +26,16 @@ class _HomeState extends State<Home> {
   late AuthService _authService;
   late DatabaseService _databaseService;
   late Future<QuerySnapshot> allPosts;
-  late List<DocumentSnapshot> filteredPosts = [];
   late TextEditingController searchQuery = TextEditingController();
   late User? user;
 
-  List? friendReqList, currentModules, completedModules;
-  List<dynamic>? bookmarks;
   String? userProfilePfp, userProfileCover, firstName, lastName;
-
   final GetIt _getIt = GetIt.instance;
   final String userId = FirebaseAuth.instance.currentUser!.uid;
+
+  Map<String, bool> _bookmarks = {};
+
+  List<DocumentSnapshot> filteredPosts = [];
 
   @override
   void initState() {
@@ -46,7 +46,6 @@ class _HomeState extends State<Home> {
     allPosts = _databaseService.fetchPosts();
     user = _authService.currentUser;
     searchQuery = TextEditingController();
-    searchQuery.addListener(filterTitles);
     loadProfile();
     timeago.setLocaleMessages('custom', CustomShortMessages());
   }
@@ -57,19 +56,16 @@ class _HomeState extends State<Home> {
     super.dispose();
   }
 
-  void filterTitles() async {
-    final postsSnapshot = await allPosts;
-    List<DocumentSnapshot<Object?>> filteringPosts = postsSnapshot.docs
-        .where((post) => post['title'].toString().contains(searchQuery.text))
-        .toList();
+  void filterTitles(String query) async {
+    final posts = await allPosts;
+    List<DocumentSnapshot> filteringPosts = posts.docs.where((post) {
+      String title = post['title'].toString().toLowerCase();
+      String content = post['content'].toString().toLowerCase();
+      return title.contains(query.toLowerCase()) || content.contains(query.toLowerCase());
+    }).toList();
     setState(() {
       filteredPosts = filteringPosts;
     });
-  }
-
-  void clearSearch() {
-    searchQuery.clear();
-    filterTitles();
   }
 
   @override
@@ -81,13 +77,14 @@ class _HomeState extends State<Home> {
         backgroundColor: Colors.brown[300],
         foregroundColor: Colors.white,
         title: const Text("BrainSync"),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(60.0),
-          child: Padding(
+      ),
+      body: Column(
+        children: [
+          Padding(
             padding: const EdgeInsets.all(16.0),
             child: TextField(
               controller: searchQuery,
-              onChanged: (query) => setState(() {}),
+              onChanged: filterTitles,
               decoration: InputDecoration(
                 hintText: 'Search for modules with Code or Title',
                 filled: true,
@@ -98,11 +95,14 @@ class _HomeState extends State<Home> {
                   onPressed: () {
                     setState(() {
                       searchQuery.clear();
+                      filteredPosts = []; // Clear filtered posts
                     });
                   },
                 ),
                 contentPadding: const EdgeInsets.symmetric(
-                    vertical: 15.0, horizontal: 10.0),
+                  vertical: 15.0,
+                  horizontal: 10.0,
+                ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(30.0),
                   borderSide: const BorderSide(color: Colors.grey, width: 1.0),
@@ -118,10 +118,6 @@ class _HomeState extends State<Home> {
               ),
             ),
           ),
-        ),
-      ),
-      body: Column(
-        children: [
           Expanded(
             child: FutureBuilder<QuerySnapshot>(
               future: allPosts,
@@ -130,23 +126,28 @@ class _HomeState extends State<Home> {
                   return const Center(child: CircularProgressIndicator());
                 }
                 if (snapshot.hasError) {
-                  return Center(child: Text("Error: ${snapshot.error}"));
+                  return const Center(child: Text("Something went wrong"));
                 }
-                List<DocumentSnapshot> posts = filteredPosts.isNotEmpty
-                    ? filteredPosts
-                    : snapshot.data!.docs;
+
+                List<DocumentSnapshot> posts = [];
+                if (filteredPosts.isNotEmpty) {
+                  posts = filteredPosts;
+                } else {
+                  posts = snapshot.data!.docs;
+                }
+
                 return ListView.builder(
                   itemCount: posts.length,
                   itemBuilder: (context, index) {
-                    final postData = posts[index].data()! as Post;
-                    bool isBookmark = bookmarks!.contains(posts[index].id);
-                    return Padding(
-                      padding: const EdgeInsets.only(top: 5.0),
-                      child: PostCard(
-                        postId: posts[index].id,
-                        postData: postData,
-                        isBookmark: isBookmark,
-                      ),
+                    print(posts[index]);
+                    final post = posts[index].data() as Post;
+                    print(post);
+                    final isBookMarked = _bookmarks[post] ?? false;
+                    return PostCard(
+                      postId: post.id!,
+                      postData: post,
+                      isBookmark: isBookMarked,
+
                     );
                   },
                 );
@@ -163,13 +164,17 @@ class _HomeState extends State<Home> {
     try {
       DocumentSnapshot? userProfile = await _databaseService.fetchCurrentUser();
       if (userProfile != null && userProfile.exists) {
+        List<String> bookmarks =
+        List<String>.from(userProfile.get('bookmarks') ?? []);
         setState(() {
           userProfilePfp = userProfile.get('pfpURL') ?? PLACEHOLDER_PFP;
           userProfileCover =
               userProfile.get('profileCoverURL') ?? PLACEHOLDER_PROFILE_COVER;
           firstName = userProfile.get('firstName') ?? 'Name';
           lastName = userProfile.get('lastName') ?? 'Name';
-          bookmarks = userProfile.get('bookmarks') ?? [];
+          for (var postId in bookmarks) {
+            _bookmarks[postId] = true;
+          }
         });
       } else {
         print('User profile not found');
@@ -178,4 +183,6 @@ class _HomeState extends State<Home> {
       print('Error loading profile: $e');
     }
   }
+
+// Remaining methods like likePost, dislikePost, bookmark, etc.
 }

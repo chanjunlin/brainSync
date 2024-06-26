@@ -42,7 +42,7 @@ class _PostCardState extends State<PostCard> {
   late int commentCount;
   late bool isLiked;
   late bool isBookmarked;
-  late List<String?> likes;
+  late List<dynamic?> likes;
   late List<dynamic> userBookmarks;
 
   @override
@@ -213,7 +213,7 @@ class _PostCardState extends State<PostCard> {
                           isBookmarked
                               ? Icons.bookmark
                               : Icons.bookmark_add_outlined,
-                          color: isLiked ? Colors.brown[300] : Colors.grey,
+                          color: isLiked ? Colors.brown[300] : Colors.brown[300],
                         ),
                         onPressed: () async {
                           bookmark(widget.postId, isBookmarked);

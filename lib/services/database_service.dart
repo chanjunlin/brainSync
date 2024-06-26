@@ -412,11 +412,11 @@ class DatabaseService {
       DocumentReference newPost = _postCollection!.doc(postRef.id);
       final userId = _authService.currentUser!.uid;
       final userRef = _usersCollection!.doc(userId);
-
+      String postRefId = postRef.id;
       newPost.set(post);
       await newPost.update(
         {
-          'id': postRef.id,
+          'id': postRefId,
           'likes': [],
           'commentCount': 0,
         },
