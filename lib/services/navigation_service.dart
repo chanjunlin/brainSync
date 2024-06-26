@@ -1,6 +1,6 @@
 import 'package:brainsync/pages/Administation/login.dart';
 import 'package:brainsync/pages/Administation/register.dart';
-import 'package:brainsync/pages/Modules/saved.dart';
+import 'package:brainsync/pages/Posts/bookmarked_posts.dart';
 import 'package:brainsync/pages/Profile/edit_profile.dart';
 import 'package:brainsync/pages/Profile/profile.dart';
 import 'package:brainsync/pages/home.dart';
@@ -26,7 +26,7 @@ class NavigationService {
     "/testing": (context) => const Testing(),
     "/notifications": (context) => const Notifications(),
     "/nusMods": (context) => const ModuleListPage(),
-    "/saved" : (context) => const Saved(),
+    "/saved": (context) => const BookmarkedPosts(),
   };
 
   Map<String, Widget Function(BuildContext)> get routes {
@@ -65,6 +65,24 @@ class NavigationService {
 
   Future<void> pushReplacementName(String routeName) async {
     await _navigatorKey.currentState?.pushReplacement(
+      PageRouteBuilder(
+        pageBuilder: (BuildContext context, Animation<double> animation1,
+            Animation<double> animation2) {
+          final pageBuilder = routes[routeName];
+          if (pageBuilder != null) {
+            return pageBuilder(context);
+          } else {
+            throw Exception('Route "$routeName" not found');
+          }
+        },
+        transitionDuration: Duration.zero,
+        reverseTransitionDuration: Duration.zero,
+      ),
+    );
+  }
+
+  Future<T?> pushNameFuture<T>(String routeName) async {
+    return await _navigatorKey.currentState?.push<T>(
       PageRouteBuilder(
         pageBuilder: (BuildContext context, Animation<double> animation1,
             Animation<double> animation2) {

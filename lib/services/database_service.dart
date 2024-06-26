@@ -346,11 +346,12 @@ class DatabaseService {
   // MODULE METHODS
 
   // Add module to user's schedule
-  Future<void> addModuleToUserSchedule(String userId, String moduleCode) async {
+  Future<void> addModuleToUserSchedule(
+      String userId, String addedModule) async {
     DocumentReference userDoc =
         _firebaseFirestore.collection('users').doc(userId);
     await userDoc.update({
-      'currentModules': FieldValue.arrayUnion([moduleCode])
+      'currentModules': FieldValue.arrayUnion([addedModule]),
     });
   }
 
@@ -361,7 +362,7 @@ class DatabaseService {
           await _firebaseFirestore.collection('users').doc(userId).get();
       Map<String, dynamic> userData = userDoc.data() as Map<String, dynamic>;
       List<String> computedModules =
-          List<String>.from(userData['completedModule'] ?? []);
+          List<String>.from(userData['completedModules'] ?? []);
       return computedModules.contains(moduleCode);
     } catch (error) {
       print("Error checking current module: $error");
@@ -385,14 +386,17 @@ class DatabaseService {
   }
 
   // Remove modules from the user's schedule
-  Future<void> removeModule(String userId, String moduleCode) async {
+  Future<void> removeModule(String userId, String moduleCode, String moduleCredit) async {
     try {
       DocumentSnapshot userDoc =
           await _firebaseFirestore.collection('users').doc(userId).get();
+      String completeCode = '${moduleCode}/${moduleCredit}';
       List<dynamic>? currentModules = userDoc["currentModules"];
-      if (currentModules != null && currentModules.contains(moduleCode)) {
-        currentModules.remove(moduleCode);
-        await userDoc.reference.update({'currentModules': currentModules});
+      if (currentModules != null && currentModules.contains(completeCode)) {
+        currentModules.remove(completeCode);
+        await userDoc.reference.update({
+          'currentModules': currentModules,
+        });
       }
     } catch (e) {
       print(e);
@@ -404,55 +408,75 @@ class DatabaseService {
   // Creating a post
   Future<void> createNewPost({required Post post}) async {
     try {
-      DocumentReference postRef = await _postCollection!.doc();
-      DocumentReference newPost = await _postCollection!.doc(postRef.id);
+      DocumentReference postRef = _postCollection!.doc();
+      DocumentReference newPost = _postCollection!.doc(postRef.id);
       final userId = _authService.currentUser!.uid;
       final userRef = _usersCollection!.doc(userId);
-
+      String postRefId = postRef.id;
       newPost.set(post);
-      newPost.update(
+      await newPost.update(
         {
-          'id': FieldValue.arrayUnion([postRef.id])
+          'id': postRefId,
+          'likes': [],
+          'commentCount': 0,
         },
       );
-      userRef.update({
+      await userRef.update({
         'myPosts': FieldValue.arrayUnion([postRef.id])
       });
+      print(newPost.id);
     } catch (e) {}
   }
 
-  // Fetching posts
-  Future<QuerySnapshot> fetchPost(List<String> postId) async {
+  // Fetching all posts
+  Future<QuerySnapshot> fetchPosts() async {
     try {
-      print(postId);
-      QuerySnapshot postSnapshot = await FirebaseFirestore.instance
+      QuerySnapshot querySnapshot =
+          await _postCollection!.orderBy('timestamp', descending: true).get();
+      return querySnapshot;
+    } catch (e) {
+      print(e);
+      throw (e);
+    }
+  }
+
+  // Fetching user's posts
+  Future<QuerySnapshot> fetchUserPosts(List<String> postId) async {
+    try {
+      QuerySnapshot postSnapshot = await _firebaseFirestore
           .collection('posts')
           .where(FieldPath.documentId, whereIn: postId)
           .orderBy('timestamp', descending: true)
           .get();
-      print(postSnapshot);
       return postSnapshot;
     } catch (e) {
       print('Error fetching posts: $e');
-      throw e;
+      rethrow;
     }
   }
 
   // Bookmarking a post
-  Future<void> addBookmark(String postId, bool isBookmark) async {
+  Future<void> addBookmark(String postId) async {
     try {
       final userId = _authService.currentUser!.uid;
       final userRef = _usersCollection!.doc(userId);
+      await userRef.update({
+        'bookmarks': FieldValue.arrayUnion([postId])
+      });
+    } catch (e) {
+      print(e);
+    }
+  }
 
-      if (isBookmark) {
-        await userRef.update({
-          'bookmarks': FieldValue.arrayRemove([postId])
-        });
-      } else {
-        await userRef.update({
-          'bookmarks': FieldValue.arrayUnion([postId])
-        });
-      }
+  // Removing post from bookmark
+  Future<void> removeBookmark(String postId) async {
+    try {
+      print(postId);
+      final userId = _authService.currentUser!.uid;
+      final userRef = _usersCollection!.doc(userId);
+      await userRef.update({
+        'bookmarks': FieldValue.arrayRemove([postId])
+      });
     } catch (e) {
       print(e);
     }
@@ -544,5 +568,4 @@ class DatabaseService {
       print("Error liking comment");
     }
   }
-
 }

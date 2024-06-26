@@ -39,7 +39,7 @@ class _ShowMyPostsState extends State<ShowMyPosts> {
       return Scaffold(
         body: FutureBuilder<QuerySnapshot>(
           future: _databaseService
-              .fetchPost(widget.myPosts!.whereType<String>().toList()),
+              .fetchUserPosts(widget.myPosts!.whereType<String>().toList()),
           builder:
               (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
@@ -59,7 +59,6 @@ class _ShowMyPostsState extends State<ShowMyPosts> {
               itemCount: posts.length,
               itemBuilder: (context, index) {
                 var postData = posts[index].data() as Map<String, dynamic>;
-
                 return PostCard(
                   postId: posts[index].id,
                   postData: postData,

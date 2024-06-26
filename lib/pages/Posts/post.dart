@@ -16,6 +16,8 @@ import 'package:get_it/get_it.dart';
 import '../../services/navigation_service.dart';
 
 class PostsPage extends StatefulWidget {
+  const PostsPage({super.key});
+
   @override
   _PostsPageState createState() => _PostsPageState();
 }

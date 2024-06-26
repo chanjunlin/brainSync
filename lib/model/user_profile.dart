@@ -7,6 +7,7 @@ class UserProfile {
   String? uid;
   String? year;
 
+  List<String?>? bookmarks;
   List<String?>? chats;
   List<String?>? completedModules;
   List<String?>? currentModules;
@@ -25,6 +26,7 @@ class UserProfile {
     this.profileCoverURL,
     this.uid,
     this.year,
+    this.bookmarks,
     this.chats,
     this.completedModules,
     this.currentModules,
@@ -44,6 +46,7 @@ class UserProfile {
     profileCoverURL = json['profileCoverURL'];
     uid = json['uid'];
     year = json['year'];
+    bookmarks = json['bookmarks'] != null ? List<String>.from(json['bookmarks']) : [];
     chats = json['chats'] != null ? List<String>.from(json['chats']) : [];
     completedModules = json['completedModules'] != null
         ? List<String>.from(json['completedModules'])
@@ -76,6 +79,7 @@ class UserProfile {
     data['profileCoverURL'] = profileCoverURL;
     data['uid'] = uid;
     data['year'] = year;
+    data['bookmarks'] = bookmarks;
     data['chats'] = chats;
     data['completedModules'] = completedModules;
     data['currentModules'] = currentModules;
