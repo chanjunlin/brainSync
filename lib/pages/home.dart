@@ -1,16 +1,14 @@
 import 'package:brainsync/common_widgets/home_post_card.dart';
+import 'package:brainsync/services/auth_service.dart';
 import 'package:brainsync/services/database_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import 'package:timeago/timeago.dart' as timeago;
 
 import '../common_widgets/bottomBar.dart';
 import '../common_widgets/navBar.dart';
 import '../model/post.dart';
-import '../model/time.dart';
 import '../services/alert_service.dart';
-import '../services/auth_service.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -19,7 +17,7 @@ class Home extends StatefulWidget {
   State<Home> createState() => _HomeState();
 }
 
-class _HomeState extends State<Home> {
+class _HomeState extends State<Home> with RouteAware {
   final GetIt _getIt = GetIt.instance;
 
   late AlertService _alertService;
@@ -27,6 +25,7 @@ class _HomeState extends State<Home> {
   late DatabaseService _databaseService;
   late TextEditingController searchQuery;
   late Future<QuerySnapshot> allPosts;
+  late Future<void> loadedProfile;
 
   List<dynamic>? bookmarks;
   List<DocumentSnapshot> filteredPosts = [];
@@ -37,16 +36,9 @@ class _HomeState extends State<Home> {
     _alertService = _getIt.get<AlertService>();
     _authService = _getIt.get<AuthService>();
     _databaseService = _getIt.get<DatabaseService>();
-    loadProfile();
+    loadedProfile = loadProfile();
     searchQuery = TextEditingController();
     allPosts = fetchPosts();
-    timeago.setLocaleMessages('custom', CustomShortMessages());
-  }
-
-  @override
-  void dispose() {
-    searchQuery.dispose();
-    super.dispose();
   }
 
   Future<QuerySnapshot> fetchPosts() async {
@@ -60,9 +52,9 @@ class _HomeState extends State<Home> {
       setState(() {
         filteredPosts = posts.docs
             .where((post) => post['title']
-                .toString()
-                .toLowerCase()
-                .contains(query.toLowerCase()))
+            .toString()
+            .toLowerCase()
+            .contains(query.toLowerCase()))
             .toList();
       });
     } catch (e) {
@@ -70,84 +62,7 @@ class _HomeState extends State<Home> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      drawer: const NavBar(),
-      appBar: AppBar(
-        title: const Text('BrainSync'),
-        backgroundColor: Colors.brown[300],
-        foregroundColor: Colors.white,
-      ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: TextField(
-              controller: searchQuery,
-              onChanged: filterTitles,
-              decoration: const InputDecoration(
-                hintText: 'Search by title',
-              ),
-            ),
-          ),
-          Expanded(
-            child: FutureBuilder<QuerySnapshot>(
-              future: allPosts,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
-                }
-
-                List<DocumentSnapshot> posts = [];
-                if (filteredPosts.isNotEmpty) {
-                  posts = filteredPosts;
-                } else {
-                  posts = snapshot.data!.docs;
-                }
-
-                posts.sort((a, b) {
-                  Timestamp timestampA = a['timestamp'];
-                  Timestamp timestampB = b['timestamp'];
-                  return timestampB.compareTo(timestampA);
-                });
-
-                return ListView.builder(
-                  itemCount: posts.length,
-                  itemBuilder: (context, index) {
-                    DocumentSnapshot post = posts[index];
-                    Post postData =
-                        Post.fromJson(post.data() as Map<String, dynamic>);
-                    return HomePostCard(
-                      postId: post.id,
-                      postData: postData,
-                      title: postData.title,
-                      content: postData.content,
-                      authorName: postData.authorName,
-                      timeStamp: postData.timestamp?.toDate(),
-                      likeCount: postData.likes?.length,
-                      commentCount: postData.commentCount ?? 0,
-                      isLiked: postData.likes
-                          ?.contains(_authService.currentUser!.uid),
-                      isBookmark: bookmarks!.contains(post.id),
-                      likes: postData.likes,
-                      userBookmarks: [],
-                    );
-                  },
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-      bottomNavigationBar: const CustomBottomNavBar(initialIndex: 0),
-    );
-  }
-
-  void loadProfile() async {
+  Future<void> loadProfile() async {
     try {
       DocumentSnapshot? userProfile = await _databaseService.fetchCurrentUser();
       if (userProfile != null && userProfile.exists) {
@@ -160,5 +75,64 @@ class _HomeState extends State<Home> {
     } catch (e) {
       _alertService.showToast(text: 'Error loading profile: $e');
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      drawer: const NavBar(),
+      appBar: AppBar(
+        title: const Text('BrainSync'),
+        backgroundColor: Colors.brown[300],
+        foregroundColor: Colors.white,
+      ),
+      body: FutureBuilder(
+        future: Future.wait([allPosts, loadedProfile]),
+        builder: (context, AsyncSnapshot<List<dynamic>> snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          }
+
+          QuerySnapshot postsSnapshot = snapshot.data![0];
+          List<DocumentSnapshot> posts =
+          filteredPosts.isNotEmpty ? filteredPosts : postsSnapshot.docs;
+          posts.sort((a, b) {
+            Timestamp timestampA = a['timestamp'];
+            Timestamp timestampB = b['timestamp'];
+            return timestampB.compareTo(timestampA);
+          });
+
+          return Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: TextField(
+                  controller: searchQuery,
+                  onChanged: filterTitles,
+                  decoration: const InputDecoration(
+                    hintText: 'Search by title',
+                  ),
+                ),
+              ),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: posts.length,
+                  itemBuilder: (context, index) {
+                    DocumentSnapshot post = posts[index];
+                    return HomePostCard(
+                      postId: post.id,
+                    );
+                  },
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+      bottomNavigationBar: const CustomBottomNavBar(initialIndex: 0),
+    );
   }
 }

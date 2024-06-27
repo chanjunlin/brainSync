@@ -19,13 +19,13 @@ class PostDetailPage extends StatefulWidget {
   final String authorName;
 
   const PostDetailPage({
-    Key? key,
+    super.key,
     required this.postId,
     required this.title,
     required this.content,
     required this.timestamp,
     required this.authorName,
-  }) : super(key: key);
+  });
 
   @override
   _PostDetailPageState createState() => _PostDetailPageState();
@@ -108,6 +108,12 @@ class _PostDetailPageState extends State<PostDetailPage> {
           style: TextStyle(
             color: Colors.white,
           ),
+        ),
+        leading: IconButton(
+          onPressed: () {
+            Navigator.pop(context, "refresh");
+          },
+          icon: const Icon(Icons.arrow_back),
         ),
       ),
       body: Padding(
@@ -266,7 +272,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
                                           Icons.reply,
                                           color: Colors.brown[300],
                                         ),
-                                        label: Text(
+                                        label: const Text(
                                           'Reply',
                                           style: TextStyle(
                                             color: Colors.black,

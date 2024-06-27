@@ -1,9 +1,9 @@
 import 'dart:core';
 
 import 'package:brainsync/services/database_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import 'package:timeago/timeago.dart' as timeago;
 
 import '../model/post.dart';
 import '../pages/Posts/actual_post.dart';
@@ -11,38 +11,11 @@ import '../services/alert_service.dart';
 import '../services/auth_service.dart';
 
 class HomePostCard extends StatefulWidget {
-  bool? isBookmark;
-  bool? isLiked;
-
-  DateTime? timeStamp;
-
-  int? commentCount;
-  int? likeCount;
-
-  Post? postData;
-
-  String? authorName;
-  String? content;
   String? postId;
-  String? title;
-
-  List<dynamic>? likes;
-  List<dynamic>? userBookmarks;
 
   HomePostCard({
     super.key,
-    required this.isBookmark,
-    required this.isLiked,
-    required this.postData,
-    required this.authorName,
-    required this.commentCount,
-    required this.content,
-    required this.likeCount,
     required this.postId,
-    required this.timeStamp,
-    required this.title,
-    required this.likes,
-    required this.userBookmarks,
   });
 
   @override
@@ -56,9 +29,13 @@ class _HomePostCardState extends State<HomePostCard> {
   late AuthService _authService;
   late DatabaseService _databaseService;
 
-  late bool isLiked;
-  late bool isBookmarked;
-  late String formattedDate;
+  bool? isLiked, isBookmarked;
+  DateTime? timeStamp;
+  int? commentCount, likeCount;
+  String? title, content, authorName, postId;
+  List<dynamic>? bookmarks;
+  List<dynamic>? likes;
+  Future<void>? loadedProfile;
 
   @override
   void initState() {
@@ -66,13 +43,65 @@ class _HomePostCardState extends State<HomePostCard> {
     _alertService = _getIt.get<AlertService>();
     _authService = _getIt.get<AuthService>();
     _databaseService = _getIt.get<DatabaseService>();
-    isLiked = widget.isLiked!;
-    isBookmarked = widget.isBookmark!;
-    formattedDate = timeago.format(widget.timeStamp!, locale: 'custom');
+    loadedProfile = loadProfile();
+  }
+
+  @override
+  void dispose() {
+    loadedProfile = null;
+    super.dispose();
+  }
+
+  Future<void> loadProfile() async {
+    try {
+      DocumentSnapshot? userProfile = await _databaseService.fetchCurrentUser();
+      DocumentSnapshot? postSnapshot =
+          await _databaseService.fetchPost(widget.postId!);
+      Post postData = postSnapshot.data() as Post;
+      if (userProfile != null && userProfile.exists) {
+        if (mounted) {
+          setState(() {
+            bookmarks = userProfile.get('bookmarks') ?? [];
+            likes = userProfile.get('myLikedPosts') ?? [];
+            isBookmarked = bookmarks!.contains(postData.id);
+            isLiked = likes!.contains(postData.id);
+            commentCount = postData.commentCount;
+            title = postData.title;
+            content = postData.content;
+            postId = postData.id;
+            authorName = postData.authorName;
+            timeStamp = postData.timestamp?.toDate();
+            likeCount = postData.likes?.length;
+            commentCount = postData.commentCount ?? 0;
+            isLiked = postData.likes?.contains(_authService.currentUser!.uid);
+            isBookmarked = bookmarks!.contains(postData.id);
+          });
+        }
+      } else {
+        _alertService.showToast(text: 'User profile not found');
+      }
+    } catch (e) {
+      _alertService.showToast(text: 'Error loading profile: $e');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    return FutureBuilder<void>(
+      future: loadedProfile,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const SizedBox.shrink();
+        } else if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        } else {
+          return buildCard();
+        }
+      },
+    );
+  }
+
+  Widget buildCard() {
     return Card(
       color: Colors.white,
       shape: RoundedRectangleBorder(
@@ -86,19 +115,22 @@ class _HomePostCardState extends State<HomePostCard> {
       elevation: 5,
       child: InkWell(
         borderRadius: BorderRadius.circular(15.0),
-        onTap: () {
-          Navigator.push(
+        onTap: () async {
+          String result = await Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => PostDetailPage(
-                postId: widget.postId!,
-                title: widget.title!,
-                timestamp: widget.timeStamp!,
-                content: widget.content!,
-                authorName: widget.authorName!,
+                postId: postId!,
+                title: title!,
+                timestamp: timeStamp!,
+                content: content!,
+                authorName: authorName!,
               ),
             ),
           );
+          if (result == "refresh") {
+            loadedProfile = loadProfile();
+          }
         },
         child: Padding(
           padding: const EdgeInsets.all(12),
@@ -110,7 +142,7 @@ class _HomePostCardState extends State<HomePostCard> {
                 children: [
                   Flexible(
                     child: Text(
-                      widget.title!,
+                      title!,
                       style: TextStyle(
                         color: Colors.brown[800],
                         fontSize: 18,
@@ -120,7 +152,7 @@ class _HomePostCardState extends State<HomePostCard> {
                     ),
                   ),
                   Text(
-                    formattedDate,
+                    "asd",
                     style: TextStyle(
                       color: Colors.brown[700],
                       fontSize: 12,
@@ -130,7 +162,7 @@ class _HomePostCardState extends State<HomePostCard> {
               ),
               const SizedBox(height: 6),
               Text(
-                widget.content!,
+                content!,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
@@ -144,44 +176,35 @@ class _HomePostCardState extends State<HomePostCard> {
                 children: [
                   Row(
                     children: [
-                      IconButton(
-                        icon: Icon(
-                          isLiked ? Icons.thumb_up : Icons.thumb_up_outlined,
-                          color: isLiked ? Colors.brown[300] : Colors.grey,
-                        ),
-                        onPressed: () async {
-                          if (isLiked) {
-                            dislikePost(widget.postId!);
-                          } else {
-                            likePost(widget.postId!);
-                          }
-                          setState(() {
-                            isLiked = !isLiked;
-                            if (isLiked) {
-                              widget.likeCount = (widget.likeCount ?? 0) + 1;
-                              if (widget.likes != null) {
-                                widget.likes!
-                                    .add(_authService.currentUser!.uid);
-                              } else {
-                                widget.likes = [_authService.currentUser!.uid];
-                              }
+                      if (isLiked != null)
+                        IconButton(
+                          icon: Icon(
+                            isLiked! ? Icons.thumb_up : Icons.thumb_up_outlined,
+                            color: isLiked!
+                                ? Colors.brown[300]
+                                : Colors.brown[300],
+                          ),
+                          onPressed: () async {
+                            if (isLiked!) {
+                              dislikePost(postId!);
                             } else {
-                              widget.likeCount = (widget.likeCount ?? 0) - 1;
-                              if (widget.likes != null) {
-                                widget.likes!
-                                    .remove(_authService.currentUser!.uid);
-                              }
+                              likePost(postId!);
                             }
-                          });
-                        },
-                      ),
-                      Text(
-                        '${widget.likeCount}',
-                        style: TextStyle(
-                          color: Colors.brown[700],
-                          fontSize: 12,
+                            if (mounted) {
+                              setState(() {
+                                isLiked = !isLiked!;
+                              });
+                            }
+                          },
                         ),
-                      ),
+                      if (isLiked != null)
+                        Text(
+                          '$likeCount',
+                          style: TextStyle(
+                            color: Colors.brown[700],
+                            fontSize: 12,
+                          ),
+                        ),
                     ],
                   ),
                   Row(
@@ -192,7 +215,7 @@ class _HomePostCardState extends State<HomePostCard> {
                       ),
                       const SizedBox(width: 10),
                       Text(
-                        '${widget.commentCount!}',
+                        '$commentCount',
                         style: TextStyle(
                           color: Colors.brown[700],
                           fontSize: 12,
@@ -202,18 +225,20 @@ class _HomePostCardState extends State<HomePostCard> {
                   ),
                   Row(
                     children: [
-                      IconButton(
-                        icon: Icon(
-                          isBookmarked
-                              ? Icons.bookmark
-                              : Icons.bookmark_add_outlined,
-                          color:
-                              isLiked ? Colors.brown[300] : Colors.brown[300],
+                      if (isBookmarked != null)
+                        IconButton(
+                          icon: Icon(
+                            isBookmarked!
+                                ? Icons.bookmark
+                                : Icons.bookmark_add_outlined,
+                            color: isBookmarked!
+                                ? Colors.brown[300]
+                                : Colors.brown[300],
+                          ),
+                          onPressed: () async {
+                            bookmark(postId!, isBookmarked!);
+                          },
                         ),
-                        onPressed: () async {
-                          bookmark(widget.postId!, isBookmarked);
-                        },
-                      ),
                     ],
                   ),
                 ],
@@ -240,9 +265,11 @@ class _HomePostCardState extends State<HomePostCard> {
       } else {
         await _databaseService.removeBookmark(postId);
       }
-      setState(() {
-        isBookmarked = !isBookmark;
-      });
+      if (mounted) {
+        setState(() {
+          isBookmarked = !isBookmark;
+        });
+      }
     } catch (e) {
       _alertService.showToast(
         text: "Error bookmarking post",
