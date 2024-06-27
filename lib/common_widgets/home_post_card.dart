@@ -4,8 +4,10 @@ import 'package:brainsync/services/database_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:timeago/timeago.dart' as timeago;
 
 import '../model/post.dart';
+import '../model/time.dart';
 import '../pages/Posts/actual_post.dart';
 import '../services/alert_service.dart';
 import '../services/auth_service.dart';
@@ -32,7 +34,7 @@ class _HomePostCardState extends State<HomePostCard> {
   bool? isLiked, isBookmarked;
   DateTime? timeStamp;
   int? commentCount, likeCount;
-  String? title, content, authorName, postId;
+  String? title, content, authorName, postId, timeAgo;
   List<dynamic>? bookmarks;
   List<dynamic>? likes;
   Future<void>? loadedProfile;
@@ -44,6 +46,7 @@ class _HomePostCardState extends State<HomePostCard> {
     _authService = _getIt.get<AuthService>();
     _databaseService = _getIt.get<DatabaseService>();
     loadedProfile = loadProfile();
+    timeago.setLocaleMessages('custom', CustomShortMessages());
   }
 
   @override
@@ -56,7 +59,7 @@ class _HomePostCardState extends State<HomePostCard> {
     try {
       DocumentSnapshot? userProfile = await _databaseService.fetchCurrentUser();
       DocumentSnapshot? postSnapshot =
-          await _databaseService.fetchPost(widget.postId!);
+      await _databaseService.fetchPost(widget.postId!);
       Post postData = postSnapshot.data() as Post;
       if (userProfile != null && userProfile.exists) {
         if (mounted) {
@@ -71,6 +74,9 @@ class _HomePostCardState extends State<HomePostCard> {
             postId = postData.id;
             authorName = postData.authorName;
             timeStamp = postData.timestamp?.toDate();
+            timeAgo = timeStamp != null
+                ? timeago.format(timeStamp!, locale: "custom")
+                : "Unknown";
             likeCount = postData.likes?.length;
             commentCount = postData.commentCount ?? 0;
             isLiked = postData.likes?.contains(_authService.currentUser!.uid);
@@ -152,7 +158,7 @@ class _HomePostCardState extends State<HomePostCard> {
                     ),
                   ),
                   Text(
-                    "asd",
+                    "$timeAgo",
                     style: TextStyle(
                       color: Colors.brown[700],
                       fontSize: 12,
@@ -193,6 +199,9 @@ class _HomePostCardState extends State<HomePostCard> {
                             if (mounted) {
                               setState(() {
                                 isLiked = !isLiked!;
+                                isLiked!
+                                    ? likeCount = (likeCount ?? 0) + 1
+                                    : likeCount = (likeCount ?? 0) - 1;
                               });
                             }
                           },
