@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
 import '../const.dart';
+import '../services/alert_service.dart';
 
 class NavBar extends StatefulWidget {
   const NavBar({super.key});
@@ -14,6 +15,7 @@ class NavBar extends StatefulWidget {
 }
 
 class _NavBarState extends State<NavBar> {
+  late AlertService _alertService;
   late DatabaseService _databaseService;
   late NavigationService _navigationService;
 
@@ -25,6 +27,7 @@ class _NavBarState extends State<NavBar> {
   @override
   void initState() {
     super.initState();
+    _alertService = _getIt.get<AlertService>();
     _databaseService = _getIt.get<DatabaseService>();
     _navigationService = _getIt.get<NavigationService>();
     loadProfile();
@@ -52,7 +55,7 @@ class _NavBarState extends State<NavBar> {
                 const SizedBox(height: 10),
                 Text(
                   firstName ?? 'No Name',
-                  style: TextStyle(color: Colors.white),
+                  style: const TextStyle(color: Colors.white),
                 ),
               ],
             ),
@@ -89,10 +92,16 @@ class _NavBarState extends State<NavBar> {
           completedModules = userProfile.get("completedModules") ?? [];
         });
       } else {
-        print('User profile not found');
+        _alertService.showToast(
+          text: 'User profile not found',
+          icon: Icons.error,
+        );
       }
     } catch (e) {
-      print('Error loading profile: $e');
+      _alertService.showToast(
+        text: 'Error loading profile: $e',
+        icon: Icons.error,
+      );
     }
   }
 }

@@ -386,7 +386,8 @@ class DatabaseService {
   }
 
   // Remove modules from the user's schedule
-  Future<void> removeModule(String userId, String moduleCode, String moduleCredit) async {
+  Future<void> removeModule(
+      String userId, String moduleCode, String moduleCredit) async {
     try {
       DocumentSnapshot userDoc =
           await _firebaseFirestore.collection('users').doc(userId).get();
@@ -435,8 +436,37 @@ class DatabaseService {
           await _postCollection!.orderBy('timestamp', descending: true).get();
       return querySnapshot;
     } catch (e) {
-      print(e);
-      throw (e);
+      rethrow;
+    }
+  }
+
+  // Fetching DocumentSnapshot of specific post
+  Future<DocumentSnapshot> fetchPost(String postId) async {
+    return await _postCollection!.doc(postId).get();
+  }
+
+  // Fetching user's bookmarked posts
+  Future<List<DocumentSnapshot>> fetchBookmarkedPosts() async {
+    try {
+      DocumentSnapshot? userDocs = await fetchCurrentUser();
+      if (userDocs != null && userDocs.exists) {
+        Map<String, dynamic> userData = userDocs.data() as Map<String, dynamic>;
+        List<dynamic> bookmarkedPostIds = userData['bookmarks'] ?? [];
+        List<DocumentSnapshot> bookmarkedPosts = [];
+        for (var postId in bookmarkedPostIds) {
+          DocumentSnapshot postSnapshot = await FirebaseFirestore.instance
+              .collection('posts')
+              .doc(postId)
+              .get();
+          bookmarkedPosts.add(postSnapshot);
+        }
+        return bookmarkedPosts;
+      } else {
+        throw "error";
+      }
+    } catch (e) {
+      _alertService.showToast(text: "User profile doesn't exists.");
+      rethrow;
     }
   }
 

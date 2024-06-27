@@ -1,104 +1,74 @@
+import 'package:brainsync/services/navigation_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import 'package:timeago/timeago.dart' as timeago;
 
-import '../../model/time.dart';
+import '../../common_widgets/home_post_card.dart';
+import '../../model/post.dart'; // Assuming your Post model is correctly defined here
 import '../../services/auth_service.dart';
-import '../Posts/actual_post.dart';
+import '../../services/database_service.dart';
 
 class BookmarkedPosts extends StatefulWidget {
-  const BookmarkedPosts({super.key});
+  const BookmarkedPosts({
+    Key? key,
+  }) : super(key: key);
 
   @override
   _BookmarkedPostsState createState() => _BookmarkedPostsState();
 }
 
 class _BookmarkedPostsState extends State<BookmarkedPosts> {
+  final GetIt _getIt = GetIt.instance;
+  Map<String, bool> _bookmarks = {}; // Changed to non-late to update in initState
+
   late String userID;
   late AuthService _authService;
-  final GetIt _getIt = GetIt.instance;
-
-  final Map<String, bool> _bookmarks = {};
+  late DatabaseService _databaseService;
+  late NavigationService _navigationService;
+  late Future<List<DocumentSnapshot>> bookmarkedPosts;
+  late Future<void> loadedBookmarks;
 
   @override
   void initState() {
     super.initState();
     _authService = _getIt.get<AuthService>();
+    _databaseService = _getIt.get<DatabaseService>();
+    _navigationService = _getIt.get<NavigationService>();
     userID = _authService.currentUser!.uid;
-    timeago.setLocaleMessages('custom', CustomShortMessages());
-    loadBookmarks();
-  }
-
-  Future<void> likePost(String postId) async {
-    try {
-      await FirebaseFirestore.instance.collection('posts').doc(postId).update({
-        'likes': FieldValue.arrayUnion([userID])
-      });
-    } on FirebaseException catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Error liking post')),
-      );
-    }
-  }
-
-  Future<void> dislikePost(String postId) async {
-    try {
-      await FirebaseFirestore.instance.collection('posts').doc(postId).update({
-        'likes': FieldValue.arrayRemove([userID])
-      });
-    } on FirebaseException catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Error disliking post')),
-      );
-    }
-  }
-
-  Future<void> bookmark(String postId, bool isBookmark) async {
-    try {
-      final userRef =
-          FirebaseFirestore.instance.collection('users').doc(userID);
-
-      if (isBookmark) {
-        await userRef.update({
-          'bookmarks': FieldValue.arrayRemove([postId])
-        });
-      } else {
-        await userRef.update({
-          'bookmarks': FieldValue.arrayUnion([postId])
-        });
-      }
-
-      setState(() {
-        _bookmarks[postId] = !isBookmark;
-      });
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Error bookmarking post')),
-      );
-    }
+    bookmarkedPosts = _databaseService.fetchBookmarkedPosts();
+    loadedBookmarks = loadBookmarks();
   }
 
   Future<void> loadBookmarks() async {
     try {
       final userRef =
-          FirebaseFirestore.instance.collection('users').doc(userID);
+      FirebaseFirestore.instance.collection('users').doc(userID);
       final userSnapshot = await userRef.get();
 
       if (userSnapshot.exists) {
         List<String> bookmarks =
-            List<String>.from(userSnapshot.data()?['bookmarks'] ?? []);
+        List<String>.from(userSnapshot.data()?['bookmarks'] ?? []);
         setState(() {
+          _bookmarks.clear();
           for (var postId in bookmarks) {
             _bookmarks[postId] = true;
           }
         });
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Error loading bookmarks')),
-      );
+      rethrow;
     }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    bookmarkedPosts = _databaseService.fetchBookmarkedPosts();
+    loadBookmarks();
+  }
+
+  Future<void> refresh() {
+    return Future.delayed(Duration(seconds: 2));
   }
 
   @override
@@ -111,187 +81,58 @@ class _BookmarkedPostsState extends State<BookmarkedPosts> {
           "Bookmarked posts",
           style: TextStyle(color: Colors.white),
         ),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            _navigationService.pushName("/home");
+          },
+        ),
       ),
-      body: StreamBuilder<DocumentSnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection('users')
-            .doc(userID)
-            .snapshots(),
-        builder: (context, userSnapshot) {
-          if (userSnapshot.connectionState == ConnectionState.waiting) {
+      body: FutureBuilder<List<DocumentSnapshot>>(
+        future: bookmarkedPosts,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          if (!userSnapshot.hasData || !userSnapshot.data!.exists) {
-            return const Center(child: Text('No saved posts'));
+          if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
           }
 
-          final userDoc = userSnapshot.data!;
-          List<String> bookmarks =
-              List<String>.from(userDoc['bookmarks'] ?? []);
-
-          return StreamBuilder<QuerySnapshot>(
-            stream: FirebaseFirestore.instance
-                .collection('posts')
-                .where(FieldPath.documentId, whereIn: bookmarks)
-                .snapshots(),
-            builder: (context, postSnapshot) {
-              if (postSnapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              }
-
-              if (!postSnapshot.hasData || postSnapshot.data!.docs.isEmpty) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Image.asset("assets/img/brain.png"),
-                      const Text(
-                        'The Silence Is Deafening',
-                        style:
-                            TextStyle(color: Color.fromARGB(255, 78, 52, 46)),
-                      ),
-                      SizedBox(width: 60),
-                    ],
+          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Image.asset("assets/img/brain.png"),
+                  const Text(
+                    'No bookmarked posts',
+                    style: TextStyle(color: Color.fromARGB(255, 78, 52, 46)),
                   ),
-                );
+                  const SizedBox(width: 60),
+                ],
+              ),
+            );
+          }
+
+          final bookmarkedPosts = snapshot.data!;
+
+          return ListView.builder(
+            itemCount: bookmarkedPosts.length,
+            itemBuilder: (context, index) {
+              DocumentSnapshot postSnapshot = bookmarkedPosts[index];
+              if (!postSnapshot.exists) {
+                return const SizedBox.shrink();
               }
-
-              final bookmarkedPosts = postSnapshot.data!.docs;
-
-              return ListView.builder(
-                itemCount: bookmarkedPosts.length,
-                itemBuilder: (context, index) {
-                  final post =
-                      bookmarkedPosts[index].data() as Map<String, dynamic>;
-                  final postId = bookmarkedPosts[index].id;
-                  final timestamp = post['timestamp'] as Timestamp;
-                  final date = timestamp.toDate();
-                  final formattedDate = timeago.format(date, locale: 'custom');
-                  final likes = post['likes'] ?? [];
-                  final isLiked = likes.contains(userID);
-                  final likeCount = likes.length;
-                  final commentCount = post['commentCount'] ?? 0;
-                  final isBookmarked = _bookmarks[postId] ?? true;
-
-                  return Card(
-                    color: Colors.white,
-                    shape: const RoundedRectangleBorder(
-                      side: BorderSide(color: Colors.brown, width: 1.0),
-                      borderRadius: BorderRadius.zero,
-                    ),
-                    margin: const EdgeInsets.all(0),
-                    child: InkWell(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => PostDetailPage(
-                              postId: postId,
-                              title: post['title'],
-                              timestamp: date,
-                              content: post['content'],
-                              authorName: post['authorName'],
-                            ),
-                          ),
-                        );
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.all(10),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  post['title'],
-                                  style: TextStyle(
-                                    color: Colors.brown[800],
-                                    fontSize: 25,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                Text(
-                                  formattedDate,
-                                  style:
-                                      TextStyle(color: Colors.brown.shade800),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 10),
-                            Text(
-                              post['content'],
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                  fontSize: 15, color: Colors.brown[800]),
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                IconButton(
-                                  icon: Icon(
-                                    isLiked
-                                        ? Icons.thumb_up
-                                        : Icons.thumb_up_outlined,
-                                    color: isLiked
-                                        ? Colors.brown[300]
-                                        : Colors.grey,
-                                  ),
-                                  onPressed: () {
-                                    isLiked
-                                        ? dislikePost(postId)
-                                        : likePost(postId);
-                                  },
-                                ),
-                                const SizedBox(width: 5),
-                                Text('$likeCount',
-                                    style: TextStyle(color: Colors.brown[800])),
-                                const SizedBox(width: 90),
-                                IconButton(
-                                  icon: const Icon(
-                                    Icons.comment,
-                                    color: Color.fromARGB(255, 161, 136, 127),
-                                  ),
-                                  onPressed: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => PostDetailPage(
-                                          postId: postId,
-                                          title: post['title'],
-                                          timestamp: date,
-                                          content: post['content'],
-                                          authorName: post['authorName'],
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                ),
-                                const SizedBox(width: 5),
-                                Text('$commentCount',
-                                    style: TextStyle(color: Colors.brown[800])),
-                                const SizedBox(width: 90),
-                                IconButton(
-                                  icon: Icon(
-                                    Icons.bookmark,
-                                    color: Colors.brown[300],
-                                  ),
-                                  onPressed: () {
-                                    bookmark(postId, isBookmarked);
-                                  },
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              );
+              String postId = postSnapshot.id;
+              if (_bookmarks.containsKey(postId)) {
+                return HomePostCard(
+                  postId: postId,
+                );
+              } else {
+                return const SizedBox.shrink();
+              }
             },
           );
         },
