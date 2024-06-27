@@ -114,7 +114,6 @@ class _BookmarkedPostsState extends State<BookmarkedPosts> {
           }
 
           final bookmarkedPosts = snapshot.data!;
-
           return ListView.builder(
             itemCount: bookmarkedPosts.length,
             itemBuilder: (context, index) {
