@@ -78,17 +78,17 @@ class UserProfile {
     data['pfpURL'] = pfpURL;
     data['profileCoverURL'] = profileCoverURL;
     data['uid'] = uid;
-    data['year'] = year;
-    data['bookmarks'] = bookmarks;
-    data['chats'] = chats;
-    data['completedModules'] = completedModules;
-    data['currentModules'] = currentModules;
-    data['friendList'] = friendList;
-    data['friendReqList'] = friendReqList;
-    data['myComments'] = myComments;
-    data['myLikedComments'] = myLikedComments;
-    data['myPosts'] = myPosts;
-    data['myLikedPosts'] = myLikedPosts;
+    data['year'] = year ?? "Year 1";
+    data['bookmarks'] = bookmarks ?? [];
+    data['chats'] = chats ?? [];
+    data['completedModules'] = completedModules ?? [];
+    data['currentModules'] = currentModules ?? [];
+    data['friendList'] = friendList ?? [];
+    data['friendReqList'] = friendReqList ?? [];
+    data['myComments'] = myComments ?? [];
+    data['myLikedComments'] = myLikedComments ?? [];
+    data['myPosts'] = myPosts ?? [];
+    data['myLikedPosts'] = myLikedPosts ?? [];
 
     return data;
   }

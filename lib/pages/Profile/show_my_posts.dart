@@ -1,4 +1,4 @@
-import 'package:brainsync/common_widgets/post_card.dart';
+import 'package:brainsync/common_widgets/home_post_card.dart';
 import 'package:brainsync/services/database_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -58,11 +58,8 @@ class _ShowMyPostsState extends State<ShowMyPosts> {
               padding: EdgeInsets.zero,
               itemCount: posts.length,
               itemBuilder: (context, index) {
-                var postData = posts[index].data() as Map<String, dynamic>;
-                return PostCard(
+                return HomePostCard(
                   postId: posts[index].id,
-                  postData: postData,
-                  onLikeChanged: () => setState(() {}),
                 );
               },
             );

@@ -308,7 +308,7 @@ class DatabaseService {
   }
 
   // Reject friend request
-  Future<void> rejectFriendRequest(String receiverUid, String senderUid) async {
+  Future<void> rejectFriendRequest(String senderUid, String receiverUid) async {
     await _firebaseFirestore.collection('users').doc(receiverUid).update({
       'friendReqList': FieldValue.arrayRemove([senderUid])
     });

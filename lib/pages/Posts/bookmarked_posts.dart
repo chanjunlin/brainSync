@@ -4,14 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
 import '../../common_widgets/home_post_card.dart';
-import '../../model/post.dart'; // Assuming your Post model is correctly defined here
 import '../../services/auth_service.dart';
 import '../../services/database_service.dart';
 
 class BookmarkedPosts extends StatefulWidget {
   const BookmarkedPosts({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   _BookmarkedPostsState createState() => _BookmarkedPostsState();
@@ -19,7 +18,7 @@ class BookmarkedPosts extends StatefulWidget {
 
 class _BookmarkedPostsState extends State<BookmarkedPosts> {
   final GetIt _getIt = GetIt.instance;
-  Map<String, bool> _bookmarks = {}; // Changed to non-late to update in initState
+  final Map<String, bool> _bookmarks = {};
 
   late String userID;
   late AuthService _authService;
@@ -42,12 +41,12 @@ class _BookmarkedPostsState extends State<BookmarkedPosts> {
   Future<void> loadBookmarks() async {
     try {
       final userRef =
-      FirebaseFirestore.instance.collection('users').doc(userID);
+          FirebaseFirestore.instance.collection('users').doc(userID);
       final userSnapshot = await userRef.get();
 
       if (userSnapshot.exists) {
         List<String> bookmarks =
-        List<String>.from(userSnapshot.data()?['bookmarks'] ?? []);
+            List<String>.from(userSnapshot.data()?['bookmarks'] ?? []);
         setState(() {
           _bookmarks.clear();
           for (var postId in bookmarks) {
@@ -65,10 +64,6 @@ class _BookmarkedPostsState extends State<BookmarkedPosts> {
     super.didChangeDependencies();
     bookmarkedPosts = _databaseService.fetchBookmarkedPosts();
     loadBookmarks();
-  }
-
-  Future<void> refresh() {
-    return Future.delayed(Duration(seconds: 2));
   }
 
   @override
@@ -106,9 +101,11 @@ class _BookmarkedPostsState extends State<BookmarkedPosts> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Image.asset("assets/img/brain.png"),
-                  const Text(
+                  Text(
                     'No bookmarked posts',
-                    style: TextStyle(color: Color.fromARGB(255, 78, 52, 46)),
+                    style: TextStyle(
+                      color: Colors.brown[700],
+                    ),
                   ),
                   const SizedBox(width: 60),
                 ],

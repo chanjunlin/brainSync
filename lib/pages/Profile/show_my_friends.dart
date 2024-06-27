@@ -8,6 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
 class ShowMyFriends extends StatefulWidget {
+  const ShowMyFriends({super.key});
+
   @override
   State<ShowMyFriends> createState() => _ShowMyFriendsState();
 }
@@ -41,7 +43,6 @@ class _ShowMyFriendsState extends State<ShowMyFriends> {
             itemCount: snapshot.data!.length,
             itemBuilder: (context, index) {
               UserProfile? friend = snapshot.data![index];
-              print(friend!.uid);
               return CustomChatTile(
                 leading: CircleAvatar(
                   backgroundImage:

@@ -92,6 +92,10 @@ flutter:
     - assets/img/people.png
     - assets/img/google.png
     - assets/img/brain.png
+    - assets/img/meditating_brain.png
+    - assets/img/happy_brain.png
+
+
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

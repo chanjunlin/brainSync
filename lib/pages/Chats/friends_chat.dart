@@ -15,6 +15,8 @@ import '../../services/navigation_service.dart';
 import 'chat_page.dart';
 
 class FriendsChats extends StatefulWidget {
+  const FriendsChats({super.key});
+
   @override
   FriendsChatsState createState() => FriendsChatsState();
 }
@@ -26,6 +28,9 @@ class FriendsChatsState extends State<FriendsChats> {
   late AuthService _authService;
   late DatabaseService _databaseService;
   late NavigationService _navigationService;
+
+  late Future<void> listenedToChats;
+  late Future<void> loadedProfile;
 
   List<String>? chats;
   String? userProfilePfp, firstName, lastName;
@@ -41,8 +46,8 @@ class FriendsChatsState extends State<FriendsChats> {
     _alertService = _getIt.get<AlertService>();
     _databaseService = _getIt.get<DatabaseService>();
     _navigationService = _getIt.get<NavigationService>();
-    loadProfile();
-    listenToChats();
+    loadedProfile = loadProfile();
+    listenedToChats = listenToChats();
   }
 
   @override
@@ -52,7 +57,7 @@ class FriendsChatsState extends State<FriendsChats> {
     super.dispose();
   }
 
-  void loadProfile() async {
+  Future<void> loadProfile() async {
     try {
       DocumentSnapshot? userProfile = await _databaseService.fetchCurrentUser();
       if (userProfile != null && userProfile.exists) {
@@ -83,7 +88,7 @@ class FriendsChatsState extends State<FriendsChats> {
     }
   }
 
-  void listenToChats() {
+  Future<void> listenToChats() async {
     chatsSubscription =
         _databaseService.getAllUserChatsStream().listen((querySnapshot) {
       if (querySnapshot.docs.isNotEmpty) {
@@ -106,6 +111,13 @@ class FriendsChatsState extends State<FriendsChats> {
             }
           }
         }
+
+        chats!.sort((a, b) {
+          Timestamp? aTimestamp = lastMessageTimestamps[a];
+          Timestamp? bTimestamp = lastMessageTimestamps[b];
+          if (aTimestamp == null || bTimestamp == null) return 0;
+          return bTimestamp.compareTo(aTimestamp);
+        });
       } else {
         setState(() {
           chats = [];
@@ -123,8 +135,9 @@ class FriendsChatsState extends State<FriendsChats> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Friends & Chats'),
+        title: const Text('Chats'),
         backgroundColor: Colors.brown[300],
         foregroundColor: Colors.white,
         automaticallyImplyLeading: false,
@@ -133,13 +146,25 @@ class FriendsChatsState extends State<FriendsChats> {
           ? SingleChildScrollView(
               padding: const EdgeInsets.all(16.0),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   if (chats!.isEmpty)
-                    const Center(
-                      child: Text(
-                        'No chats available.',
-                        style: TextStyle(fontSize: 16),
+                    Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Image.asset("assets/img/meditating_brain.png"),
+                          Text(
+                            'No active chats',
+                            style: TextStyle(
+                              fontSize: 20,
+                              color: Colors.brown[700],
+                            ),
+                          ),
+                          const SizedBox(width: 60),
+                        ],
                       ),
                     )
                   else
@@ -154,11 +179,13 @@ class FriendsChatsState extends State<FriendsChats> {
                           builder: (context, snapshot) {
                             if (snapshot.connectionState ==
                                 ConnectionState.waiting) {
-                              return const Center(
-                                  child: CircularProgressIndicator());
+                              return const SizedBox.shrink();
                             } else if (snapshot.hasError) {
                               return Center(
-                                  child: Text('Error: ${snapshot.error}'));
+                                child: Text(
+                                  'Error: ${snapshot.error}',
+                                ),
+                              );
                             } else if (snapshot.hasData &&
                                 snapshot.data != null) {
                               DocumentSnapshot<Object?> chatDetails =
@@ -184,12 +211,12 @@ class FriendsChatsState extends State<FriendsChats> {
                                 builder: (context, userSnapshot) {
                                   if (userSnapshot.connectionState ==
                                       ConnectionState.waiting) {
-                                    return const Center(
-                                        child: CircularProgressIndicator());
+                                    return const SizedBox.shrink();
                                   } else if (userSnapshot.hasError) {
                                     return Center(
-                                        child: Text(
-                                            'Error: ${userSnapshot.error}'));
+                                      child:
+                                          Text('Error: ${userSnapshot.error}'),
+                                    );
                                   } else if (userSnapshot.hasData &&
                                       userSnapshot.data != null) {
                                     UserProfile otherUser =

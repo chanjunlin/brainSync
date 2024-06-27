@@ -112,12 +112,18 @@ class _ShowModuleState extends State<ShowModule> {
               color: Colors.grey[600],
             ),
           ),
+          const SizedBox(height: 8),
           if (isCurrent)
             ElevatedButton(
               onPressed: () {
                 _navigationService.pushName("/nusMods");
               },
-              child: const Text("Add module"),
+              child: Text(
+                "Add module",
+                style: TextStyle(
+                  color: Colors.brown[700],
+                ),
+              ),
             ),
         ],
       );
