@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
 import '../../common_widgets/custom_form_field.dart';
-import '../../const.dart';
+import '../../miscellaneous/const.dart';
 import '../../services/alert_service.dart';
 import '../../services/auth_service.dart';
 import '../../services/database_service.dart';

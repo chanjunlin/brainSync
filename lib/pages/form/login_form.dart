@@ -1,6 +1,6 @@
 import 'package:brainsync/common_widgets/custom_form_field.dart';
 import 'package:brainsync/common_widgets/square_tile.dart';
-import 'package:brainsync/const.dart';
+import 'package:brainsync/miscellaneous/const.dart';
 import 'package:brainsync/pages/Administation/forget_password.dart';
 import 'package:brainsync/services/alert_service.dart';
 import 'package:brainsync/services/auth_service.dart';

@@ -5,7 +5,7 @@ import 'package:brainsync/model/chat.dart';
 import 'package:brainsync/model/message.dart';
 import 'package:brainsync/services/database_service.dart';
 import 'package:brainsync/services/storage_service.dart';
-import 'package:brainsync/utils.dart';
+import 'package:brainsync/miscellaneous/utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dash_chat_2/dash_chat_2.dart';
 import 'package:flutter/material.dart';

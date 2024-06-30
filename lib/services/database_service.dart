@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:brainsync/model/post.dart';
 import 'package:brainsync/model/user_profile.dart';
 import 'package:brainsync/services/alert_service.dart';
-import 'package:brainsync/utils.dart';
+import 'package:brainsync/miscellaneous/utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get_it/get_it.dart';
 

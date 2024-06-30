@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:brainsync/common_widgets/dialog.dart';
 import 'package:brainsync/common_widgets/edit_list_field.dart';
 import 'package:brainsync/common_widgets/edit_text_field.dart';
-import 'package:brainsync/const.dart';
+import 'package:brainsync/miscellaneous/const.dart';
 import 'package:brainsync/services/alert_service.dart';
 import 'package:brainsync/services/auth_service.dart';
 import 'package:brainsync/services/database_service.dart';
@@ -14,7 +14,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
-import '../../main.dart';
+import '../../miscellaneous/main.dart';
 
 class EditProfilePage extends StatefulWidget {
   const EditProfilePage({super.key});

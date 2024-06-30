@@ -5,7 +5,6 @@ import 'package:brainsync/pages/Profile/edit_profile.dart';
 import 'package:brainsync/pages/Profile/profile.dart';
 import 'package:brainsync/pages/home.dart';
 import 'package:brainsync/pages/notifications.dart';
-import 'package:brainsync/testing.dart';
 import 'package:flutter/material.dart';
 
 import '../pages/Chats/friends_chat.dart';
@@ -23,7 +22,6 @@ class NavigationService {
     "/editProfile": (context) => const EditProfilePage(),
     "/post": (context) => PostsPage(),
     "/friendsChat": (context) => FriendsChats(),
-    "/testing": (context) => const Testing(),
     "/notifications": (context) => const Notifications(),
     "/nusMods": (context) => const ModuleListPage(),
     "/saved": (context) => const BookmarkedPosts(),

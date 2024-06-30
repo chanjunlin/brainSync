@@ -2,7 +2,7 @@ import 'package:brainsync/services/navigation_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
-import '../../main.dart';
+import '../../miscellaneous/main.dart';
 import '../../services/api_service.dart';
 import '../Modules/module_page.dart';
 

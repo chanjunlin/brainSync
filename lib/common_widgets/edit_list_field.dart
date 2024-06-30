@@ -3,7 +3,7 @@ import 'package:brainsync/services/database_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
-import '../main.dart';
+import '../miscellaneous/main.dart';
 import '../pages/Modules/module_page.dart';
 import '../services/api_service.dart';
 import '../services/navigation_service.dart';

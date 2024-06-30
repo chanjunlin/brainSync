@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:brainsync/const.dart';
+import 'package:brainsync/miscellaneous/const.dart';
 import 'package:brainsync/pages/Profile/show_my_friends.dart';
 import 'package:brainsync/pages/Profile/show_my_modules.dart';
 import 'package:brainsync/pages/Profile/show_my_posts.dart';
@@ -14,7 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
 import '../../common_widgets/bottomBar.dart';
-import '../../main.dart';
+import '../../miscellaneous/main.dart';
 
 class Profile extends StatefulWidget {
   const Profile({super.key});
