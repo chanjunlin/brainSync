@@ -1,0 +1,110 @@
+import 'package:brainsync/pages/form/login_form.dart';
+import 'package:brainsync/services/navigation_service.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:get_it/get_it.dart';
+import 'package:mockito/mockito.dart';
+import 'package:brainsync/services/auth_service.dart';
+import 'package:brainsync/services/alert_service.dart';
+
+class MockAuthService extends Mock implements AuthService {
+  @override
+  Future<bool> login(String email, String password) {
+    return super.noSuchMethod(
+      Invocation.method(#login, [email, password]),
+      returnValue: Future.value(true), // Provide a default return value
+      returnValueForMissingStub: Future.value(true),
+    );
+  }
+}
+
+class MockAlertService extends Mock implements AlertService {}
+
+class MockNavigationService extends Mock implements NavigationService {}
+
+void main() {
+  group('Login Page Widget Tests', () {
+    late MockAuthService authService;
+    late MockAlertService alertService;
+    late MockNavigationService navigationService;
+
+    setUp(() {
+      authService = MockAuthService();
+      alertService = MockAlertService();
+      navigationService = MockNavigationService();
+
+      final getIt = GetIt.instance;
+      getIt.registerSingleton<AuthService>(authService);
+      getIt.registerSingleton<AlertService>(alertService);
+      getIt.registerSingleton<NavigationService>(navigationService);
+    });
+
+    tearDown(() {
+      GetIt.instance.reset();
+    });
+
+    testWidgets('Login Button Should Trigger Login Process', (WidgetTester tester) async {
+      bool navigatedToHome= false;
+      
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(body: LoginForm(setLoading: (_) {}, navigateToHome: () {
+          navigatedToHome = true;
+        })),
+      ));
+      
+      await tester.pump();
+      
+      var emailField = find.byKey(const Key('emailField'));
+      var passwordField = find.byKey(const Key('passwordField'));
+      var button = find.text("Login");
+      var googlebutton = find.text("Sign in with Google");
+      
+      expect(emailField, findsOneWidget);
+      expect(passwordField, findsOneWidget);
+      expect(button, findsOneWidget);
+      expect(googlebutton, findsOneWidget);
+
+      when(authService.login('wuchenfeng0214@gmail.com', 'Palkia123!')).thenAnswer((_) async => true); //using this account as an example
+      
+      await tester.enterText(emailField, 'wuchenfeng0214@gmail.com');
+      await tester.enterText(passwordField, 'Palkia123!');
+      await tester.tap(button);
+      await tester.tap(googlebutton);
+      await tester.pumpAndSettle();
+
+      verify(authService.login('wuchenfeng0214@gmail.com', 'Palkia123!')).called(1);
+
+      expect(navigatedToHome, isTrue);
+
+    });
+    testWidgets("forget password button leads to forget password page", (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(body: LoginForm(setLoading: (_) {}, navigateToHome: () {
+        } )),
+      ));
+      
+      await tester.pump();
+
+      var forgetPassword = find.text('Forget Your Password?');
+
+      expect(forgetPassword, findsOneWidget);
+
+      await tester.tap(forgetPassword);
+      await tester.pumpAndSettle();
+      
+      expect(find.text('Forgot Password?'), findsOneWidget);
+    });
+    /*testWidgets("sign up button leads to sign up page", (WidgetTester tester) async {
+      await tester.pumpWidget(const MaterialApp(
+        home: Scaffold(body: LoginPage(),),
+      ));
+      
+      await tester.pump();
+
+      var signupbutton = find.text('Sign Up');
+
+      expect(signupbutton, findsOneWidget);
+
+    });*/
+  });
+}

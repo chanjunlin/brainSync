@@ -65,6 +65,7 @@ class SignUpFormState extends State<SignUpForm> {
               children: [
                 Expanded(
                   child: CustomFormField(
+                    key: Key('firstNameField'),
                     labelText: "First Name",
                     hintText: "First Name",
                     height: MediaQuery.sizeOf(context).height * 0.09,
@@ -79,6 +80,7 @@ class SignUpFormState extends State<SignUpForm> {
                 SizedBox(width: 16),
                 Expanded(
                   child: CustomFormField(
+                    key: Key('lastNameField'),
                     labelText: "Last Name",
                     hintText: "Last Name",
                     height: MediaQuery.sizeOf(context).height * 0.09,
@@ -94,6 +96,7 @@ class SignUpFormState extends State<SignUpForm> {
               ],
             ),
             CustomFormField(
+              key: Key('emailField'),
               labelText: "Email",
               hintText: "Email",
               height: MediaQuery.sizeOf(context).height * 0.09,
@@ -106,6 +109,7 @@ class SignUpFormState extends State<SignUpForm> {
               },
             ),
             CustomFormField(
+              key: Key('passwordField'),
               labelText: "Password",
               hintText: "Password",
               height: MediaQuery.sizeOf(context).height * 0.09,
@@ -118,6 +122,7 @@ class SignUpFormState extends State<SignUpForm> {
               },
             ),
             CustomFormField(
+              key: Key('repasswordField'),
               labelText: "Retype Password",
               hintText: "Retype Password",
               height: MediaQuery.sizeOf(context).height * 0.09,
@@ -130,6 +135,7 @@ class SignUpFormState extends State<SignUpForm> {
               },
             ),
             DropdownButtonFormField<String>(
+              key: Key('yearField'),
               decoration: InputDecoration(
                 labelText: "Year",
                 filled: true,
@@ -177,6 +183,7 @@ class SignUpFormState extends State<SignUpForm> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
+                key: Key('signupbutton'),
                 style: FilledButton.styleFrom(
                   backgroundColor: Colors.brown[300],
                   foregroundColor: Colors.white,

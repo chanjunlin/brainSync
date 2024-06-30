@@ -28,8 +28,11 @@ class _LoginFormState extends State<LoginForm> {
   late AlertService _alertService;
   late AuthService _authService;
 
-  String? email, password;
+  String email = ""; // Initialize with empty string
+  String password = ""; // Initialize with empty string
   bool _obscurePassword = true; // Added to manage password visibility
+  
+   // Added to manage password visibility
 
   @override
   void initState() {
@@ -53,17 +56,19 @@ class _LoginFormState extends State<LoginForm> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               CustomFormField(
+                key: const Key('emailField'),
                 labelText: "Email",
                 hintText: "Enter a valid email",
                 height: MediaQuery.sizeOf(context).height * 0.07,
                 validationRegEx: EMAIL_VALIDATION_REGEX,
                 onSaved: (value) {
                   setState(() {
-                    email = value;
+                    email = value ?? "";
                   });
                 },
               ),
               CustomFormField(
+                key: const Key('passwordField'),
                 labelText: "Password",
                 hintText: "Enter a valid password",
                 obscureText: _obscurePassword, // Use the obscurePassword variable
@@ -81,7 +86,7 @@ class _LoginFormState extends State<LoginForm> {
                 validationRegEx: PASSWORD_VALIDATION_REGEX,
                 onSaved: (value) {
                   setState(() {
-                    password = value;
+                    password = value ?? "";
                   });
                 },
               ),
