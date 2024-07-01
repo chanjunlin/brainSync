@@ -83,6 +83,7 @@ class _HomeState extends State<Home> with RouteAware {
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: const NavBar(),
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.brown[300],
         foregroundColor: Colors.white,
@@ -151,21 +152,38 @@ class _HomeState extends State<Home> with RouteAware {
             return timestampB.compareTo(timestampA);
           });
 
-          return Column(
-            children: [
-              Expanded(
-                child: ListView.builder(
-                  itemCount: posts.length,
-                  itemBuilder: (context, index) {
-                    DocumentSnapshot post = posts[index];
-                    return HomePostCard(
-                      postId: post.id,
-                    );
-                  },
-                ),
-              ),
-            ],
-          );
+          return posts.isEmpty
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Image.asset("assets/img/brain.png"),
+                      Text(
+                        'No posts',
+                        style: TextStyle(
+                          fontSize: 20,
+                          color: Colors.brown[700],
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              : Column(
+                  children: [
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: posts.length,
+                        itemBuilder: (context, index) {
+                          DocumentSnapshot post = posts[index];
+                          return HomePostCard(
+                            postId: post.id,
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                );
         },
       ),
       bottomNavigationBar: const CustomBottomNavBar(initialIndex: 0),
