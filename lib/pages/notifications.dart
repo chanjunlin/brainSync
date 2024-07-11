@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:brainsync/common_widgets/friend_request_card.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
@@ -48,6 +49,12 @@ class _NotificationsState extends State<Notifications> {
 
   @override
   Widget build(BuildContext context) {
+    final message =
+        ModalRoute.of(context)?.settings.arguments as RemoteMessage?;
+    print(message);
+    if (message != null) {
+      print(message.data.toString());
+    }
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(

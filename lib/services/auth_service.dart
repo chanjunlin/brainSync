@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
-import '../miscellaneous/const.dart';
+import '../const.dart';
 import '../model/user_profile.dart';
 
 class AuthService {
@@ -58,10 +58,14 @@ class AuthService {
     return false;
   }
 
-  Future<void> signInWithGoogle(BuildContext context) async {
+  Future<bool> signInWithGoogle(BuildContext context) async {
     try {
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-      if (googleUser == null) return;
+      if (googleUser == null)
+        {
+          _firebaseAuth.signOut();
+          return false;
+        }
 
       final GoogleSignInAuthentication googleAuth =
           await googleUser.authentication;
@@ -92,13 +96,18 @@ class AuthService {
               chats: chats,
             ),
           );
+          return true;
         } else {
-          UserProfile userProfile =
-              await getUserProfile(userCredential.user!.uid);
-          await userCredential.user!.updateDisplayName(userProfile.firstName);
+          signOut();
+          return false;
+          // UserProfile userProfile =
+          //     await getUserProfile(userCredential.user!.uid);
+          // await userCredential.user!.updateDisplayName(userProfile.firstName);
         }
       }
+      return false;
     } catch (e) {
+      print(e);
       rethrow;
     }
   }
@@ -158,7 +167,7 @@ class AuthService {
       }
     } catch (e) {
       print('Error retrieving user profile: $e');
-      throw e;
+      rethrow;
     }
   }
 
@@ -168,7 +177,7 @@ class AuthService {
       print("Profile created");
     } catch (e) {
       print('Error creating user profile: $e');
-      throw e;
+      rethrow;
     }
   }
 

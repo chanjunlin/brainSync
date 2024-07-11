@@ -1,6 +1,7 @@
-import 'package:brainsync/services/alert_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+
+import '../services/alert_service.dart';
 
 class CustomDialog {
   static void show({
@@ -40,33 +41,37 @@ class CustomDialog {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
+                Flexible(
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                    ),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: Text(
+                      cancelText,
+                      style: TextStyle(color: Colors.brown.shade800),
+                    ),
                   ),
-                  child: Text(
-                    cancelText,
-                    style: TextStyle(color: Colors.brown.shade800),
-                  ),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
                 ),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.brown[300],
+                Flexible(
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.brown[300],
+                    ),
+                    onPressed: () {
+                      alertService.showToast(
+                        text: toastText,
+                      );
+                      Navigator.of(context).pop();
+                      onDiscard();
+                    },
+                    child: Text(
+                      discardText,
+                      style: const TextStyle(color: Colors.white),
+                    ),
                   ),
-                  child: Text(
-                    discardText,
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  onPressed: () {
-                    alertService.showToast(
-                      text: toastText,
-                    );
-                    Navigator.of(context).pop();
-                    onDiscard();
-                  },
                 ),
               ],
             ),

@@ -1,5 +1,5 @@
 import 'package:brainsync/common_widgets/chat_tile.dart';
-import 'package:brainsync/miscellaneous/const.dart';
+import 'package:brainsync/const.dart';
 import 'package:brainsync/model/user_profile.dart';
 import 'package:brainsync/pages/Profile/visiting_profile.dart';
 import 'package:brainsync/services/database_service.dart';

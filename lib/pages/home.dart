@@ -7,7 +7,6 @@ import 'package:get_it/get_it.dart';
 import '../common_widgets/bottomBar.dart';
 import '../common_widgets/navBar.dart';
 import '../services/alert_service.dart';
-import 'package:dcdg/dcdg.dart';
 
 
 class Home extends StatefulWidget {
@@ -149,10 +148,9 @@ class _HomeState extends State<Home> with RouteAware {
           if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           }
-
           if (snapshot.hasData) {
             allPosts = snapshot.data!.docs;
-            filteredPosts = filteredPosts.isEmpty ? allPosts : filteredPosts;
+            filteredPosts = filteredPosts.isEmpty ? [] : filteredPosts;
             filteredPosts.sort((a, b) {
               Timestamp timestampA = a['timestamp'];
               Timestamp timestampB = b['timestamp'];
@@ -180,9 +178,9 @@ class _HomeState extends State<Home> with RouteAware {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Image.asset("assets/img/meditating_brain.png"),
+                  Image.asset("assets/img/magnifying_glass_brain.png"),
                   Text(
-                    'No posts',
+                    'No posts found',
                     style: TextStyle(
                       fontSize: 20,
                       color: Colors.brown[700],

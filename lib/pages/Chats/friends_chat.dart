@@ -7,7 +7,7 @@ import 'package:get_it/get_it.dart';
 
 import '../../common_widgets/bottomBar.dart';
 import '../../common_widgets/chat_tile.dart';
-import '../../miscellaneous/const.dart';
+import '../../const.dart';
 import '../../model/user_profile.dart';
 import '../../services/auth_service.dart';
 import '../../services/database_service.dart';

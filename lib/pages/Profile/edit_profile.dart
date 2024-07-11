@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:brainsync/common_widgets/dialog.dart';
 import 'package:brainsync/common_widgets/edit_list_field.dart';
 import 'package:brainsync/common_widgets/edit_text_field.dart';
-import 'package:brainsync/miscellaneous/const.dart';
+import 'package:brainsync/const.dart';
 import 'package:brainsync/services/alert_service.dart';
 import 'package:brainsync/services/auth_service.dart';
 import 'package:brainsync/services/database_service.dart';
@@ -14,7 +14,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
-import '../../miscellaneous/main.dart';
+import '../../main.dart';
 
 class EditProfilePage extends StatefulWidget {
   const EditProfilePage({super.key});
@@ -155,6 +155,12 @@ class _EditProfilePageState extends State<EditProfilePage> with RouteAware {
     );
   }
 
+  void updateModule(List<dynamic>? newModules) {
+    setState(() {
+      completedModules = newModules;
+    });
+  }
+
   Widget buildProfile() {
     return Scaffold(
       backgroundColor: Colors.white,
@@ -232,17 +238,17 @@ class _EditProfilePageState extends State<EditProfilePage> with RouteAware {
         color: Colors.grey,
         child: selectedCoverImage != null
             ? Image.file(
-                selectedCoverImage!,
-                height: coverHeight,
-                width: double.infinity,
-                fit: BoxFit.cover,
-              )
+          selectedCoverImage!,
+          height: coverHeight,
+          width: double.infinity,
+          fit: BoxFit.cover,
+        )
             : Image.network(
-                userProfileCover ?? PLACEHOLDER_PROFILE_COVER,
-                height: coverHeight,
-                width: double.infinity,
-                fit: BoxFit.cover,
-              ),
+          userProfileCover ?? PLACEHOLDER_PROFILE_COVER,
+          height: coverHeight,
+          width: double.infinity,
+          fit: BoxFit.cover,
+        ),
       ),
     );
   }
@@ -265,7 +271,7 @@ class _EditProfilePageState extends State<EditProfilePage> with RouteAware {
           backgroundImage: selectedProfileImage != null
               ? FileImage(selectedProfileImage!)
               : NetworkImage(userProfilePfp ?? PLACEHOLDER_PFP)
-                  as ImageProvider,
+          as ImageProvider,
         ),
       ),
     );
@@ -355,6 +361,8 @@ class _EditProfilePageState extends State<EditProfilePage> with RouteAware {
               modulesList: currentModules ?? [],
               moduleType: "Current",
               isEditable: true,
+              onModulesListChanged: updateModule,
+              completedModule: completedModules,
             ),
             const SizedBox(height: 16),
             CustomListField(

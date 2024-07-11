@@ -36,7 +36,7 @@ class _LoginPageState extends State<LoginPage> {
     return SafeArea(
       child: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
           child: Column(
             children: [
               headerText(),
@@ -48,6 +48,9 @@ class _LoginPageState extends State<LoginPage> {
                 },
                 navigateToHome: () {
                   _navigationService.pushReplacementName("/home");
+                },
+                navigateToLogin: () {
+                  _navigationService.pushReplacementName("/login");
                 },
               ),
               createAnAccount(),

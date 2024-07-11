@@ -8,9 +8,9 @@ class ModulePage extends StatefulWidget {
   final Future<Map<String, dynamic>> moduleInfo;
 
   const ModulePage({
-    Key? key,
+    super.key,
     required this.moduleInfo,
-  }) : super(key: key);
+  });
 
   @override
   State<ModulePage> createState() => _ModulePageState();
@@ -174,7 +174,7 @@ class _ModulePageState extends State<ModulePage> {
   }
 
   Widget buildHeader() {
-    print('${moduleCode}  is ${completed}');
+    print('$moduleCode  is $completed');
     if (completed == null || current == null) {
       return const Center(child: CircularProgressIndicator());
     }

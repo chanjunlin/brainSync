@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../miscellaneous/main.dart';
+import '../main.dart';
 import '../model/module.dart';
 
 class ApiService {
@@ -10,7 +10,7 @@ class ApiService {
   static Future<Map<String, dynamic>> fetchModuleInfo(
       String acadYear, String? moduleCode) async {
     var url =
-        Uri.https(baseUrl, "/$apiVersion/$acadYear/modules/${moduleCode}.json");
+        Uri.https(baseUrl, "/$apiVersion/$acadYear/modules/$moduleCode.json");
     try {
       var response = await http.get(url);
       if (response.statusCode == 200) {

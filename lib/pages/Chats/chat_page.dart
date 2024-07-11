@@ -5,7 +5,7 @@ import 'package:brainsync/model/chat.dart';
 import 'package:brainsync/model/message.dart';
 import 'package:brainsync/services/database_service.dart';
 import 'package:brainsync/services/storage_service.dart';
-import 'package:brainsync/miscellaneous/utils.dart';
+import 'package:brainsync/utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dash_chat_2/dash_chat_2.dart';
 import 'package:flutter/material.dart';
@@ -99,7 +99,7 @@ class _ChatPageState extends State<ChatPage> {
                 children: [
                   Text(
                     widget.chatUser.firstName ?? 'User',
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
@@ -108,7 +108,7 @@ class _ChatPageState extends State<ChatPage> {
                   if (widget.chatUser.lastName != null)
                     Text(
                       widget.chatUser.lastName!,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 14,
                         color: Colors.white70,
                       ),
@@ -117,7 +117,7 @@ class _ChatPageState extends State<ChatPage> {
               ),
             ),
             IconButton(
-              icon: Icon(Icons.more_vert, color: Colors.white),
+              icon: const Icon(Icons.more_vert, color: Colors.white),
               onPressed: () {
                 // Handle more options
               },
@@ -136,10 +136,10 @@ class _ChatPageState extends State<ChatPage> {
       ),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
+          return const Center(child: CircularProgressIndicator());
         }
         if (snapshot.hasError) {
-          return Center(child: Text('Error loading chat'));
+          return const Center(child: Text('Error loading chat'));
         }
         Chat? chat = snapshot.data?.data();
         List<ChatMessage> messages = [];

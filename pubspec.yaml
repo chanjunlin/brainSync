@@ -62,8 +62,10 @@ dependencies:
   debounce_throttle: ^2.0.0
   provider: ^6.1.2
   dcdg: ^4.1.0
+  firebase_messaging: ^15.0.3
 
 
+  path: any
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -95,6 +97,8 @@ flutter:
     - assets/img/brain.png
     - assets/img/meditating_brain.png
     - assets/img/happy_brain.png
+    - assets/img/magnifying_glass_brain.png
+
 
 
 

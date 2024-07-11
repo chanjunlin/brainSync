@@ -3,21 +3,26 @@ import 'package:brainsync/services/database_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
-import '../miscellaneous/main.dart';
+import '../main.dart';
 import '../pages/Modules/module_page.dart';
 import '../services/api_service.dart';
 import '../services/navigation_service.dart';
+import 'dialog.dart';
 
 class CustomListField extends StatefulWidget {
   final List<dynamic>? modulesList;
+  final List<dynamic>? completedModule;
   final String moduleType;
   final bool isEditable;
+  final Function(List<String>)? onModulesListChanged;
 
   const CustomListField({
     super.key,
     required this.modulesList,
     required this.moduleType,
+    this.completedModule,
     this.isEditable = false,
+    this.onModulesListChanged,
   });
 
   @override
@@ -34,6 +39,7 @@ class _CustomListFieldState extends State<CustomListField> {
 
   @override
   void initState() {
+    print(widget.completedModule);
     super.initState();
     moduleController = widget.modulesList?.map((module) {
           return TextEditingController(text: module.toString());
@@ -66,6 +72,34 @@ class _CustomListFieldState extends State<CustomListField> {
       moduleController.removeAt(index);
       widget.modulesList!.removeAt(index);
     });
+  }
+
+  void moduleIsCompleted(int index) {
+    List<String> totalInfo = moduleController[index].text.split("/");
+    String moduleCode = totalInfo[0];
+    String moduleCredit = totalInfo[1];
+    CustomDialog.show(
+      context: context,
+      title: 'Complete Module',
+      content: 'Are you sure you want to mark this module as completed?',
+      cancelText: 'Cancel',
+      discardText: 'Mark as Complete',
+      toastText: 'Module marked as completed!',
+      onDiscard: () {
+        widget.completedModule?.add(moduleController[index].text);
+        List<String>? newList = widget.completedModule?.cast<String>();
+        _databaseService.moduleIsCompleted(
+          _authService.currentUser!.uid,
+          moduleCode,
+          moduleCredit,
+        );
+        setState(() {
+          moduleController.removeAt(index);
+          widget.modulesList!.removeAt(index);
+          widget.onModulesListChanged!(newList!);
+        });
+      },
+    );
   }
 
   List<String> getUpdatedModuleList() {
@@ -133,7 +167,7 @@ class _CustomListFieldState extends State<CustomListField> {
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: widget.modulesList!.map((module) {
+      children: moduleList.map((module) {
         if (module == null) return const SizedBox.shrink();
         List<String> parts = module.split('/');
         String moduleCode = parts[0];
@@ -154,14 +188,29 @@ class _CustomListFieldState extends State<CustomListField> {
                     ),
                   ),
                 ),
-                IconButton(
-                  onPressed: () {
-                    removeModule(moduleList.indexOf(module));
-                  },
-                  icon: Icon(
-                    Icons.delete,
-                    color: Colors.redAccent[200],
-                  ),
+                Row(
+                  children: [
+                    if (widget.isEditable) // Show check icon only if editable
+                      IconButton(
+                        onPressed: () {
+                          moduleIsCompleted(moduleList.indexOf(module));
+                        },
+                        icon: Icon(
+                          Icons.check,
+                          color: Colors.green[300],
+                        ),
+                      ),
+                    if (widget.isEditable)
+                      IconButton(
+                        onPressed: () {
+                          removeModule(moduleList.indexOf(module));
+                        },
+                        icon: Icon(
+                          Icons.delete,
+                          color: Colors.redAccent[200],
+                        ),
+                      ),
+                  ],
                 ),
               ],
             ),

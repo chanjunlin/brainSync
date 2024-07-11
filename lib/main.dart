@@ -1,10 +1,13 @@
 import 'dart:async';
 
+import 'package:brainsync/firebase_api.dart';
+import 'package:brainsync/firebase_options.dart';
 import 'package:brainsync/services/alert_service.dart';
 import 'package:brainsync/services/auth_service.dart';
 import 'package:brainsync/services/navigation_service.dart';
-import 'package:brainsync/miscellaneous/utils.dart';
+import 'package:brainsync/utils.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -14,11 +17,13 @@ const String academicYear = "2023-2024";
 
 Future<void> main() async {
   await setup();
+  await FirebaseApi().initNotifications();
   runApp(MyApp());
 }
 
 Future<void> setup() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await setUpFireBase();
   await registerServices();
 }
@@ -26,7 +31,7 @@ Future<void> setup() async {
 class MyApp extends StatefulWidget {
   final GetIt _getIt = GetIt.instance;
 
-  MyApp({super.key}) {}
+  MyApp({super.key});
 
   @override
   State<MyApp> createState() => _MyAppState();

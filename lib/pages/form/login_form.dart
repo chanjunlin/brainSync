@@ -1,6 +1,6 @@
 import 'package:brainsync/common_widgets/custom_form_field.dart';
 import 'package:brainsync/common_widgets/square_tile.dart';
-import 'package:brainsync/miscellaneous/const.dart';
+import 'package:brainsync/const.dart';
 import 'package:brainsync/pages/Administation/forget_password.dart';
 import 'package:brainsync/services/alert_service.dart';
 import 'package:brainsync/services/auth_service.dart';
@@ -10,11 +10,13 @@ import 'package:get_it/get_it.dart';
 class LoginForm extends StatefulWidget {
   final Function(bool) setLoading;
   final Function navigateToHome;
+  final Function navigateToLogin;
 
   const LoginForm({
     super.key,
     required this.setLoading,
     required this.navigateToHome,
+    required this.navigateToLogin,
   });
 
   @override
@@ -37,7 +39,6 @@ class _LoginFormState extends State<LoginForm> {
     _alertService = _getIt.get<AlertService>();
     _authService = _getIt.get<AuthService>();
   }
-  
 
   @override
   Widget build(BuildContext context) {
@@ -63,10 +64,12 @@ class _LoginFormState extends State<LoginForm> {
                   });
                 },
               ),
+              const SizedBox(height: 8),
               CustomFormField(
                 labelText: "Password",
                 hintText: "Enter a valid password",
-                obscureText: _obscurePassword, // Use the obscurePassword variable
+                obscureText: _obscurePassword,
+                // Use the obscurePassword variable
                 suffixIcon: IconButton(
                   icon: Icon(
                     _obscurePassword ? Icons.visibility_off : Icons.visibility,
@@ -107,7 +110,8 @@ class _LoginFormState extends State<LoginForm> {
                       _loginFormKey.currentState?.save();
                       widget.setLoading(true);
                       try {
-                        bool result = await _authService.login(email!, password!);
+                        bool result =
+                            await _authService.login(email!, password!);
                         if (result) {
                           widget.navigateToHome();
                         } else {
@@ -169,8 +173,13 @@ class _LoginFormState extends State<LoginForm> {
                   onTap: () async {
                     widget.setLoading(true);
                     try {
-                      await _authService.signInWithGoogle(context);
-                      widget.navigateToHome();
+                      bool result =
+                          await _authService.signInWithGoogle(context);
+                      if (result) {
+                        widget.navigateToHome();
+                      } else {
+                        widget.navigateToLogin();
+                      }
                     } catch (error) {
                       _alertService.showToast(
                         text: "Error signing in with Google. Please try again.",

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
 import '../../common_widgets/custom_form_field.dart';
-import '../../miscellaneous/const.dart';
+import '../../const.dart';
 import '../../services/alert_service.dart';
 import '../../services/auth_service.dart';
 import '../../services/database_service.dart';
@@ -76,7 +76,7 @@ class SignUpFormState extends State<SignUpForm> {
                     },
                   ),
                 ),
-                SizedBox(width: 16),
+                const SizedBox(width: 16),
                 Expanded(
                   child: CustomFormField(
                     labelText: "Last Name",
@@ -170,8 +170,8 @@ class SignUpFormState extends State<SignUpForm> {
                 }
                 return null;
               },
-              style: TextStyle(color: Colors.black),
-              dropdownColor: Color(0xFFF8F9FF),
+              style: const TextStyle(color: Colors.black),
+              dropdownColor: const Color(0xFFF8F9FF),
             ),
             const SizedBox(height: 30),
             SizedBox(
