@@ -139,6 +139,7 @@ class _ProfileState extends State<Profile> with RouteAware {
           }
         },
       ),
+      bottomNavigationBar: const CustomBottomNavBar(initialIndex: 4),
     );
   }
 
@@ -153,7 +154,6 @@ class _ProfileState extends State<Profile> with RouteAware {
           buildTabBarSection(),
         ],
       ),
-      bottomNavigationBar: const CustomBottomNavBar(initialIndex: 4),
     );
   }
 
