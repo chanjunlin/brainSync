@@ -261,7 +261,6 @@ class _PostsPageState extends State<PostsPage> {
                   return null;
                 },
               ),
-              const SizedBox(height: 20),
               const Spacer(),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,

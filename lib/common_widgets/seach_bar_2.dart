@@ -55,12 +55,24 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
               showSuggestions = true;
             });
           },
-          decoration: const InputDecoration(
+          decoration: InputDecoration(
             hintText: 'Enter module code',
-            prefixIcon: Icon(Icons.search),
+            prefixIcon: const Icon(Icons.code),
+            focusColor: Colors.brown[300],
+            enabledBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.brown[300]!),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.brown[300]!),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            border: OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.brown[300]!),
+              borderRadius: BorderRadius.circular(10),
+            ),
           ),
         ),
-        const SizedBox(height: 8.0),
         if (showSuggestions && widget.suggestions.isNotEmpty)
           Container(
             height: 200,
