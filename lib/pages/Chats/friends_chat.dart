@@ -143,29 +143,26 @@ class FriendsChatsState extends State<FriendsChats> {
         automaticallyImplyLeading: false,
       ),
       body: chats != null
-          ? SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
+          ? Center(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   if (chats!.isEmpty)
-                    Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Image.asset("assets/img/meditating_brain.png"),
-                          Text(
-                            'No active chats',
-                            style: TextStyle(
-                              fontSize: 20,
-                              color: Colors.brown[700],
-                            ),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Image.asset("assets/img/meditating_brain.png"),
+                        const SizedBox(height: 16),
+                        Text(
+                          'No active chats',
+                          style: TextStyle(
+                            fontSize: 20,
+                            color: Colors.brown[700],
                           ),
-                          const SizedBox(width: 60),
-                        ],
-                      ),
+                        ),
+                      ],
                     )
                   else
                     ListView.builder(

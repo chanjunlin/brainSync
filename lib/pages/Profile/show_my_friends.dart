@@ -36,7 +36,23 @@ class _ShowMyFriendsState extends State<ShowMyFriends> {
         } else if (snapshot.hasError) {
           return Center(child: Text('Error: ${snapshot.error}'));
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Center(child: Text('No friends found.'));
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Image.asset("assets/img/sad_brain.png"),
+                const SizedBox(height: 16),
+                Text(
+                  'No friends found',
+                  style: TextStyle(
+                    fontSize: 20,
+                    color: Colors.brown[700],
+                  ),
+                ),
+              ],
+            ),
+          );
         } else {
           return ListView.builder(
             padding: EdgeInsets.zero,
@@ -53,7 +69,9 @@ class _ShowMyFriendsState extends State<ShowMyFriends> {
                 onTap: () {
                   _navigationService.push(
                     MaterialPageRoute(builder: (context) {
-                      return VisitProfile(userId: friend.uid as String,);
+                      return VisitProfile(
+                        userId: friend.uid as String,
+                      );
                     }),
                   );
                 },

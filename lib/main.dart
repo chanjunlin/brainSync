@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:brainsync/firebase_api.dart';
 import 'package:brainsync/firebase_options.dart';
 import 'package:brainsync/services/alert_service.dart';
 import 'package:brainsync/services/auth_service.dart';
@@ -17,7 +16,6 @@ const String academicYear = "2023-2024";
 
 Future<void> main() async {
   await setup();
-  await FirebaseApi().initNotifications();
   runApp(MyApp());
 }
 
