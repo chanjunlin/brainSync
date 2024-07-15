@@ -5,6 +5,7 @@ import 'package:brainsync/pages/Profile/edit_profile.dart';
 import 'package:brainsync/pages/Profile/profile.dart';
 import 'package:brainsync/pages/home.dart';
 import 'package:brainsync/pages/notifications.dart';
+import 'package:brainsync/splash_screen.dart';
 import 'package:flutter/material.dart';
 
 import '../pages/Chats/friends_chat.dart';
@@ -25,6 +26,7 @@ class NavigationService {
     "/notifications": (context) => const Notifications(),
     "/nusMods": (context) => const ModuleListPage(),
     "/saved": (context) => const BookmarkedPosts(),
+    "/splashScreen": (context) => SplashScreen(),
   };
 
   Map<String, Widget Function(BuildContext)> get routes {

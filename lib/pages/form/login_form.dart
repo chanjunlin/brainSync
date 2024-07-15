@@ -31,7 +31,7 @@ class _LoginFormState extends State<LoginForm> {
   late AuthService _authService;
 
   String? email, password;
-  bool _obscurePassword = true; // Added to manage password visibility
+  bool _obscurePassword = true;
 
   @override
   void initState() {
@@ -60,7 +60,7 @@ class _LoginFormState extends State<LoginForm> {
                 validationRegEx: EMAIL_VALIDATION_REGEX,
                 onSaved: (value) {
                   setState(() {
-                    email = value;
+                    email = value?.trim();
                   });
                 },
               ),
@@ -69,7 +69,6 @@ class _LoginFormState extends State<LoginForm> {
                 labelText: "Password",
                 hintText: "Enter a valid password",
                 obscureText: _obscurePassword,
-                // Use the obscurePassword variable
                 suffixIcon: IconButton(
                   icon: Icon(
                     _obscurePassword ? Icons.visibility_off : Icons.visibility,
@@ -84,7 +83,7 @@ class _LoginFormState extends State<LoginForm> {
                 validationRegEx: PASSWORD_VALIDATION_REGEX,
                 onSaved: (value) {
                   setState(() {
-                    password = value;
+                    password = value?.trim();
                   });
                 },
               ),

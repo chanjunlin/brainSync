@@ -127,6 +127,7 @@ class _ProfileState extends State<Profile> with RouteAware {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: FutureBuilder<void>(
         future: loadedProfile,
         builder: (context, snapshot) {
@@ -145,6 +146,7 @@ class _ProfileState extends State<Profile> with RouteAware {
 
   Widget buildProfile() {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: ListView(
         padding: EdgeInsets.zero,
         children: [

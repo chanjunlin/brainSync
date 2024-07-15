@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
 import '../common_widgets/bottomBar.dart';
-import '../common_widgets/navBar.dart';
+import '../common_widgets/nav_bar.dart';
 import '../services/alert_service.dart';
 
 

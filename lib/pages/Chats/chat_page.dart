@@ -68,6 +68,7 @@ class _ChatPageState extends State<ChatPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.brown[300],
         foregroundColor: Colors.white,
@@ -119,7 +120,6 @@ class _ChatPageState extends State<ChatPage> {
             IconButton(
               icon: const Icon(Icons.more_vert, color: Colors.white),
               onPressed: () {
-                // Handle more options
               },
             ),
           ],
@@ -184,7 +184,7 @@ class _ChatPageState extends State<ChatPage> {
       } else {
         Message message = Message(
           senderID: currentUser!.id,
-          content: chatMessage.text,
+          content: chatMessage.text.trim(),
           messageType: MessageType.Text,
           sentAt: Timestamp.fromDate(chatMessage.createdAt),
         );
@@ -195,7 +195,6 @@ class _ChatPageState extends State<ChatPage> {
         );
       }
     } catch (e) {
-      // Handle error
       print('Error sending message: $e');
     }
   }

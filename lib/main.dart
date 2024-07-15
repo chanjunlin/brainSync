@@ -3,6 +3,7 @@ import 'package:brainsync/firebase_options.dart';
 import 'package:brainsync/services/alert_service.dart';
 import 'package:brainsync/services/auth_service.dart';
 import 'package:brainsync/services/navigation_service.dart';
+import 'package:brainsync/splash_screen.dart';
 import 'package:brainsync/utils.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -50,7 +51,6 @@ class _MyAppState extends State<MyApp> {
     _alertService = _getIt.get<AlertService>();
     userSubscription = FirebaseAuth.instance.authStateChanges().listen(
           (user) {
-        // Avoid redundant sign-out calls
         if (user == null && _authService.currentUser != null) {
           _authService.signOut();
         }
@@ -72,11 +72,11 @@ class _MyAppState extends State<MyApp> {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.blue,
+          seedColor: Colors.brown.shade300,
         ),
         textTheme: GoogleFonts.montserratTextTheme(),
       ),
-      initialRoute: _authService.currentUser == null ? "/login" : "/home",
+      initialRoute: "/splashScreen",
       routes: _navigationService.routes,
     );
   }

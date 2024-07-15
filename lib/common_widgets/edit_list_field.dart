@@ -7,7 +7,7 @@ import '../main.dart';
 import '../pages/Modules/module_page.dart';
 import '../services/api_service.dart';
 import '../services/navigation_service.dart';
-import 'dialog.dart';
+import 'custom_dialog.dart';
 
 class CustomListField extends StatefulWidget {
   final List<dynamic>? modulesList;
@@ -39,7 +39,6 @@ class _CustomListFieldState extends State<CustomListField> {
 
   @override
   void initState() {
-    print(widget.completedModule);
     super.initState();
     moduleController = widget.modulesList?.map((module) {
           return TextEditingController(text: module.toString());
@@ -172,8 +171,14 @@ class _CustomListFieldState extends State<CustomListField> {
         List<String> parts = module.split('/');
         String moduleCode = parts[0];
         return Card(
+          color: Colors.white,
           elevation: 2,
           margin: const EdgeInsets.symmetric(vertical: 4),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+            side: BorderSide(
+                color: Colors.brown[800]!, width: 1),
+          ),
           child: ListTile(
             contentPadding:
                 const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -190,7 +195,7 @@ class _CustomListFieldState extends State<CustomListField> {
                 ),
                 Row(
                   children: [
-                    if (widget.isEditable) // Show check icon only if editable
+                    if (widget.isEditable)
                       IconButton(
                         onPressed: () {
                           moduleIsCompleted(moduleList.indexOf(module));

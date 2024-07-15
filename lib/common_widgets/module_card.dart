@@ -19,6 +19,7 @@ class ModuleTile extends StatelessWidget {
         onTap();
       },
       child: Card(
+        color: Colors.white,
         elevation: 4,
         margin: const EdgeInsets.all(8),
         child: Padding(

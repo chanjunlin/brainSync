@@ -146,6 +146,7 @@ class _ShowModuleState extends State<ShowModule> {
         String moduleCredit = parts.length > 1 ? parts[1] : '0';
 
         return Card(
+          color: Colors.white,
           elevation: 2,
           margin: const EdgeInsets.symmetric(vertical: 4),
           child: ListTile(

@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:badword_guard/badword_guard.dart';
-import 'package:brainsync/common_widgets/dialog.dart';
+import 'package:brainsync/common_widgets/custom_dialog.dart';
 import 'package:brainsync/common_widgets/seach_bar_2.dart';
 import 'package:brainsync/model/module.dart';
 import 'package:brainsync/model/post.dart';
@@ -182,6 +182,7 @@ class _PostsPageState extends State<PostsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: const Text(

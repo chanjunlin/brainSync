@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:brainsync/common_widgets/dialog.dart';
+import 'package:brainsync/common_widgets/custom_dialog.dart';
 import 'package:brainsync/common_widgets/edit_list_field.dart';
 import 'package:brainsync/common_widgets/edit_text_field.dart';
 import 'package:brainsync/const.dart';
@@ -300,11 +300,12 @@ class _EditProfilePageState extends State<EditProfilePage> with RouteAware {
                 const SizedBox(width: 10),
                 Expanded(
                   child: CustomTextField(
-                      textController: lastNameController,
-                      labelText: "Last Name",
-                      vertical: 16,
-                      horizontal: 16,
-                      maxLines: 1),
+                    textController: lastNameController,
+                    labelText: "Last Name",
+                    vertical: 16,
+                    horizontal: 16,
+                    maxLines: 1,
+                  ),
                 ),
               ],
             ),
@@ -358,18 +359,26 @@ class _EditProfilePageState extends State<EditProfilePage> with RouteAware {
             ),
             const SizedBox(height: 16),
             const Divider(),
-            CustomListField(
-              modulesList: currentModules ?? [],
-              moduleType: "Current",
-              isEditable: true,
-              onModulesListChanged: updateModule,
-              completedModule: completedModules,
-            ),
-            const SizedBox(height: 16),
-            CustomListField(
-              modulesList: completedModules ?? [],
-              moduleType: "Completed",
-              isEditable: false,
+            SizedBox(
+              width: double.infinity, // Ensure modules list stretches full width
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CustomListField(
+                    modulesList: currentModules ?? [],
+                    moduleType: "Current",
+                    isEditable: true,
+                    onModulesListChanged: updateModule,
+                    completedModule: completedModules,
+                  ),
+                  const SizedBox(height: 16),
+                  CustomListField(
+                    modulesList: completedModules ?? [],
+                    moduleType: "Completed",
+                    isEditable: false,
+                  ),
+                ],
+              ),
             ),
           ],
         ),
