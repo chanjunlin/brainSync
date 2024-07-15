@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:brainsync/firebase_options.dart';
 import 'package:brainsync/services/alert_service.dart';
 import 'package:brainsync/services/auth_service.dart';
@@ -40,7 +39,7 @@ class _MyAppState extends State<MyApp> {
 
   late AuthService _authService;
   late AlertService _alertService;
-  late StreamSubscription<User?> user;
+  late StreamSubscription<User?> userSubscription;
   late NavigationService _navigationService;
 
   @override
@@ -49,9 +48,10 @@ class _MyAppState extends State<MyApp> {
     _navigationService = _getIt.get<NavigationService>();
     _authService = _getIt.get<AuthService>();
     _alertService = _getIt.get<AlertService>();
-    user = FirebaseAuth.instance.authStateChanges().listen(
-      (user) {
-        if (user == null) {
+    userSubscription = FirebaseAuth.instance.authStateChanges().listen(
+          (user) {
+        // Avoid redundant sign-out calls
+        if (user == null && _authService.currentUser != null) {
           _authService.signOut();
         }
       },
@@ -60,7 +60,7 @@ class _MyAppState extends State<MyApp> {
 
   @override
   void dispose() {
-    user.cancel();
+    userSubscription.cancel();
     super.dispose();
   }
 

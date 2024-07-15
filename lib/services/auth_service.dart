@@ -61,11 +61,10 @@ class AuthService {
   Future<bool> signInWithGoogle(BuildContext context) async {
     try {
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-      if (googleUser == null)
-        {
-          _firebaseAuth.signOut();
-          return false;
-        }
+      if (googleUser == null) {
+        _firebaseAuth.signOut();
+        return false;
+      }
 
       final GoogleSignInAuthentication googleAuth =
           await googleUser.authentication;
@@ -100,9 +99,6 @@ class AuthService {
         } else {
           signOut();
           return false;
-          // UserProfile userProfile =
-          //     await getUserProfile(userCredential.user!.uid);
-          // await userCredential.user!.updateDisplayName(userProfile.firstName);
         }
       }
       return false;
@@ -191,4 +187,5 @@ class AuthService {
       return false;
     }
   }
+
 }

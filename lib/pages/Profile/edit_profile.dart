@@ -129,6 +129,7 @@ class _EditProfilePageState extends State<EditProfilePage> with RouteAware {
         );
         _navigationService.pushReplacementName("/profile");
       } catch (e) {
+        print(e);
         _alertService.showToast(
           text: "Failed to update profile",
           icon: Icons.error,
@@ -238,17 +239,17 @@ class _EditProfilePageState extends State<EditProfilePage> with RouteAware {
         color: Colors.grey,
         child: selectedCoverImage != null
             ? Image.file(
-          selectedCoverImage!,
-          height: coverHeight,
-          width: double.infinity,
-          fit: BoxFit.cover,
-        )
+                selectedCoverImage!,
+                height: coverHeight,
+                width: double.infinity,
+                fit: BoxFit.cover,
+              )
             : Image.network(
-          userProfileCover ?? PLACEHOLDER_PROFILE_COVER,
-          height: coverHeight,
-          width: double.infinity,
-          fit: BoxFit.cover,
-        ),
+                userProfileCover ?? PLACEHOLDER_PROFILE_COVER,
+                height: coverHeight,
+                width: double.infinity,
+                fit: BoxFit.cover,
+              ),
       ),
     );
   }
@@ -271,7 +272,7 @@ class _EditProfilePageState extends State<EditProfilePage> with RouteAware {
           backgroundImage: selectedProfileImage != null
               ? FileImage(selectedProfileImage!)
               : NetworkImage(userProfilePfp ?? PLACEHOLDER_PFP)
-          as ImageProvider,
+                  as ImageProvider,
         ),
       ),
     );

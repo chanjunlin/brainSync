@@ -1,10 +1,8 @@
 import 'dart:async';
-
-import 'package:brainsync/services/alert_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-
 import '../../common_widgets/bottomBar.dart';
 import '../../common_widgets/chat_tile.dart';
 import '../../const.dart';
@@ -24,13 +22,12 @@ class FriendsChats extends StatefulWidget {
 class FriendsChatsState extends State<FriendsChats> {
   final GetIt _getIt = GetIt.instance;
 
-  late AlertService _alertService;
   late AuthService _authService;
   late DatabaseService _databaseService;
   late NavigationService _navigationService;
 
-  late Future<void> listenedToChats;
   late Future<void> loadedProfile;
+  late Future<void> listenedToChats;
 
   List<String>? chats;
   String? userProfilePfp, firstName, lastName;
@@ -43,7 +40,6 @@ class FriendsChatsState extends State<FriendsChats> {
   void initState() {
     super.initState();
     _authService = _getIt.get<AuthService>();
-    _alertService = _getIt.get<AlertService>();
     _databaseService = _getIt.get<DatabaseService>();
     _navigationService = _getIt.get<NavigationService>();
     loadedProfile = loadProfile();
@@ -67,8 +63,11 @@ class FriendsChatsState extends State<FriendsChats> {
           lastName = userProfile.get('lastName') ?? 'Name';
           chats = List<String>.from(userProfile.get("chats") ?? []);
         });
-        profileSubscription =
-            userProfile.reference.snapshots().listen((updatedSnapshot) {
+
+        sortChatsByLatestMessage(); // Sort chats initially
+
+        // Listen to profile updates
+        profileSubscription = userProfile.reference.snapshots().listen((updatedSnapshot) {
           if (updatedSnapshot.exists) {
             setState(() {
               userProfilePfp = updatedSnapshot.get('pfpURL') ?? PLACEHOLDER_PFP;
@@ -76,48 +75,50 @@ class FriendsChatsState extends State<FriendsChats> {
               lastName = updatedSnapshot.get('lastName') ?? 'Name';
               chats = List<String>.from(updatedSnapshot.get("chats") ?? []);
             });
+            sortChatsByLatestMessage(); // Sort chats whenever profile updates
           }
         });
+
       } else {
-        _alertService.showToast(
-            text: "User profile not found", icon: Icons.error_outline_rounded);
+        // Handle case where user profile is not found
       }
     } catch (e) {
-      _alertService.showToast(
-          text: "Error loading profile: $e", icon: Icons.error_outline_rounded);
+      // Handle error loading profile
+    }
+  }
+
+  void sortChatsByLatestMessage() {
+    if (chats != null && chats!.isNotEmpty) {
+      chats!.sort((a, b) {
+        Timestamp? aTimestamp = lastMessageTimestamps[a];
+        Timestamp? bTimestamp = lastMessageTimestamps[b];
+        if (aTimestamp == null || bTimestamp == null) return 0;
+        return bTimestamp.compareTo(aTimestamp);
+      });
     }
   }
 
   Future<void> listenToChats() async {
-    chatsSubscription =
-        _databaseService.getAllUserChatsStream().listen((querySnapshot) {
+    chatsSubscription = _databaseService.getAllUserChatsStream().listen((querySnapshot) {
       if (querySnapshot.docs.isNotEmpty) {
         for (var doc in querySnapshot.docs) {
           String chatId = doc.id;
           dynamic lastMessageData = doc.get('lastMessage');
-          Timestamp? lastMessageTimestamp =
-              lastMessageData != null ? lastMessageData['sentAt'] : null;
+          Timestamp? lastMessageTimestamp = lastMessageData != null ? lastMessageData['sentAt'] : null;
           if (lastMessageTimestamp != null) {
-            if (lastMessageTimestamps[chatId] == null ||
-                lastMessageTimestamps[chatId]!.compareTo(lastMessageTimestamp) <
-                    0) {
+            if (lastMessageTimestamps[chatId] == null || lastMessageTimestamps[chatId]!.compareTo(lastMessageTimestamp) < 0) {
               setState(() {
-                if (!chats!.contains(chatId)) {
+                if (chats != null && !chats!.contains(chatId)) {
                   chats!.add(chatId);
                 }
                 lastMessageTimestamps[chatId] = lastMessageTimestamp;
               });
-              updateChatSubtitle(chatId, lastMessageData['content']);
+              updateChatSubtitle(chatId, lastMessageData['content'], lastMessageTimestamp);
             }
           }
         }
 
-        chats!.sort((a, b) {
-          Timestamp? aTimestamp = lastMessageTimestamps[a];
-          Timestamp? bTimestamp = lastMessageTimestamps[b];
-          if (aTimestamp == null || bTimestamp == null) return 0;
-          return bTimestamp.compareTo(aTimestamp);
-        });
+        sortChatsByLatestMessage(); // Sort chats whenever new messages are received
       } else {
         setState(() {
           chats = [];
@@ -126,10 +127,25 @@ class FriendsChatsState extends State<FriendsChats> {
     });
   }
 
-  void updateChatSubtitle(String chatId, String content) {
-    setState(() {
-      chatSubtitles[chatId] = content;
-    });
+  void updateChatSubtitle(String chatId, String content, Timestamp? sentAt) {
+    if (sentAt != null) {
+      final now = DateTime.now();
+      final difference = now.difference(sentAt.toDate());
+      String subtitle = '';
+      if (difference.inDays > 0) {
+        subtitle = DateFormat.yMMMd().format(sentAt.toDate());
+      } else if (difference.inHours > 0) {
+        subtitle = '${difference.inHours}h ago';
+      } else if (difference.inMinutes > 0) {
+        subtitle = '${difference.inMinutes}m ago';
+      } else {
+        subtitle = 'just now';
+      }
+
+      setState(() {
+        chatSubtitles[chatId] = '$content';
+      });
+    }
   }
 
   @override
@@ -137,126 +153,170 @@ class FriendsChatsState extends State<FriendsChats> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Chats'),
+        title: const Center(
+          child: Text(
+            "Chats",
+            textAlign: TextAlign.center,
+          ),
+        ),
         backgroundColor: Colors.brown[300],
         foregroundColor: Colors.white,
         automaticallyImplyLeading: false,
       ),
       body: chats != null
           ? Center(
-              child: Column(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            if (chats!.isEmpty)
+              Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  if (chats!.isEmpty)
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Image.asset("assets/img/meditating_brain.png"),
-                        const SizedBox(height: 16),
-                        Text(
-                          'No active chats',
-                          style: TextStyle(
-                            fontSize: 20,
-                            color: Colors.brown[700],
-                          ),
-                        ),
-                      ],
-                    )
-                  else
-                    ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: chats!.length,
-                      itemBuilder: (context, index) {
-                        String chatId = chats![index];
-                        return FutureBuilder<DocumentSnapshot?>(
-                          future: _databaseService.getChatDetails(chatId),
-                          builder: (context, snapshot) {
-                            if (snapshot.connectionState ==
-                                ConnectionState.waiting) {
-                              return const SizedBox.shrink();
-                            } else if (snapshot.hasError) {
-                              return Center(
-                                child: Text(
-                                  'Error: ${snapshot.error}',
-                                ),
-                              );
-                            } else if (snapshot.hasData &&
-                                snapshot.data != null) {
-                              DocumentSnapshot<Object?> chatDetails =
-                                  snapshot.data!;
-                              String chatSubtitle = chatSubtitles[chatId] ?? "";
-                              List<dynamic> participantsIds =
-                                  chatDetails.get('participantsIds') ?? [];
-                              String otherUserId = participantsIds.firstWhere(
+                  Image.asset("assets/img/meditating_brain.png"),
+                  const SizedBox(height: 16),
+                  Text(
+                    'No active chats',
+                    style: TextStyle(
+                      fontSize: 20,
+                      color: Colors.brown[700],
+                    ),
+                  ),
+                ],
+              )
+            else
+              Expanded(
+                child: ListView.builder(
+                  itemCount: chats!.length,
+                  itemBuilder: (context, index) {
+                    String chatId = chats![index];
+                    return FutureBuilder<DocumentSnapshot?>(
+                      future: _databaseService.getChatDetails(chatId),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const SizedBox.shrink();
+                        } else if (snapshot.hasError) {
+                          return Center(
+                            child: Text(
+                              'Error: ${snapshot.error}',
+                            ),
+                          );
+                        } else if (snapshot.hasData &&
+                            snapshot.data != null) {
+                          DocumentSnapshot<Object?> chatDetails =
+                          snapshot.data!;
+                          String chatSubtitle =
+                              chatSubtitles[chatId] ?? "";
+                          List<dynamic> participantsIds =
+                              chatDetails.get('participantsIds') ?? [];
+                          String otherUserId = participantsIds.firstWhere(
                                 (id) => id != _authService.currentUser!.uid,
-                                orElse: () => null,
-                              );
-                              List<dynamic> participantsNames =
-                                  chatDetails.get('participantsNames') ?? [];
-                              String otherUserName =
-                                  participantsNames.firstWhere(
+                            orElse: () => '',
+                          );
+                          List<dynamic> participantsNames =
+                              chatDetails.get('participantsNames') ?? [];
+                          String otherUserName =
+                          participantsNames.firstWhere(
                                 (name) =>
-                                    name !=
-                                    _authService.currentUser!.displayName,
-                                orElse: () => "",
-                              );
-                              return FutureBuilder<DocumentSnapshot?>(
-                                future: _databaseService.fetchUser(otherUserId),
-                                builder: (context, userSnapshot) {
-                                  if (userSnapshot.connectionState ==
-                                      ConnectionState.waiting) {
-                                    return const SizedBox.shrink();
-                                  } else if (userSnapshot.hasError) {
-                                    return Center(
-                                      child:
-                                          Text('Error: ${userSnapshot.error}'),
-                                    );
-                                  } else if (userSnapshot.hasData &&
-                                      userSnapshot.data != null) {
-                                    UserProfile otherUser =
-                                        UserProfile.fromJson(userSnapshot.data!
-                                            .data() as Map<String, dynamic>);
-                                    return CustomChatTile(
-                                      leading: CircleAvatar(
-                                        radius: 20,
-                                        backgroundImage: NetworkImage(
-                                            otherUser.pfpURL ??
-                                                PLACEHOLDER_PFP),
+                            name !=
+                                _authService.currentUser!.displayName,
+                            orElse: () => "",
+                          );
+                          return FutureBuilder<DocumentSnapshot?>(
+                            future:
+                            _databaseService.fetchUser(otherUserId),
+                            builder: (context, userSnapshot) {
+                              if (userSnapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return const SizedBox.shrink();
+                              } else if (userSnapshot.hasError) {
+                                return Center(
+                                  child: Text(
+                                      'Error: ${userSnapshot.error}'),
+                                );
+                              } else if (userSnapshot.hasData &&
+                                  userSnapshot.data != null) {
+                                UserProfile otherUser =
+                                UserProfile.fromJson(
+                                    userSnapshot.data!.data()
+                                    as Map<String, dynamic>);
+                                return ListTile(
+                                  leading: CircleAvatar(
+                                    radius: 20,
+                                    backgroundImage: NetworkImage(
+                                        otherUser.pfpURL ??
+                                            PLACEHOLDER_PFP),
+                                  ),
+                                  title: Text(otherUserName),
+                                  subtitle: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          chatSubtitle,
+                                          overflow: TextOverflow.ellipsis,
+                                          maxLines: 1,
+                                        ),
                                       ),
-                                      title: otherUserName,
-                                      subtitle: chatSubtitle,
-                                      onTap: () {
-                                        _navigationService.push(
-                                          MaterialPageRoute(builder: (context) {
+                                      Text(
+                                        getFormattedTime(chatDetails.get('lastMessage')['sentAt']),
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  onTap: () {
+                                    _navigationService.push(
+                                      MaterialPageRoute(
+                                          builder: (context) {
                                             return ChatPage(
                                                 chatUser: otherUser);
                                           }),
-                                        );
-                                      },
                                     );
-                                  } else {
-                                    return const Center(
-                                        child: Text('User data not found'));
-                                  }
-                                },
-                              );
-                            } else {
-                              return const Center(
-                                child: Text('Chat details not found'),
-                              );
-                            }
-                          },
-                        );
+                                  },
+                                );
+                              } else {
+                                return const Center(
+                                    child: Text('User data not found'));
+                              }
+                            },
+                          );
+                        } else {
+                          return const Center(
+                            child: Text('Chat details not found'),
+                          );
+                        }
                       },
-                    ),
-                ],
+                    );
+                  },
+                ),
               ),
-            )
+          ],
+        ),
+      )
           : const Center(child: CircularProgressIndicator()),
       bottomNavigationBar: const CustomBottomNavBar(initialIndex: 1),
     );
+  }
+
+  String getFormattedTime(Timestamp? timestamp) {
+    if (timestamp != null) {
+      final now = DateTime.now();
+      final difference = now.difference(timestamp.toDate());
+      if (difference.inDays > 0) {
+        return DateFormat.yMMMd().format(timestamp.toDate());
+      } else if (difference.inHours > 0) {
+        return '${difference.inHours}h ago';
+      } else if (difference.inMinutes > 0) {
+        return '${difference.inMinutes}m ago';
+      } else {
+        return 'just now';
+      }
+    }
+    return '';
   }
 }
