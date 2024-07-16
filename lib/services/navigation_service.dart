@@ -26,7 +26,7 @@ class NavigationService {
     "/notifications": (context) => const Notifications(),
     "/nusMods": (context) => const ModuleListPage(),
     "/saved": (context) => const BookmarkedPosts(),
-    "/splashScreen": (context) => SplashScreen(),
+    "/splashScreen": (context) => const SplashScreen(),
   };
 
   Map<String, Widget Function(BuildContext)> get routes {

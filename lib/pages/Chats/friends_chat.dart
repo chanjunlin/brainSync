@@ -4,7 +4,6 @@ import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import '../../common_widgets/bottomBar.dart';
-import '../../common_widgets/chat_tile.dart';
 import '../../const.dart';
 import '../../model/user_profile.dart';
 import '../../services/auth_service.dart';
@@ -143,7 +142,7 @@ class FriendsChatsState extends State<FriendsChats> {
       }
 
       setState(() {
-        chatSubtitles[chatId] = '$content';
+        chatSubtitles[chatId] = content;
       });
     }
   }
@@ -262,7 +261,7 @@ class FriendsChatsState extends State<FriendsChats> {
                                       ),
                                       Text(
                                         getFormattedTime(chatDetails.get('lastMessage')['sentAt']),
-                                        style: TextStyle(
+                                        style: const TextStyle(
                                           fontSize: 12,
                                           color: Colors.grey,
                                         ),

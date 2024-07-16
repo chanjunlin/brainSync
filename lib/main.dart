@@ -3,7 +3,6 @@ import 'package:brainsync/firebase_options.dart';
 import 'package:brainsync/services/alert_service.dart';
 import 'package:brainsync/services/auth_service.dart';
 import 'package:brainsync/services/navigation_service.dart';
-import 'package:brainsync/splash_screen.dart';
 import 'package:brainsync/utils.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';

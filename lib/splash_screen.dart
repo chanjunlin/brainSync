@@ -4,6 +4,8 @@ import 'package:brainsync/services/auth_service.dart';
 import 'package:brainsync/services/navigation_service.dart';
 
 class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
+
   @override
   _SplashScreenState createState() => _SplashScreenState();
 }
@@ -29,16 +31,16 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     );
 
     _animationBrain = Tween<Offset>(
-      begin: Offset(-1.0, 0.0),
-      end: Offset(0.0, 0.0),
+      begin: const Offset(-1.0, 0.0),
+      end: const Offset(0.0, 0.0),
     ).animate(CurvedAnimation(
       parent: _controller,
       curve: Curves.easeInOut,
     ));
 
     _animationSync = Tween<Offset>(
-      begin: Offset(1.0, 0.0),
-      end: Offset(0.0, 0.0),
+      begin: const Offset(1.0, 0.0),
+      end: const Offset(0.0, 0.0),
     ).animate(CurvedAnimation(
       parent: _controller,
       curve: Curves.easeInOut,
@@ -49,7 +51,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   }
 
   _navigateToNextScreen() async {
-    await Future.delayed(Duration(seconds: 3));
+    await Future.delayed(const Duration(seconds: 3));
     String initialRoute = _authService.currentUser == null ? '/login' : '/home';
     Navigator.pushReplacementNamed(context, initialRoute);
   }
@@ -72,7 +74,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
               position: _animationBrain,
               child: SizedBox(
                 width: MediaQuery.of(context).size.width,
-                child: Text(
+                child: const Text(
                   'Brain',
                   textAlign: TextAlign.center,
                   style: TextStyle(
@@ -87,7 +89,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
               position: _animationSync,
               child: SizedBox(
                 width: MediaQuery.of(context).size.width,
-                child: Text(
+                child: const Text(
                   'Sync',
                   textAlign: TextAlign.center,
                   style: TextStyle(
