@@ -12,7 +12,7 @@ class MockAuthService extends Mock implements AuthService {
   Future<bool> login(String email, String password) {
     return super.noSuchMethod(
       Invocation.method(#login, [email, password]),
-      returnValue: Future.value(true), // Provide a default return value
+      returnValue: Future.value(true), 
       returnValueForMissingStub: Future.value(true),
     );
   }
@@ -44,7 +44,7 @@ void main() {
     });
 
     testWidgets('Login Button Should Trigger Login Process', (WidgetTester tester) async {
-      bool navigatedToHome= false;
+      bool navigatedToHome = false;
       
       await tester.pumpWidget(MaterialApp(
         home: Scaffold(body: LoginForm(setLoading: (_) {}, navigateToHome: () {
@@ -77,6 +77,33 @@ void main() {
       expect(navigatedToHome, isTrue);
 
     });
+    testWidgets("invalid email", (WidgetTester tester) async {
+      bool navigatedToHome= false;
+      
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(body: LoginForm(setLoading: (_) {}, navigateToHome: () {
+          navigatedToHome = true;
+        })),
+      ));
+
+      await tester.pump();
+
+      var emailField = find.byKey(const Key('emailField'));
+      var passwordField = find.byKey(const Key('passwordField'));
+      var button = find.text("Login");
+      var googlebutton = find.text("Sign in with Google");
+
+      when(authService.login('doesnotexist@gmail.com', 'Palkia123!')).thenAnswer((_) async => false);
+
+      await tester.enterText(emailField, 'doesnotexist@gmail.com');
+      await tester.enterText(passwordField, 'Palkia123!');
+      await tester.tap(button);
+      await tester.tap(googlebutton);
+      await tester.pumpAndSettle();
+
+      expect(navigatedToHome, isFalse);
+    });
+
     testWidgets("forget password button leads to forget password page", (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
         home: Scaffold(body: LoginForm(setLoading: (_) {}, navigateToHome: () {
@@ -94,17 +121,5 @@ void main() {
       
       expect(find.text('Forgot Password?'), findsOneWidget);
     });
-    /*testWidgets("sign up button leads to sign up page", (WidgetTester tester) async {
-      await tester.pumpWidget(const MaterialApp(
-        home: Scaffold(body: LoginPage(),),
-      ));
-      
-      await tester.pump();
-
-      var signupbutton = find.text('Sign Up');
-
-      expect(signupbutton, findsOneWidget);
-
-    });*/
   });
 }

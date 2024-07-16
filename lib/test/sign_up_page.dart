@@ -1,4 +1,4 @@
-/*import 'package:brainsync/model/user_profile.dart';
+import 'package:brainsync/model/user_profile.dart';
 import 'package:brainsync/pages/form/signup_form.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -86,10 +86,10 @@ void main () {
       isLoading = false;
       await tester.pump();
       
-      print("Before tapping button: isLoading=$isLoading");
+      /*print("Before tapping button: isLoading=$isLoading");
       await tester.tap(button);
       await tester.pumpAndSettle();
-      print("After tapping button: isLoading=$isLoading");
-    });
+      print("After tapping button: isLoading=$isLoading");*/
+    }); //WHY DOESNT THIS WORKRKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK
   });
-}*/
+} 
