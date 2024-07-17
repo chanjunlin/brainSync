@@ -1,9 +1,7 @@
 import 'dart:async';
 import 'package:brainsync/firebase_options.dart';
-import 'package:brainsync/services/alert_service.dart';
 import 'package:brainsync/services/auth_service.dart';
 import 'package:brainsync/services/navigation_service.dart';
-import 'package:brainsync/splash_screen.dart';
 import 'package:brainsync/utils.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -27,8 +25,6 @@ Future<void> setup() async {
 }
 
 class MyApp extends StatefulWidget {
-  final GetIt _getIt = GetIt.instance;
-
   MyApp({super.key});
 
   @override
@@ -39,7 +35,6 @@ class _MyAppState extends State<MyApp> {
   final GetIt _getIt = GetIt.instance;
 
   late AuthService _authService;
-  late AlertService _alertService;
   late StreamSubscription<User?> userSubscription;
   late NavigationService _navigationService;
 
@@ -48,9 +43,8 @@ class _MyAppState extends State<MyApp> {
     super.initState();
     _navigationService = _getIt.get<NavigationService>();
     _authService = _getIt.get<AuthService>();
-    _alertService = _getIt.get<AlertService>();
     userSubscription = FirebaseAuth.instance.authStateChanges().listen(
-          (user) {
+      (user) {
         if (user == null && _authService.currentUser != null) {
           _authService.signOut();
         }
