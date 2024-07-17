@@ -65,35 +65,37 @@ class SignUpFormState extends State<SignUpForm> {
               children: [
                 Expanded(
                   child: CustomFormField(
+                    key: Key('firstNameField'),
                     labelText: "First Name",
                     hintText: "First Name",
                     height: MediaQuery.sizeOf(context).height * 0.09,
                     validationRegEx: NAME_VALIDATION_REGEX,
                     onSaved: (value) {
                       setState(() {
-                        firstName = value;
+                        firstName = value?.trim();
                       });
                     },
                   ),
                 ),
-                SizedBox(width: 16),
+                const SizedBox(width: 16),
                 Expanded(
                   child: CustomFormField(
+                    key: Key('lastNameField'),
                     labelText: "Last Name",
                     hintText: "Last Name",
                     height: MediaQuery.sizeOf(context).height * 0.09,
                     validationRegEx: NAME_VALIDATION_REGEX,
                     onSaved: (value) {
                       setState(() {
-                        lastName = value;
+                        lastName = value?.trim();
                       });
                     },
-                    // prefixIcon: Icon(Icons.person),
                   ),
                 ),
               ],
             ),
             CustomFormField(
+              key: Key('emailField'),
               labelText: "Email",
               hintText: "Email",
               height: MediaQuery.sizeOf(context).height * 0.09,
@@ -101,11 +103,12 @@ class SignUpFormState extends State<SignUpForm> {
               obscureText: false,
               onSaved: (value) {
                 setState(() {
-                  email = value;
+                  email = value?.trim();
                 });
               },
             ),
             CustomFormField(
+              key: Key('passwordField'),
               labelText: "Password",
               hintText: "Password",
               height: MediaQuery.sizeOf(context).height * 0.09,
@@ -113,11 +116,12 @@ class SignUpFormState extends State<SignUpForm> {
               obscureText: true,
               onSaved: (value) {
                 setState(() {
-                  password = value;
+                  password = value?.trim();
                 });
               },
             ),
             CustomFormField(
+              key: Key('repasswordField'),
               labelText: "Retype Password",
               hintText: "Retype Password",
               height: MediaQuery.sizeOf(context).height * 0.09,
@@ -125,11 +129,12 @@ class SignUpFormState extends State<SignUpForm> {
               obscureText: true,
               onSaved: (value) {
                 setState(() {
-                  repassword = value;
+                  repassword = value?.trim();
                 });
               },
             ),
             DropdownButtonFormField<String>(
+              key: Key('yearField'),
               decoration: InputDecoration(
                 labelText: "Year",
                 filled: true,
@@ -151,7 +156,7 @@ class SignUpFormState extends State<SignUpForm> {
               items: getYearOptions().map((year) {
                 return DropdownMenuItem<String>(
                   value: year,
-                  child: Text(year), // Removed the icon
+                  child: Text(year),
                 );
               }).toList(),
               onChanged: (value) {
@@ -170,13 +175,14 @@ class SignUpFormState extends State<SignUpForm> {
                 }
                 return null;
               },
-              style: TextStyle(color: Colors.black),
-              dropdownColor: Color(0xFFF8F9FF),
+              style: const TextStyle(color: Colors.black),
+              dropdownColor: const Color(0xFFF8F9FF),
             ),
             const SizedBox(height: 30),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
+                key: Key('signupbutton'),
                 style: FilledButton.styleFrom(
                   backgroundColor: Colors.brown[300],
                   foregroundColor: Colors.white,

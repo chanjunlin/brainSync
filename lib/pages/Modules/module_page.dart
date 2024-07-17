@@ -8,9 +8,9 @@ class ModulePage extends StatefulWidget {
   final Future<Map<String, dynamic>> moduleInfo;
 
   const ModulePage({
-    Key? key,
+    super.key,
     required this.moduleInfo,
-  }) : super(key: key);
+  });
 
   @override
   State<ModulePage> createState() => _ModulePageState();
@@ -138,6 +138,7 @@ class _ModulePageState extends State<ModulePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.brown[300],
         foregroundColor: Colors.white,
@@ -174,7 +175,6 @@ class _ModulePageState extends State<ModulePage> {
   }
 
   Widget buildHeader() {
-    print('${moduleCode}  is ${completed}');
     if (completed == null || current == null) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -294,9 +294,13 @@ class _ModulePageState extends State<ModulePage> {
 
   Widget buildDetailSection(String title, List<Widget> children) {
     return Card(
+      color: Colors.white,
       margin: const EdgeInsets.symmetric(vertical: 8),
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      elevation: 5,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+        side: BorderSide(color: Colors.brown[100]!, width: 2), // Specify the border color and width
+      ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(

@@ -9,9 +9,9 @@ class FriendListPage extends StatefulWidget {
   final List<UserProfile?> friendList;
 
   const FriendListPage({
-    Key? key,
+    super.key,
     required this.friendList,
-  }) : super(key: key);
+  });
 
   @override
   State<FriendListPage> createState() => _FriendListPageState();

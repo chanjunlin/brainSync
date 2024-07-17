@@ -127,6 +127,7 @@ class _ProfileState extends State<Profile> with RouteAware {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: FutureBuilder<void>(
         future: loadedProfile,
         builder: (context, snapshot) {
@@ -139,11 +140,13 @@ class _ProfileState extends State<Profile> with RouteAware {
           }
         },
       ),
+      bottomNavigationBar: const CustomBottomNavBar(initialIndex: 4),
     );
   }
 
   Widget buildProfile() {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: ListView(
         padding: EdgeInsets.zero,
         children: [
@@ -153,7 +156,6 @@ class _ProfileState extends State<Profile> with RouteAware {
           buildTabBarSection(),
         ],
       ),
-      bottomNavigationBar: const CustomBottomNavBar(initialIndex: 4),
     );
   }
 
@@ -308,6 +310,6 @@ class _ProfileState extends State<Profile> with RouteAware {
   }
 
   Widget showFriends() {
-    return ShowMyFriends();
+    return const ShowMyFriends();
   }
 }

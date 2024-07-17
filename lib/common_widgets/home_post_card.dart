@@ -218,19 +218,31 @@ class _HomePostCardState extends State<HomePostCard> {
                   ),
                   Row(
                     children: [
-                      const Icon(
-                        Icons.comment,
-                        color: Color.fromARGB(255, 161, 136, 127),
-                      ),
-                      const SizedBox(width: 10),
-                      Text(
-                        '$commentCount',
-                        style: TextStyle(
-                          color: Colors.brown[700],
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
+                              IconButton(
+                                icon: const Icon(
+                                          Icons.comment,
+                                          color: Color.fromARGB(255, 161, 136, 127),
+                                        ),
+                                        onPressed: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+              builder: (context) => PostDetailPage(
+                postId: postId!,
+                title: title!,
+                timestamp: timeStamp!,
+                content: content!,
+                authorName: authorName!,
+              ),
+            ),
+                                          );
+                                        },
+                                      ),
+                                      const SizedBox(width: 5),
+                                      Text('$commentCount',
+                                          style:
+                                              TextStyle(color: Colors.brown[800])),
+                                    ],
                   ),
                   Row(
                     children: [

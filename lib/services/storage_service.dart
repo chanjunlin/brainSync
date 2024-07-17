@@ -35,6 +35,7 @@ class StorageService {
       if (p.state == TaskState.success) {
         return profileFileRef.getDownloadURL();
       }
+      return null;
     });
   }
 
@@ -50,6 +51,7 @@ class StorageService {
       if (p.state == TaskState.success) {
         return coverFileRef.getDownloadURL();
       }
+      return null;
     });
   }
 
@@ -65,6 +67,7 @@ class StorageService {
     String userId = _authService.currentUser!.uid;
     String? downloadProfileURL;
     String? downloadCoverURL;
+
     if (profileFile != null) {
       downloadProfileURL = await uploadUserProfile(
         profileFile: profileFile,
@@ -107,6 +110,7 @@ class StorageService {
       if (p.state == TaskState.success) {
         return fileRef.getDownloadURL();
       }
+      return null;
     });
   }
 }

@@ -77,6 +77,7 @@ class _ModuleListPageState extends State<ModuleListPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.brown[300],
         title: Column(

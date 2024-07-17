@@ -2,11 +2,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class FormHeader extends StatelessWidget {
-  const FormHeader({Key? key,
+  const FormHeader({super.key,
     required this.image,
     required this.title,
     required this.subTitle,
-  }) : super(key: key);
+  });
 
   final String title, subTitle;
   final Image image;

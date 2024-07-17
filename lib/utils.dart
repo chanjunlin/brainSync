@@ -1,4 +1,3 @@
-import 'package:brainsync/firebase_options.dart';
 import 'package:brainsync/services/alert_service.dart';
 import 'package:brainsync/services/api_service.dart';
 import 'package:brainsync/services/auth_service.dart';
@@ -8,6 +7,8 @@ import 'package:brainsync/services/navigation_service.dart';
 import 'package:brainsync/services/storage_service.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:get_it/get_it.dart';
+
+import 'firebase_options.dart';
 
 Future<void> setUpFireBase() async {
   await Firebase.initializeApp(

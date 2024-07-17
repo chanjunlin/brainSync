@@ -1,3 +1,4 @@
+import 'package:brainsync/services/auth_service.dart';
 import 'package:brainsync/services/navigation_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -15,7 +16,8 @@ class ForgetPassword extends StatefulWidget {
 class _ForgetPasswordState extends State<ForgetPassword> {
   final GetIt _getIt = GetIt.instance;
   final TextEditingController _emailController = TextEditingController();
-
+  final _authService = GetIt.instance.get<AuthService>();
+  
   late AlertService _alertService;
   late NavigationService _navigationService;
 
@@ -30,16 +32,14 @@ class _ForgetPasswordState extends State<ForgetPassword> {
 
   Future<void> sendPasswordResetEmail() async {
     try {
-      await FirebaseAuth.instance
-          .sendPasswordResetEmail(email: _emailController.text);
+      await _authService.sendPasswordResetEmail(_emailController.text);
       _alertService.showToast(
         text: "Password reset email sent!",
         icon: Icons.check,
       );
-      _navigationService.pushReplacementName("/login");
     } on FirebaseAuthException catch (e) {
       _alertService.showToast(
-        text: "Invalid email, $e",
+        text: "Invalid email",
         icon: Icons.error_outline_rounded,
       );
     }
@@ -74,6 +74,7 @@ class _ForgetPasswordState extends State<ForgetPassword> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text(
           "Forgot Password",
@@ -109,7 +110,7 @@ class _ForgetPasswordState extends State<ForgetPassword> {
               ),
               const SizedBox(height: 20),
               Image.asset(
-                "assets/img/lock1.png",
+                "assets/img/lock.png",
                 alignment: Alignment.topCenter,
               ),
               entryField("email", _emailController, prefixIcon: Icons.email),

@@ -1,0 +1,5 @@
+{
+  "devDependencies": {
+    "@appland/appmap": "^3.150.1"
+  }
+}

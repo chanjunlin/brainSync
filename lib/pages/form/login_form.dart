@@ -10,11 +10,13 @@ import 'package:get_it/get_it.dart';
 class LoginForm extends StatefulWidget {
   final Function(bool) setLoading;
   final Function navigateToHome;
+  final Function navigateToLogin;
 
   const LoginForm({
     super.key,
     required this.setLoading,
     required this.navigateToHome,
+    required this.navigateToLogin,
   });
 
   @override
@@ -27,9 +29,8 @@ class _LoginFormState extends State<LoginForm> {
 
   late AlertService _alertService;
   late AuthService _authService;
-
   String? email, password;
-  bool _obscurePassword = true; // Added to manage password visibility
+  bool _obscurePassword = true;
 
   @override
   void initState() {
@@ -37,7 +38,6 @@ class _LoginFormState extends State<LoginForm> {
     _alertService = _getIt.get<AlertService>();
     _authService = _getIt.get<AuthService>();
   }
-  
 
   @override
   Widget build(BuildContext context) {
@@ -53,20 +53,23 @@ class _LoginFormState extends State<LoginForm> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               CustomFormField(
+                key: const Key('emailField'),
                 labelText: "Email",
                 hintText: "Enter a valid email",
                 height: MediaQuery.sizeOf(context).height * 0.07,
                 validationRegEx: EMAIL_VALIDATION_REGEX,
                 onSaved: (value) {
                   setState(() {
-                    email = value;
+                    email = value?.trim();
                   });
                 },
               ),
+              const SizedBox(height: 8),
               CustomFormField(
+                key: const Key('passwordField'),
                 labelText: "Password",
                 hintText: "Enter a valid password",
-                obscureText: _obscurePassword, // Use the obscurePassword variable
+                obscureText: _obscurePassword,
                 suffixIcon: IconButton(
                   icon: Icon(
                     _obscurePassword ? Icons.visibility_off : Icons.visibility,
@@ -81,7 +84,8 @@ class _LoginFormState extends State<LoginForm> {
                 validationRegEx: PASSWORD_VALIDATION_REGEX,
                 onSaved: (value) {
                   setState(() {
-                    password = value;
+                    
+                    password = value?.trim();
                   });
                 },
               ),
@@ -107,7 +111,8 @@ class _LoginFormState extends State<LoginForm> {
                       _loginFormKey.currentState?.save();
                       widget.setLoading(true);
                       try {
-                        bool result = await _authService.login(email!, password!);
+                        bool result =
+                            await _authService.login(email!, password!);
                         if (result) {
                           widget.navigateToHome();
                         } else {
@@ -169,8 +174,13 @@ class _LoginFormState extends State<LoginForm> {
                   onTap: () async {
                     widget.setLoading(true);
                     try {
-                      await _authService.signInWithGoogle(context);
-                      widget.navigateToHome();
+                      bool result =
+                          await _authService.signInWithGoogle(context);
+                      if (result) {
+                        widget.navigateToHome();
+                      } else {
+                        widget.navigateToLogin();
+                      }
                     } catch (error) {
                       _alertService.showToast(
                         text: "Error signing in with Google. Please try again.",

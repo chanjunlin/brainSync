@@ -23,7 +23,6 @@ class _LoginPageState extends State<LoginPage> {
     _navigationService = _getIt.get<NavigationService>();
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -37,7 +36,7 @@ class _LoginPageState extends State<LoginPage> {
     return SafeArea(
       child: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
           child: Column(
             children: [
               headerText(),
@@ -49,6 +48,9 @@ class _LoginPageState extends State<LoginPage> {
                 },
                 navigateToHome: () {
                   _navigationService.pushReplacementName("/home");
+                },
+                navigateToLogin: () {
+                  _navigationService.pushReplacementName("/login");
                 },
               ),
               createAnAccount(),
@@ -102,13 +104,13 @@ class _LoginPageState extends State<LoginPage> {
           'Don\'t have an account? ',
           style: TextStyle(color: Colors.brown[800]),
         ),
-        GestureDetector(
+        TextButton(
           child: Text(
             "Sign Up",
             style: TextStyle(
                 fontWeight: FontWeight.w800, color: Colors.brown[300]),
           ),
-          onTap: () async {
+          onPressed: () async {
             _navigationService.pushName("/register");
           },
         )
