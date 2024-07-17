@@ -104,13 +104,13 @@ class _LoginPageState extends State<LoginPage> {
           'Don\'t have an account? ',
           style: TextStyle(color: Colors.brown[800]),
         ),
-        GestureDetector(
+        TextButton(
           child: Text(
             "Sign Up",
             style: TextStyle(
                 fontWeight: FontWeight.w800, color: Colors.brown[300]),
           ),
-          onTap: () async {
+          onPressed: () async {
             _navigationService.pushName("/register");
           },
         )

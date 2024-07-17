@@ -29,7 +29,6 @@ class _LoginFormState extends State<LoginForm> {
 
   late AlertService _alertService;
   late AuthService _authService;
-
   String? email, password;
   bool _obscurePassword = true;
 
@@ -54,6 +53,7 @@ class _LoginFormState extends State<LoginForm> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               CustomFormField(
+                key: const Key('emailField'),
                 labelText: "Email",
                 hintText: "Enter a valid email",
                 height: MediaQuery.sizeOf(context).height * 0.07,
@@ -66,6 +66,7 @@ class _LoginFormState extends State<LoginForm> {
               ),
               const SizedBox(height: 8),
               CustomFormField(
+                key: const Key('passwordField'),
                 labelText: "Password",
                 hintText: "Enter a valid password",
                 obscureText: _obscurePassword,
@@ -83,6 +84,7 @@ class _LoginFormState extends State<LoginForm> {
                 validationRegEx: PASSWORD_VALIDATION_REGEX,
                 onSaved: (value) {
                   setState(() {
+                    
                     password = value?.trim();
                   });
                 },
