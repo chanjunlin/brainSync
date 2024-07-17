@@ -39,7 +39,7 @@ android {
 
     defaultConfig {
         applicationId "com.example.brainsync"
-        minSdkVersion 24
+        minSdkVersion 23
         targetSdkVersion 34
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName

@@ -14,7 +14,7 @@ const String academicYear = "2023-2024";
 
 Future<void> main() async {
   await setup();
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 Future<void> setup() async {
@@ -25,7 +25,7 @@ Future<void> setup() async {
 }
 
 class MyApp extends StatefulWidget {
-  MyApp({super.key});
+  const MyApp({super.key});
 
   @override
   State<MyApp> createState() => _MyAppState();

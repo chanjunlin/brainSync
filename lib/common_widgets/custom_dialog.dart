@@ -72,7 +72,7 @@ class CustomDialog {
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.brown[300],
-                        minimumSize: Size(120, 50),
+                        minimumSize: const Size(120, 50),
                       ),
                       onPressed: () {
                         alertService.showToast(
