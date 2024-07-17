@@ -6,7 +6,7 @@ class ModuleTile extends StatelessWidget {
   final Module module;
   final Function onTap;
 
-  ModuleTile({
+  const ModuleTile({
     super.key,
     required this.module,
     required this.onTap,
@@ -19,6 +19,7 @@ class ModuleTile extends StatelessWidget {
         onTap();
       },
       child: Card(
+        color: Colors.white,
         elevation: 4,
         margin: const EdgeInsets.all(8),
         child: Padding(
@@ -34,7 +35,7 @@ class ModuleTile extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Flexible(
-                child: Text(module.title, style: TextStyle(fontSize: 14)),
+                child: Text(module.title, style: const TextStyle(fontSize: 14)),
               ),
             ],
           ),

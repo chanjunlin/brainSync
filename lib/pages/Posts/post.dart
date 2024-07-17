@@ -1,8 +1,8 @@
 import 'dart:async';
-import 'dart:core';
 
 import 'package:badword_guard/badword_guard.dart';
-import 'package:brainsync/common_widgets/dialog.dart';
+import 'package:brainsync/common_widgets/custom_dialog.dart';
+import 'package:brainsync/common_widgets/seach_bar_2.dart';
 import 'package:brainsync/model/module.dart';
 import 'package:brainsync/model/post.dart';
 import 'package:brainsync/services/alert_service.dart';
@@ -24,17 +24,15 @@ class PostsPage extends StatefulWidget {
 
 class _PostsPageState extends State<PostsPage> {
   String? userProfilePfp, name;
-  final TextEditingController _titleController = TextEditingController();
-  final TextEditingController _contentController = TextEditingController();
+  final TextEditingController titleController = TextEditingController();
+  final TextEditingController contentController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   final GetIt _getIt = GetIt.instance;
   final LanguageChecker _checker = LanguageChecker();
-
   late AlertService _alertService;
   late AuthService _authService;
   late DatabaseService _databaseService;
   late NavigationService _navigationService;
-
   late Future<List<Module>> futureModules;
   List<Module> filteredModules = [];
   Timer? _debounce;
@@ -47,31 +45,30 @@ class _PostsPageState extends State<PostsPage> {
     _databaseService = _getIt.get<DatabaseService>();
     _navigationService = _getIt.get<NavigationService>();
     futureModules = ApiService.fetchModules();
-    _titleController.addListener(onTitleChanged);
+    titleController.addListener(() {
+      setState(() {});
+    });
   }
 
   @override
   void dispose() {
     _debounce?.cancel();
-    _titleController.dispose();
-    _contentController.dispose();
+    titleController.dispose();
+    contentController.dispose();
     super.dispose();
-  }
-
-  void onTitleChanged() {
-    if (_debounce?.isActive ?? false) _debounce!.cancel();
-    _debounce = Timer(const Duration(milliseconds: 300), () {
-      filterModules(_titleController.text);
-    });
   }
 
   void filterModules(String query) async {
     final modules = await futureModules;
     setState(() {
-      filteredModules = modules
-          .where((module) =>
-              module.code.toLowerCase().startsWith(query.toLowerCase()))
-          .toList();
+      if (query.isEmpty) {
+        filteredModules = modules;
+      } else {
+        filteredModules = modules
+            .where((module) =>
+                module.code.toLowerCase().contains(query.toLowerCase()))
+            .toList();
+      }
     });
   }
 
@@ -79,9 +76,29 @@ class _PostsPageState extends State<PostsPage> {
     return filteredModules.any((module) => module.code == title);
   }
 
+  void clearSearch() {
+    titleController.clear();
+  }
+
+  void handleSuggestionSelected(String suggestion) {
+    setState(() {
+      titleController.text = suggestion;
+      filteredModules.clear();
+    });
+  }
+
   Future<void> createPost() async {
     if (_formKey.currentState!.validate()) {
-      String content = _contentController.text;
+      String title = titleController.text.trim();
+      if (!isValidModuleCode(title)) {
+        _alertService.showToast(
+          text: "Invalid module code!",
+          icon: Icons.error,
+        );
+        return;
+      }
+
+      String content = contentController.text;
       if (_checker.containsBadLanguage(content)) {
         _alertService.showToast(
           text: "Post contains inappropriate content!",
@@ -89,18 +106,19 @@ class _PostsPageState extends State<PostsPage> {
         );
         return;
       }
+
       String filteredContent = _checker.filterBadWords(content);
       await _databaseService.createNewPost(
         post: Post(
           authorName: _authService.currentUser!.uid,
           content: filteredContent,
-          title: _titleController.text,
+          title: title,
           timestamp: Timestamp.now(),
         ),
       );
 
-      _titleController.clear();
-      _contentController.clear();
+      titleController.clear();
+      contentController.clear();
       _alertService.showToast(
         text: "Post created successfully!",
         icon: Icons.check,
@@ -161,43 +179,10 @@ class _PostsPageState extends State<PostsPage> {
     );
   }
 
-  Widget buildSuggestionList() {
-    final currentText = _titleController.text.trim();
-    if (currentText.isEmpty || isValidModuleCode(currentText)) {
-      return Container();
-    }
-    final List<Module> visibleModules = filteredModules.take(3).toList();
-    return Positioned(
-      top: 107,
-      left: 16,
-      right: 16,
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.brown[300]!),
-          borderRadius: BorderRadius.circular(10),
-          color: const Color(0xFFF8F9FF),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: visibleModules.map((module) {
-            return ListTile(
-              title: Text(module.code),
-              onTap: () {
-                setState(() {
-                  _titleController.text = module.code;
-                  filteredModules.clear();
-                });
-              },
-            );
-          }).toList(),
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: const Text(
@@ -209,128 +194,95 @@ class _PostsPageState extends State<PostsPage> {
         backgroundColor: Colors.brown[300],
         elevation: 0,
       ),
-      body: Stack(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "Module Code",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.brown[800],
+                ),
+              ),
+              const SizedBox(height: 10),
+              CustomSearchBar(
+                controller: titleController,
+                onChanged: (value) {
+                  filterModules(value);
+                },
+                suggestions: filteredModules,
+                onSuggestionSelected: handleSuggestionSelected,
+              ),
+              const SizedBox(height: 30),
+              Text(
+                "Content",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.brown[800],
+                ),
+              ),
+              const SizedBox(height: 10),
+              TextFormField(
+                cursorColor: Colors.brown[300],
+                controller: contentController,
+                decoration: InputDecoration(
+                  labelText: 'Content',
+                  labelStyle: TextStyle(
+                    color: Colors.brown[800],
+                  ),
+                  prefixIcon: Icon(
+                    Icons.text_fields,
+                    color: Colors.brown[300],
+                  ),
+                  focusColor: Colors.brown[300],
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.brown[300]!),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.brown[300]!),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  border: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.brown[300]!),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                maxLines: null,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter content';
+                  }
+                  return null;
+                },
+              ),
+              const Spacer(),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    "Module Code",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.brown[800],
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.only(right: 8.0),
+                      child: discardButton(),
                     ),
                   ),
-                  const SizedBox(height: 10),
-                  TextFormField(
-                    controller: _titleController,
-                    decoration: InputDecoration(
-                      labelText: 'Module Code',
-                      labelStyle: TextStyle(
-                        color: Colors.brown[800],
-                      ),
-                      prefixIcon: Icon(
-                        Icons.code,
-                        color: Colors.brown[300],
-                      ),
-                      focusColor: Colors.brown[300],
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.brown[300]!),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.brown[300]!),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      border: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.brown[300]!),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 8.0),
+                      child: sendButton(),
                     ),
-                    style: const TextStyle(fontSize: 16.0),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter a module code';
-                      } else if (!isValidModuleCode(value)) {
-                        return 'Invalid module code';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 30),
-                  Text(
-                    "Content",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.brown[800],
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  TextFormField(
-                    cursorColor: Colors.brown[300],
-                    controller: _contentController,
-                    decoration: InputDecoration(
-                      labelText: 'Content',
-                      labelStyle: TextStyle(
-                        color: Colors.brown[800],
-                      ),
-                      prefixIcon: Icon(
-                        Icons.text_fields,
-                        color: Colors.brown[300],
-                      ),
-                      focusColor: Colors.brown[300],
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.brown[300]!),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.brown[300]!),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      border: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.brown[300]!),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    maxLines: null,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter content';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                  const Spacer(),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.only(right: 8.0),
-                          child: discardButton(),
-                        ),
-                      ),
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 8.0),
-                          child: sendButton(),
-                        ),
-                      ),
-                    ],
                   ),
                 ],
               ),
-            ),
+            ],
           ),
-          buildSuggestionList(),
-        ],
+        ),
       ),
     );
   }

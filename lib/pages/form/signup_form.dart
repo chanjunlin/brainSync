@@ -72,12 +72,12 @@ class SignUpFormState extends State<SignUpForm> {
                     validationRegEx: NAME_VALIDATION_REGEX,
                     onSaved: (value) {
                       setState(() {
-                        firstName = value;
+                        firstName = value?.trim();
                       });
                     },
                   ),
                 ),
-                SizedBox(width: 16),
+                const SizedBox(width: 16),
                 Expanded(
                   child: CustomFormField(
                     key: Key('lastNameField'),
@@ -87,10 +87,9 @@ class SignUpFormState extends State<SignUpForm> {
                     validationRegEx: NAME_VALIDATION_REGEX,
                     onSaved: (value) {
                       setState(() {
-                        lastName = value;
+                        lastName = value?.trim();
                       });
                     },
-                    // prefixIcon: Icon(Icons.person),
                   ),
                 ),
               ],
@@ -104,7 +103,7 @@ class SignUpFormState extends State<SignUpForm> {
               obscureText: false,
               onSaved: (value) {
                 setState(() {
-                  email = value;
+                  email = value?.trim();
                 });
               },
             ),
@@ -117,7 +116,7 @@ class SignUpFormState extends State<SignUpForm> {
               obscureText: true,
               onSaved: (value) {
                 setState(() {
-                  password = value;
+                  password = value?.trim();
                 });
               },
             ),
@@ -130,7 +129,7 @@ class SignUpFormState extends State<SignUpForm> {
               obscureText: true,
               onSaved: (value) {
                 setState(() {
-                  repassword = value;
+                  repassword = value?.trim();
                 });
               },
             ),
@@ -157,7 +156,7 @@ class SignUpFormState extends State<SignUpForm> {
               items: getYearOptions().map((year) {
                 return DropdownMenuItem<String>(
                   value: year,
-                  child: Text(year), // Removed the icon
+                  child: Text(year),
                 );
               }).toList(),
               onChanged: (value) {
@@ -176,8 +175,8 @@ class SignUpFormState extends State<SignUpForm> {
                 }
                 return null;
               },
-              style: TextStyle(color: Colors.black),
-              dropdownColor: Color(0xFFF8F9FF),
+              style: const TextStyle(color: Colors.black),
+              dropdownColor: const Color(0xFFF8F9FF),
             ),
             const SizedBox(height: 30),
             SizedBox(

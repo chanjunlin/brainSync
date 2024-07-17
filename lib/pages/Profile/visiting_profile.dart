@@ -6,7 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
-import '../../common_widgets/dialog.dart';
+import '../../common_widgets/custom_dialog.dart';
 import '../../const.dart';
 import '../../model/user_profile.dart';
 import '../../services/auth_service.dart';
@@ -141,7 +141,7 @@ class _VisitProfileState extends State<VisitProfile> {
       alignment: Alignment.center,
       children: [
         Container(
-          margin: EdgeInsets.only(bottom: bottom),
+          margin: const EdgeInsets.only(bottom: bottom),
           child: buildCoverImage(),
         ),
         Positioned(top: top, child: buildProfileImage()),

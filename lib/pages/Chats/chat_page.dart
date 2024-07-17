@@ -68,6 +68,7 @@ class _ChatPageState extends State<ChatPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.brown[300],
         foregroundColor: Colors.white,
@@ -99,7 +100,7 @@ class _ChatPageState extends State<ChatPage> {
                 children: [
                   Text(
                     widget.chatUser.firstName ?? 'User',
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
@@ -108,7 +109,7 @@ class _ChatPageState extends State<ChatPage> {
                   if (widget.chatUser.lastName != null)
                     Text(
                       widget.chatUser.lastName!,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 14,
                         color: Colors.white70,
                       ),
@@ -117,9 +118,8 @@ class _ChatPageState extends State<ChatPage> {
               ),
             ),
             IconButton(
-              icon: Icon(Icons.more_vert, color: Colors.white),
+              icon: const Icon(Icons.more_vert, color: Colors.white),
               onPressed: () {
-                // Handle more options
               },
             ),
           ],
@@ -136,10 +136,10 @@ class _ChatPageState extends State<ChatPage> {
       ),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
+          return const Center(child: CircularProgressIndicator());
         }
         if (snapshot.hasError) {
-          return Center(child: Text('Error loading chat'));
+          return const Center(child: Text('Error loading chat'));
         }
         Chat? chat = snapshot.data?.data();
         List<ChatMessage> messages = [];
@@ -184,7 +184,7 @@ class _ChatPageState extends State<ChatPage> {
       } else {
         Message message = Message(
           senderID: currentUser!.id,
-          content: chatMessage.text,
+          content: chatMessage.text.trim(),
           messageType: MessageType.Text,
           sentAt: Timestamp.fromDate(chatMessage.createdAt),
         );
@@ -195,7 +195,6 @@ class _ChatPageState extends State<ChatPage> {
         );
       }
     } catch (e) {
-      // Handle error
       print('Error sending message: $e');
     }
   }

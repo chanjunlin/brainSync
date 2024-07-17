@@ -5,8 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
 import '../common_widgets/bottomBar.dart';
-import '../common_widgets/navBar.dart';
+import '../common_widgets/nav_bar.dart';
 import '../services/alert_service.dart';
+
 
 class Home extends StatefulWidget {
   const Home({
@@ -23,40 +24,46 @@ class _HomeState extends State<Home> with RouteAware {
   late AlertService _alertService;
   late DatabaseService _databaseService;
   late TextEditingController searchQuery;
-  late Future<QuerySnapshot> allPosts;
-  late Future<void> loadedProfile;
-
-  List<dynamic>? bookmarks;
+  late Future<QuerySnapshot> allPostsFuture;
+  List<DocumentSnapshot> allPosts = [];
   List<DocumentSnapshot> filteredPosts = [];
+  List<dynamic> bookmarks = [];
 
   @override
   void initState() {
     super.initState();
     _alertService = _getIt.get<AlertService>();
     _databaseService = _getIt.get<DatabaseService>();
-    loadedProfile = loadProfile();
     searchQuery = TextEditingController();
-    allPosts = fetchPosts();
+    searchQuery.addListener(_onSearchChanged);
+    allPostsFuture = fetchPosts();
+    loadProfile();
+  }
+
+  @override
+  void dispose() {
+    searchQuery.removeListener(_onSearchChanged);
+    searchQuery.dispose();
+    super.dispose();
   }
 
   Future<QuerySnapshot> fetchPosts() async {
-    return FirebaseFirestore.instance.collection('posts').get();
+    final postsSnapshot = await FirebaseFirestore.instance.collection('posts').get();
+    setState(() {
+      allPosts = postsSnapshot.docs;
+      filteredPosts = allPosts;
+    });
+    return postsSnapshot;
   }
 
-  void filterTitles(String query) async {
-    try {
-      final posts = await allPosts;
-      setState(() {
-        filteredPosts = posts.docs
-            .where((post) => post['title']
-                .toString()
-                .toLowerCase()
-                .contains(query.toLowerCase()))
-            .toList();
-      });
-    } catch (e) {
-      _alertService.showToast(text: 'Error filtering posts: $e');
-    }
+  void _onSearchChanged() {
+    final query = searchQuery.text.toLowerCase();
+    setState(() {
+      filteredPosts = allPosts.where((post) {
+        final title = post['title'].toString().toLowerCase();
+        return title.contains(query);
+      }).toList();
+    });
   }
 
   Future<void> loadProfile() async {
@@ -76,7 +83,6 @@ class _HomeState extends State<Home> with RouteAware {
 
   void clearSearch() {
     searchQuery.clear();
-    filterTitles('');
   }
 
   @override
@@ -98,7 +104,7 @@ class _HomeState extends State<Home> with RouteAware {
                 color: Colors.brown[800],
               ),
               controller: searchQuery,
-              onChanged: filterTitles,
+              onChanged: (value) => _onSearchChanged(),
               decoration: InputDecoration(
                 hintStyle: TextStyle(
                   color: Colors.brown[700],
@@ -109,9 +115,9 @@ class _HomeState extends State<Home> with RouteAware {
                 prefixIcon: Icon(Icons.search, color: Colors.brown[300]),
                 suffixIcon: searchQuery.text.isNotEmpty
                     ? IconButton(
-                        icon: Icon(Icons.clear, color: Colors.brown[300]),
-                        onPressed: clearSearch,
-                      )
+                  icon: Icon(Icons.clear, color: Colors.brown[300]),
+                  onPressed: clearSearch,
+                )
                     : null,
                 contentPadding: const EdgeInsets.symmetric(
                     vertical: 15.0, horizontal: 10.0),
@@ -126,7 +132,7 @@ class _HomeState extends State<Home> with RouteAware {
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(30.0),
                   borderSide:
-                      BorderSide(color: Colors.brown.shade300, width: 2.0),
+                  BorderSide(color: Colors.brown.shade300, width: 2.0),
                 ),
               ),
             ),
@@ -134,56 +140,66 @@ class _HomeState extends State<Home> with RouteAware {
         ),
       ),
       body: FutureBuilder(
-        future: Future.wait([allPosts, loadedProfile]),
-        builder: (context, AsyncSnapshot<List<dynamic>> snapshot) {
+        future: allPostsFuture,
+        builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           }
+          if (snapshot.hasData) {
+            allPosts = snapshot.data!.docs;
+            filteredPosts = filteredPosts.isEmpty ? [] : filteredPosts;
+            filteredPosts.sort((a, b) {
+              Timestamp timestampA = a['timestamp'];
+              Timestamp timestampB = b['timestamp'];
+              return timestampB.compareTo(timestampA);
+            });
+          }
 
-          QuerySnapshot postsSnapshot = snapshot.data![0];
-          List<DocumentSnapshot> posts =
-              filteredPosts.isNotEmpty ? filteredPosts : postsSnapshot.docs;
-          posts.sort((a, b) {
-            Timestamp timestampA = a['timestamp'];
-            Timestamp timestampB = b['timestamp'];
-            return timestampB.compareTo(timestampA);
-          });
-
-          return posts.isEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Image.asset("assets/img/brain.png"),
-                      Text(
-                        'No posts',
-                        style: TextStyle(
-                          fontSize: 20,
-                          color: Colors.brown[700],
-                        ),
-                      ),
-                    ],
-                  ),
-                )
-              : Column(
-                  children: [
-                    Expanded(
-                      child: ListView.builder(
-                        itemCount: posts.length,
-                        itemBuilder: (context, index) {
-                          DocumentSnapshot post = posts[index];
-                          return HomePostCard(
-                            postId: post.id,
-                          );
-                        },
-                      ),
+          return AnimatedSwitcher(
+            duration: const Duration(milliseconds: 500),
+            transitionBuilder: (Widget child, Animation<double> animation) {
+              return FadeTransition(
+                opacity: animation,
+                child: SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(1, 0),
+                    end: Offset.zero,
+                  ).animate(animation),
+                  child: child,
+                ),
+              );
+            },
+            child: filteredPosts.isEmpty
+                ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Image.asset("assets/img/magnifying_glass_brain.png"),
+                  Text(
+                    'No posts found',
+                    style: TextStyle(
+                      fontSize: 20,
+                      color: Colors.brown[700],
                     ),
-                  ],
+                  ),
+                ],
+              ),
+            )
+                : ListView.builder(
+              key: ValueKey(filteredPosts.length),
+              itemCount: filteredPosts.length,
+              itemBuilder: (context, index) {
+                DocumentSnapshot post = filteredPosts[index];
+                return HomePostCard(
+                  postId: post.id,
                 );
+              },
+            ),
+          );
         },
       ),
       bottomNavigationBar: const CustomBottomNavBar(initialIndex: 0),

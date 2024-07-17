@@ -69,6 +69,7 @@ class _NotificationsState extends State<Notifications> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Image.asset("assets/img/happy_brain.png"),
+            const SizedBox(height: 16),
             Text(
               'No notifications',
               style: TextStyle(

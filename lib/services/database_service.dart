@@ -212,7 +212,7 @@ class DatabaseService {
       });
     } catch (e) {
       print('Transaction failed: $e');
-      throw e; // Rethrow the error for handling in the calling function
+      rethrow; // Rethrow the error for handling in the calling function
     }
   }
 
@@ -391,12 +391,34 @@ class DatabaseService {
     try {
       DocumentSnapshot userDoc =
           await _firebaseFirestore.collection('users').doc(userId).get();
-      String completeCode = '${moduleCode}/${moduleCredit}';
+      String completeCode = '$moduleCode/$moduleCredit';
       List<dynamic>? currentModules = userDoc["currentModules"];
       if (currentModules != null && currentModules.contains(completeCode)) {
         currentModules.remove(completeCode);
         await userDoc.reference.update({
           'currentModules': currentModules,
+        });
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  // Converting module from current to completed
+  Future<void> moduleIsCompleted(
+      String userId, String moduleCode, String moduleCredit) async {
+    try {
+      DocumentSnapshot userDoc =
+          await _firebaseFirestore.collection('users').doc(userId).get();
+      String completeCode = '$moduleCode/$moduleCredit';
+      List<dynamic>? currentModules = userDoc["currentModules"];
+      List<dynamic>? completedModules = userDoc["completedModules"];
+      completedModules?.add(completeCode as dynamic);
+      if (currentModules != null && currentModules.contains(completeCode)) {
+        currentModules.remove(completeCode);
+        await userDoc.reference.update({
+          'currentModules': currentModules,
+          'completedModules': completedModules,
         });
       }
     } catch (e) {
