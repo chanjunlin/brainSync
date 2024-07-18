@@ -37,7 +37,7 @@ class _ForgetPasswordState extends State<ForgetPassword> {
         text: "Password reset email sent!",
         icon: Icons.check,
       );
-    } on FirebaseAuthException catch (e) {
+    } on FirebaseAuthException {
       _alertService.showToast(
         text: "Invalid email",
         icon: Icons.error_outline_rounded,
@@ -74,6 +74,7 @@ class _ForgetPasswordState extends State<ForgetPassword> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text(
           "Forgot Password",
@@ -109,7 +110,7 @@ class _ForgetPasswordState extends State<ForgetPassword> {
               ),
               const SizedBox(height: 20),
               Image.asset(
-                "assets/img/lock1.png",
+                "assets/img/lock.png",
                 alignment: Alignment.topCenter,
               ),
               entryField("email", _emailController, prefixIcon: Icons.email),

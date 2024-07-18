@@ -6,11 +6,11 @@ class CommentCard extends StatelessWidget {
   final String formattedDate;
 
   const CommentCard({
-    Key? key,
+    super.key,
     required this.authorName,
     required this.content,
     required this.formattedDate,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

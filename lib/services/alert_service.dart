@@ -25,6 +25,7 @@ class AlertService {
         position: DelightSnackbarPosition.top,
         builder: (context) {
           return ToastCard(
+            color: Colors.white,
             leading: Icon(icon, size: 28),
             title: Text(
               text,

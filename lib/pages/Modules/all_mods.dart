@@ -21,13 +21,15 @@ class _ModuleListPageState extends State<ModuleListPage> {
   late NavigationService _navigationService;
 
   final GetIt _getIt = GetIt.instance;
+  late ApiService _apiService;
   late String acadYear;
 
   @override
   void initState() {
     super.initState();
     acadYear = getCurrentAcadYear();
-    futureModules = ApiService.fetchModules();
+    _apiService = _getIt<ApiService>();
+    futureModules = _apiService.fetchModules();
     searchController = TextEditingController();
     _navigationService = _getIt.get<NavigationService>();
     searchController.addListener(() => setState(() {}));
@@ -41,7 +43,8 @@ class _ModuleListPageState extends State<ModuleListPage> {
 
   String getCurrentAcadYear() {
     final DateTime now = DateTime.now();
-    final DateTime midJuly = DateTime(now.year, 7, 15); // Assuming mid-July is the 15th
+    final DateTime midJuly =
+        DateTime(now.year, 7, 15); // Assuming mid-July is the 15th
     final int startYear = now.isBefore(midJuly) ? now.year - 1 : now.year;
     final int endYear = startYear + 1;
     return '$startYear-$endYear';
@@ -52,7 +55,7 @@ class _ModuleListPageState extends State<ModuleListPage> {
     _navigationService.push(
       MaterialPageRoute(
         builder: (context) => ModulePage(
-          moduleInfo: ApiService.fetchModuleInfo(acadYear, moduleCode),
+          moduleInfo: _apiService.fetchModuleInfo(acadYear, moduleCode),
         ),
       ),
     );
@@ -77,6 +80,7 @@ class _ModuleListPageState extends State<ModuleListPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.brown[300],
         title: Column(
@@ -115,9 +119,9 @@ class _ModuleListPageState extends State<ModuleListPage> {
                 prefixIcon: const Icon(Icons.search, color: Colors.grey),
                 suffixIcon: searchController.text.isNotEmpty
                     ? IconButton(
-                  icon: const Icon(Icons.clear, color: Colors.grey),
-                  onPressed: clearSearch,
-                )
+                        icon: const Icon(Icons.clear, color: Colors.grey),
+                        onPressed: clearSearch,
+                      )
                     : null,
                 contentPadding: const EdgeInsets.symmetric(
                     vertical: 15.0, horizontal: 10.0),
@@ -131,7 +135,8 @@ class _ModuleListPageState extends State<ModuleListPage> {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(30.0),
-                  borderSide: BorderSide(color: Colors.brown.shade300, width: 2.0),
+                  borderSide:
+                      BorderSide(color: Colors.brown.shade300, width: 2.0),
                 ),
               ),
               style: const TextStyle(fontSize: 16.0),

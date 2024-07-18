@@ -1,11 +1,10 @@
-import 'dart:ffi';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Post {
   int? commentCount;
 
-  List<dynamic?>? likes;
+  List<dynamic>? likes;
 
   String? authorName;
   String? content;

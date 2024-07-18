@@ -36,6 +36,7 @@ class _NavBarState extends State<NavBar> {
   @override
   Widget build(BuildContext context) {
     return Drawer(
+      backgroundColor: Colors.white,
       child: ListView(
         padding: const EdgeInsets.all(0),
         children: [
@@ -50,7 +51,7 @@ class _NavBarState extends State<NavBar> {
                   radius: 40,
                   backgroundImage: userProfilePfp != null
                       ? NetworkImage(userProfilePfp!)
-                      : NetworkImage(PLACEHOLDER_PFP),
+                      : const NetworkImage(PLACEHOLDER_PFP),
                 ),
                 const SizedBox(height: 10),
                 Text(

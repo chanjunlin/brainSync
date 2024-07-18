@@ -1,6 +1,4 @@
 import 'package:brainsync/common_widgets/bottomBar.dart';
-import 'package:brainsync/pages/Chats/friends_chat.dart';
-import 'package:brainsync/pages/home.dart';
 import 'package:brainsync/services/database_service.dart';
 import 'package:brainsync/services/navigation_service.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';

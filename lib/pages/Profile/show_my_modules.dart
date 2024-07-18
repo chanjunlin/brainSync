@@ -26,11 +26,13 @@ class _ShowModuleState extends State<ShowModule> {
 
   final GetIt _getIt = GetIt.instance;
   late NavigationService _navigationService;
+  late ApiService _apiService;
 
   @override
   void initState() {
     super.initState();
     _navigationService = _getIt.get<NavigationService>();
+    _apiService = _getIt.get<ApiService>();
     calculateTotalCredits();
   }
 
@@ -73,13 +75,21 @@ class _ShowModuleState extends State<ShowModule> {
                 buildSectionTitle('Current Modules'),
                 if (widget.currentModules != null &&
                     widget.currentModules!.isNotEmpty)
-                  displayTotalCredits(),
+                  displayTotalCredits("current"),
               ],
             ),
             const SizedBox(height: 8),
             buildModulesList(widget.currentModules, true),
             const SizedBox(height: 16),
-            buildSectionTitle('Completed Modules'),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                buildSectionTitle('Completed Modules'),
+                if (widget.completedModules != null &&
+                    widget.completedModules!.isNotEmpty)
+                  displayTotalCredits("completed"),
+              ],
+            ),
             const SizedBox(height: 8),
             buildModulesList(widget.completedModules, false),
             const SizedBox(height: 16),
@@ -138,6 +148,7 @@ class _ShowModuleState extends State<ShowModule> {
         String moduleCredit = parts.length > 1 ? parts[1] : '0';
 
         return Card(
+          color: Colors.white,
           elevation: 2,
           margin: const EdgeInsets.symmetric(vertical: 4),
           child: ListTile(
@@ -168,7 +179,7 @@ class _ShowModuleState extends State<ShowModule> {
                 MaterialPageRoute(
                   builder: (context) => ModulePage(
                     moduleInfo:
-                        ApiService.fetchModuleInfo(academicYear, moduleCode),
+                        _apiService.fetchModuleInfo(academicYear, moduleCode),
                   ),
                 ),
               );
@@ -179,7 +190,7 @@ class _ShowModuleState extends State<ShowModule> {
     );
   }
 
-  Widget displayTotalCredits() {
+  Widget displayTotalCredits(String moduleType) {
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
@@ -191,14 +202,24 @@ class _ShowModuleState extends State<ShowModule> {
         children: [
           const Text("Total: "),
           const SizedBox(width: 4),
-          Text(
-            "$totalCurrentCredit credits",
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: Colors.brown[700],
+          if (moduleType == "current")
+            Text(
+              "$totalCurrentCredit credits",
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: Colors.brown[700],
+              ),
             ),
-          ),
+          if (moduleType == "completed")
+            Text(
+              "$totalCompletedCredit credits",
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: Colors.brown[700],
+              ),
+            ),
         ],
       ),
     );

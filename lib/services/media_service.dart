@@ -4,12 +4,12 @@ import 'package:image_picker/image_picker.dart';
 class MediaService {
   final ImagePicker _picker = ImagePicker();
 
-  MediaService() {}
+  MediaService();
 
   Future<File?> getImageFromGallery() async {
-    final XFile? _file = await _picker.pickImage(source: ImageSource.gallery);
-    if (_file != null) {
-      return File(_file!.path);
+    final XFile? file = await _picker.pickImage(source: ImageSource.gallery);
+    if (file != null) {
+      return File(file.path);
     }
     return null;
   }
@@ -19,9 +19,10 @@ class MediaService {
     final XFile? image = await picker.pickImage(source: ImageSource.gallery);
     if (image != null) {
       print('Image path: ${image.path}');
-      return File(image!.path);
+      return File(image.path);
     } else {
       print('No image selected.');
     }
+    return null;
   }
 }

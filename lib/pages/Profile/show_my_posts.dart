@@ -37,6 +37,7 @@ class _ShowMyPostsState extends State<ShowMyPosts> {
       );
     } else {
       return Scaffold(
+        backgroundColor: Colors.white,
         body: FutureBuilder<QuerySnapshot>(
           future: _databaseService
               .fetchUserPosts(widget.myPosts!.whereType<String>().toList()),

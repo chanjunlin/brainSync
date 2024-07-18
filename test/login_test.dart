@@ -43,10 +43,8 @@ void main() {
       GetIt.instance.reset();
     });
 
-    testWidgets('Login Button Should Trigger Login Process',
-        (WidgetTester tester) async {
+    testWidgets('Valid account', (WidgetTester tester) async {
       bool navigatedToHome = false;
-      bool navigatedToLogin = false;
 
       await tester.pumpWidget(MaterialApp(
         home: Scaffold(
@@ -85,7 +83,7 @@ void main() {
 
       expect(navigatedToHome, isTrue);
     });
-    testWidgets("invalid email", (WidgetTester tester) async {
+    testWidgets("Invalid email", (WidgetTester tester) async {
       bool navigatedToHome = false;
 
       await tester.pumpWidget(MaterialApp(
@@ -118,8 +116,40 @@ void main() {
       expect(navigatedToHome, isFalse);
     });
 
-    testWidgets("forget password button leads to forget password page",
-        (WidgetTester tester) async {
+    testWidgets("Invalid password", (WidgetTester tester) async {
+      bool navigatedToHome = false;
+
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+            body: LoginForm(
+          setLoading: (_) {},
+          navigateToHome: () {
+            navigatedToHome = true;
+          },
+          navigateToLogin: () {},
+        )),
+      ));
+
+      await tester.pump();
+
+      var emailField = find.byKey(const Key('emailField'));
+      var passwordField = find.byKey(const Key('passwordField'));
+      var button = find.text("Login");
+      var googlebutton = find.text("Sign in with Google");
+
+      when(authService.login('e1115706@u.nus.edu', 'Test123'))
+          .thenAnswer((_) async => false);
+
+      await tester.enterText(emailField, 'e1115706@u.nus.edu');
+      await tester.enterText(passwordField, 'Test123');
+      await tester.tap(button);
+      await tester.tap(googlebutton);
+      await tester.pumpAndSettle();
+
+      expect(navigatedToHome, isFalse);
+    });
+
+    testWidgets("Forget password", (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
         home: Scaffold(
             body: LoginForm(

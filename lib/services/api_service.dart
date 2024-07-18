@@ -4,13 +4,13 @@ import '../main.dart';
 import '../model/module.dart';
 
 class ApiService {
-  static const String baseUrl = "api.nusmods.com";
-  static const String apiVersion = "v2";
+  final String baseUrl = "api.nusmods.com";
+  final String apiVersion = "v2";
 
-  static Future<Map<String, dynamic>> fetchModuleInfo(
+  Future<Map<String, dynamic>> fetchModuleInfo(
       String acadYear, String? moduleCode) async {
     var url =
-        Uri.https(baseUrl, "/$apiVersion/$acadYear/modules/${moduleCode}.json");
+        Uri.https(baseUrl, "/$apiVersion/$acadYear/modules/$moduleCode.json");
     try {
       var response = await http.get(url);
       if (response.statusCode == 200) {
@@ -24,7 +24,7 @@ class ApiService {
     }
   }
 
-  static Future<List<Module>> fetchModules() async {
+  Future<List<Module>> fetchModules() async {
     var url = Uri.https(baseUrl, "/$apiVersion/$academicYear/moduleList.json");
 
     try {
@@ -43,7 +43,8 @@ class ApiService {
 
   String getCurrentAcadYear() {
     final DateTime now = DateTime.now();
-    final DateTime midJuly = DateTime(now.year, 7, 15); // Assuming mid-July is the 15th
+    final DateTime midJuly =
+        DateTime(now.year, 7, 15); // Assuming mid-July is the 15th
     final int startYear = now.isBefore(midJuly) ? now.year - 1 : now.year;
     final int endYear = startYear + 1;
     return '$startYear-$endYear';

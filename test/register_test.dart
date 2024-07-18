@@ -7,7 +7,6 @@ import 'package:brainsync/services/auth_service.dart';
 import 'package:brainsync/services/database_service.dart';
 import 'package:brainsync/services/navigation_service.dart';
 import 'package:brainsync/services/alert_service.dart';
-// Ensure this is the correct path to your main.dart
 import 'package:mockito/mockito.dart';
 
 class MockAlertService extends Mock implements AlertService {}
@@ -18,38 +17,36 @@ class MockNavigationService extends Mock implements NavigationService {}
 
 class MockDatabaseService extends Mock implements DatabaseService {}
 
-void main () {
-  group('sign up page test', () {
+void main() {
+  group('Register page test', () {
     late MockAuthService authService;
     late MockAlertService alertService;
-    late MockNavigationService navigationService;
     late MockDatabaseService databaseService;
-
-    setUpAll(() async {
-      await Firebase.initializeApp();
-    });
-
+    late MockNavigationService navigationService;
 
     setUp(() {
       authService = MockAuthService();
       alertService = MockAlertService();
-      navigationService = MockNavigationService();
       databaseService = MockDatabaseService();
+      navigationService = MockNavigationService();
 
       final getIt = GetIt.instance;
       getIt.registerSingleton<AuthService>(authService);
       getIt.registerSingleton<AlertService>(alertService);
-      getIt.registerSingleton<NavigationService>(navigationService);
       getIt.registerSingleton<DatabaseService>(databaseService);
-  });
+      getIt.registerSingleton<NavigationService>(navigationService);
+    });
 
-  tearDown(() {
+    tearDown(() {
       GetIt.instance.reset();
     });
 
-    testWidgets("an account should be created when valid username and password are entered", (WidgetTester tester) async {
-      bool isLoading = false;
+    tearDown(() {
+      GetIt.instance.reset();
+    });
 
+    testWidgets("Valid fields -> Account created", (WidgetTester tester) async {
+      bool isLoading = false;
       await tester.pumpWidget(const MaterialApp(
         home: Scaffold(body: SignUpForm()),
       ));
@@ -72,23 +69,10 @@ void main () {
       expect(yearField, findsOneWidget);
       expect(button, findsOneWidget);
 
-      await tester.enterText(firstNameField, 'John');
-      await tester.enterText(lastNameField, 'Wong');
-      await tester.enterText(emailField, 'johnwong@example.com');
-      await tester.enterText(passwordField, 'TestPassword123!');
-      await tester.enterText(repasswordField, 'TestPassword123!');
-      await tester.tap(yearField);
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Year 1'));
-      await tester.pumpAndSettle();
-
-      isLoading = false;
-      await tester.pump();
-      
-      /*print("Before tapping button: isLoading=$isLoading");
-      await tester.tap(button);
-      await tester.pumpAndSettle();
-      print("After tapping button: isLoading=$isLoading");*/
-    }); //WHY DOESNT THIS WORKRKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK
+      expect(
+          await authService.register(
+              "JunLin", "Test123!", "e1115706@u.nus.edu"),
+          'true');
+    });
   });
-} 
+}

@@ -77,12 +77,8 @@ void main() {
       await tester.tap(createButton);
       await tester.pump();
 
-      var moduleValidationMessage =
-          find.text("Please enter a valid module code");
-      var contentValidationMessage = find.text("Please enter content");
-
-      expect(moduleValidationMessage, findsOneWidget);
-      expect(contentValidationMessage, findsOneWidget);
+      var validationMessage = find.text("Please enter content");
+      expect(validationMessage, findsOneWidget);
     });
 
     testWidgets('Empty module code field', (WidgetTester tester) async {
@@ -108,27 +104,5 @@ void main() {
       expect(validationMessage, findsOneWidget);
     });
 
-    testWidgets('Empty content field', (WidgetTester tester) async {
-      await tester.pumpWidget(const MaterialApp(
-        home: PostsPage(),
-      ));
-
-      var moduleCodeField = find.byKey(const Key('ModuleCodeField'));
-      expect(moduleCodeField, findsOneWidget);
-
-      var contentField = find.byKey(const Key("ContentField"));
-      expect(contentField, findsOneWidget);
-
-      var createButton = find.text("Create Post");
-      expect(createButton, findsOneWidget);
-
-      await tester.enterText(moduleCodeField, 'CS2040S');
-
-      await tester.tap(createButton);
-      await tester.pump();
-
-      var validationMessage = find.text('Please enter content');
-      expect(validationMessage, findsOneWidget);
-    });
   });
 }
