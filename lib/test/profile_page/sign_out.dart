@@ -1,6 +1,6 @@
-import 'dart:io';
-
 import 'package:brainsync/model/module.dart';
+import 'package:brainsync/pages/Profile/profile.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
@@ -12,7 +12,12 @@ import 'package:brainsync/services/database_service.dart';
 import 'package:brainsync/services/navigation_service.dart';
 import 'package:brainsync/services/alert_service.dart';
 
-class MockAuthService extends Mock implements AuthService {}
+class MockAuthService extends Mock implements AuthService {
+  @override
+  Future<bool> signOut() async {
+    return Future.value(true);
+  }
+}
 
 class MockApiService extends Mock implements ApiService {
   @override
@@ -27,76 +32,49 @@ class MockNavigationService extends Mock implements NavigationService {}
 
 class MockDatabaseService extends Mock implements DatabaseService {}
 
-
 void main() {
-  group('ApiService', () {
+  group('profile page test', () {
     late AuthService authService;
     late AlertService alertService;
     late ApiService apiService;
-    late DatabaseService databaseService;
     late NavigationService navigationService;
+    late DatabaseService databaseService;
 
     setUp(() {
       apiService = MockApiService();
       authService = MockAuthService();
       alertService = MockAlertService();
-      databaseService = MockDatabaseService();
       navigationService = MockNavigationService();
+      databaseService = MockDatabaseService();
 
       final getIt = GetIt.instance;
       getIt.registerSingleton<ApiService>(apiService);
       getIt.registerSingleton<AuthService>(authService);
       getIt.registerSingleton<AlertService>(alertService);
-      getIt.registerSingleton<DatabaseService>(databaseService);
       getIt.registerSingleton<NavigationService>(navigationService);
+      getIt.registerSingleton<DatabaseService>(databaseService);
     });
-
     tearDown(() {
       GetIt.instance.reset();
     });
-    testWidgets('Empty text fields', (WidgetTester tester) async {
+    testWidgets('sign-out button', (WidgetTester tester) async {
       await tester.pumpWidget(const MaterialApp(
-        home: PostsPage(),
+        home: Profile(
+          profileImageProvider: AssetImage('assets/img/apple.png'),
+          coverImageProvider: AssetImage('assets/img/google.png'),
+        ) 
       ));
 
-      var moduleCodeField = find.byKey(Key('ModuleCodeField'));
-      expect(moduleCodeField, findsOneWidget);
+      await tester.pumpAndSettle();
 
-      var contentField = find.byKey(Key("ContentField"));
-      expect(contentField, findsOneWidget);
+      var logout = find.byIcon(Icons.logout);
+      var profile = find.text('Edit Profile');
 
-      var createButton = find.text("Create Post");
-      expect(createButton, findsOneWidget);
+      expect(logout, findsOneWidget);
+      expect(profile, findsOneWidget);
 
-      await tester.tap(createButton);
-      await tester.pump();
-
-      var validationMessage = find.text("Please enter content");
-      expect(validationMessage, findsOneWidget);
+      await tester.tap(profile); 
+      await tester.pumpAndSettle();
     });
-
-    testWidgets('Empty module code field', (WidgetTester tester) async {
-      await tester.pumpWidget(const MaterialApp(
-        home: PostsPage(),
-      ));
-
-      var moduleCodeField = find.byKey(const Key('ModuleCodeField'));
-      expect(moduleCodeField, findsOneWidget);
-
-      var contentField = find.byKey(const Key("ContentField"));
-      expect(contentField, findsOneWidget);
-
-      var createButton = find.text("Create Post");
-      expect(createButton, findsOneWidget);
-
-      await tester.enterText(contentField, 'Sample content');
-
-      await tester.tap(createButton);
-      await tester.pump();
-
-      var validationMessage = find.text('Please enter a valid module code');
-      expect(validationMessage, findsOneWidget);
-    });
-
   });
 }

@@ -17,7 +17,14 @@ import '../../common_widgets/bottomBar.dart';
 import '../../main.dart';
 
 class Profile extends StatefulWidget {
-  const Profile({super.key});
+  final ImageProvider? profileImageProvider;
+  final ImageProvider? coverImageProvider;
+
+  const Profile({
+    Key? key,
+    this.profileImageProvider,
+    this.coverImageProvider,
+  }) : super(key: key);
 
   @override
   State<Profile> createState() => _ProfileState();
@@ -184,26 +191,26 @@ class _ProfileState extends State<Profile> with RouteAware {
   }
 
   Widget buildCoverImage() {
-    return Container(
-      height: coverHeight,
-      width: double.infinity,
-      color: Colors.grey,
-      child: Image.network(
-        profileCoverURL ?? PLACEHOLDER_PROFILE_COVER,
-        fit: BoxFit.cover,
-      ),
-    );
-  }
+  return Container(
+    height: coverHeight,
+    width: double.infinity,
+    color: Colors.grey,
+    child: Image(
+      image: widget.coverImageProvider ?? NetworkImage(profileCoverURL ?? PLACEHOLDER_PROFILE_COVER),
+      fit: BoxFit.cover,
+    ),
+  );
+}
 
   Widget buildProfileImage() {
-    return CircleAvatar(
-      radius: profileHeight / 2,
-      backgroundColor: Colors.grey,
-      backgroundImage: selectedImage != null
-          ? FileImage(selectedImage!)
-          : NetworkImage(pfpURL ?? PLACEHOLDER_PFP) as ImageProvider,
-    );
-  }
+  return CircleAvatar(
+    radius: profileHeight / 2,
+    backgroundColor: Colors.grey,
+    backgroundImage: selectedImage != null
+        ? FileImage(selectedImage!)
+        : (widget.profileImageProvider ?? NetworkImage(pfpURL ?? PLACEHOLDER_PFP)),
+  );
+}
 
   Widget buildSignOutButton() {
     return IconButton(

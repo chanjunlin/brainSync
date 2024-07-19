@@ -1,3 +1,4 @@
+import 'package:brainsync/model/user_profile.dart';
 import 'package:brainsync/pages/form/signup_form.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -7,12 +8,18 @@ import 'package:brainsync/services/auth_service.dart';
 import 'package:brainsync/services/database_service.dart';
 import 'package:brainsync/services/navigation_service.dart';
 import 'package:brainsync/services/alert_service.dart';
-// Ensure this is the correct path to your main.dart
+import 'package:brainsync/main.dart'; // Ensure this is the correct path to your main.dart
 import 'package:mockito/mockito.dart';
 
 class MockAlertService extends Mock implements AlertService {}
 
-class MockAuthService extends Mock implements AuthService {}
+class MockAuthService extends Mock implements AuthService {
+  @override
+  Future<String> register(String name, String password, String email) async {
+    // Return a mocked value or handle different scenarios
+    return "true"; // Example of a mocked successful registration
+  }
+}
 
 class MockNavigationService extends Mock implements NavigationService {}
 
@@ -85,10 +92,8 @@ void main () {
       isLoading = false;
       await tester.pump();
       
-      /*print("Before tapping button: isLoading=$isLoading");
       await tester.tap(button);
       await tester.pumpAndSettle();
-      print("After tapping button: isLoading=$isLoading");*/
-    }); //WHY DOESNT THIS WORKRKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK
+    }); 
   });
 } 
