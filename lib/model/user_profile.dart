@@ -13,6 +13,7 @@ class UserProfile {
   List<String?>? currentModules;
   List<String?>? friendList;
   List<String?>? friendReqList;
+  List<String?>? groupChats;
   List<String?>? myComments;
   List<String?>? myPosts;
   List<String?>? myLikedComments;
@@ -32,6 +33,7 @@ class UserProfile {
     this.currentModules,
     this.friendList,
     this.friendReqList,
+    this.groupChats,
     this.myComments,
     this.myLikedComments,
     this.myPosts,
@@ -46,7 +48,8 @@ class UserProfile {
     profileCoverURL = json['profileCoverURL'];
     uid = json['uid'];
     year = json['year'];
-    bookmarks = json['bookmarks'] != null ? List<String>.from(json['bookmarks']) : [];
+    bookmarks =
+        json['bookmarks'] != null ? List<String>.from(json['bookmarks']) : [];
     chats = json['chats'] != null ? List<String>.from(json['chats']) : [];
     completedModules = json['completedModules'] != null
         ? List<String>.from(json['completedModules'])
@@ -59,6 +62,8 @@ class UserProfile {
     friendReqList = json['friendReqList'] != null
         ? List<String>.from(json['friendReqList'])
         : [];
+    groupChats =
+        json['groupChats'] != null ? List<String>.from(json['groupChats']) : [];
     myComments =
         json['myComments'] != null ? List<String>.from(json['myComments']) : [];
     myLikedComments = json['myLikedComments'] != null
@@ -85,6 +90,7 @@ class UserProfile {
     data['currentModules'] = currentModules ?? [];
     data['friendList'] = friendList ?? [];
     data['friendReqList'] = friendReqList ?? [];
+    data['groupChats'] = groupChats ?? [];
     data['myComments'] = myComments ?? [];
     data['myLikedComments'] = myLikedComments ?? [];
     data['myPosts'] = myPosts ?? [];

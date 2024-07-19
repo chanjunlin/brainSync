@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:brainsync/model/group_chat.dart';
 import 'package:brainsync/model/post.dart';
 import 'package:brainsync/model/user_profile.dart';
 import 'package:brainsync/services/alert_service.dart';
@@ -17,7 +18,7 @@ class DatabaseService {
   final GetIt _getIt = GetIt.instance;
 
   CollectionReference<UserProfile>? _usersCollection;
-  CollectionReference? _chatCollection, _postCollection;
+  CollectionReference? _chatCollection, _groupChatCollection, _postCollection;
 
   late AlertService _alertService;
   late AuthService _authService;
@@ -41,6 +42,12 @@ class DatabaseService {
         .withConverter<Chat>(
             fromFirestore: (snapshots, _) => Chat.fromJson(snapshots.data()!),
             toFirestore: (chat, _) => chat.toJson());
+    _groupChatCollection = _firebaseFirestore
+        .collection('groupChats')
+        .withConverter<GroupChat>(
+            fromFirestore: (snapshots, _) =>
+                GroupChat.fromJson(snapshots.data()!),
+            toFirestore: (groupChat, _) => groupChat.toJson());
     _postCollection = _firebaseFirestore
         .collection('posts')
         .withConverter<Post>(
@@ -140,6 +147,48 @@ class DatabaseService {
     await docRef.set(chat);
   }
 
+  Future<void> createNewGroup(
+      String groupID,
+      String groupName,
+      List<UserProfile?> members
+      ) async {
+    final groupDocRef = _groupChatCollection?.doc(groupID);
+
+    final participantIds = members.map((member) => member?.uid ?? '').toList();
+    final participantNames = members
+        .map((member) => "${member?.firstName ?? ''} ${member?.lastName ?? ''}")
+        .toList();
+
+    final groupChat = GroupChat(
+      groupID: groupID,
+      groupName: groupName,
+      participantsIds: participantIds,
+      messages: [],
+      participantsNames: participantNames,
+    );
+
+    await groupDocRef?.set(groupChat);
+
+    final userDocs = participantIds.map((uid) {
+      return _usersCollection?.doc(uid);
+    }).toList();
+
+    for (var docRef in userDocs) {
+      if (docRef != null) {
+        final DocumentSnapshot userSnapshot = await docRef.get();
+        if (userSnapshot.exists) {
+          List<dynamic> userGroupChat = userSnapshot.get("groupChats") ?? [];
+          if (!userGroupChat.contains(groupID)) {
+            userGroupChat.add(groupID);
+            await docRef.update({'groupChats': userGroupChat});
+          }
+        }
+      }
+    }
+  }
+
+
+
   // Retrieve chat details in DocumentSnapshot
   Future<DocumentSnapshot<Object?>> getChatDetails(String chatId) async {
     return _firebaseFirestore.collection('chats').doc(chatId).get();
@@ -151,6 +200,10 @@ class DatabaseService {
         .collection('chats')
         .where('participantsIds', arrayContains: _authService.currentUser!.uid)
         .snapshots();
+  }
+
+  Future<DocumentSnapshot<Object?>> getGroupChatDetails(String groupID) async {
+    return _firebaseFirestore.collection('groupChats').doc(groupID).get();
   }
 
   // Send chat message
@@ -173,7 +226,6 @@ class DatabaseService {
         DocumentSnapshot docSnapshot = await docRef.get();
         Map<String, dynamic> chatData =
             docSnapshot.data() as Map<String, dynamic>;
-        print(chatData["messages"]);
         List<dynamic> user1Chats = user1Snapshot.get('chats') ?? [];
         List<dynamic> user2Chats = user2Snapshot.get('chats') ?? [];
 
@@ -221,6 +273,12 @@ class DatabaseService {
     String chatID = generateChatID(uid1: uid1, uid2: uid2);
     final docRef = _chatCollection!.doc(chatID);
     return docRef.snapshots() as Stream<DocumentSnapshot<Chat>>;
+  }
+
+  // Retrieve group chat data in from of stream
+  Stream getGroupChatData(String groupID) {
+    final docRef = _groupChatCollection!.doc(groupID);
+    return docRef.snapshots() as Stream<DocumentSnapshot<GroupChat>>;
   }
 
   // FRIEND REQUEST METHODS

@@ -67,6 +67,7 @@ dependencies:
 
   intl: any
   path: any
+  uuid: ^4.4.2
 dev_dependencies:
   flutter_test:
     sdk: flutter

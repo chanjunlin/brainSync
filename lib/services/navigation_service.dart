@@ -8,6 +8,8 @@ import 'package:brainsync/pages/notifications.dart';
 import 'package:brainsync/splash_screen.dart';
 import 'package:flutter/material.dart';
 
+import '../pages/Chats/create_group_chat.dart';
+import '../pages/Chats/create_private_chat.dart';
 import '../pages/Chats/friends_chat.dart';
 import '../pages/Modules/all_mods.dart';
 import '../pages/Posts/post.dart';
@@ -27,6 +29,8 @@ class NavigationService {
     "/nusMods": (context) => const ModuleListPage(),
     "/saved": (context) => const BookmarkedPosts(),
     "/splashScreen": (context) => const SplashScreen(),
+    "/privateChat": (context) => PrivateChat(),
+    "/groupChat": (context) => GroupChatCreation(),
   };
 
   Map<String, Widget Function(BuildContext)> get routes {
