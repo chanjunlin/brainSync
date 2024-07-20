@@ -1,14 +1,10 @@
-import 'dart:convert';
 import 'dart:io';
 
-import 'package:brainsync/common_widgets/seach_bar_2.dart';
-import 'package:brainsync/main.dart';
 import 'package:brainsync/model/module.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:get_it/get_it.dart';
-import 'package:http/http.dart' as http;
 import 'package:brainsync/pages/Posts/post.dart';
 import 'package:brainsync/services/api_service.dart';
 import 'package:brainsync/services/auth_service.dart';
@@ -66,10 +62,10 @@ void main() {
         home: PostsPage(),
       ));
 
-      var moduleCodeField = find.byKey(Key('ModuleCodeField'));
+      var moduleCodeField = find.byKey(const Key('ModuleCodeField'));
       expect(moduleCodeField, findsOneWidget);
 
-      var contentField = find.byKey(Key("ContentField"));
+      var contentField = find.byKey(const Key("ContentField"));
       expect(contentField, findsOneWidget);
 
       var createButton = find.text("Create Post");

@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
@@ -7,10 +6,11 @@ import '../../const.dart';
 import '../../model/user_profile.dart';
 import '../../services/database_service.dart';
 import '../../services/navigation_service.dart';
-import '../Profile/visiting_profile.dart';
 import 'chat_page.dart';
 
 class PrivateChat extends StatefulWidget {
+  const PrivateChat({super.key});
+
   @override
   _PrivateChatState createState() => _PrivateChatState();
 }
@@ -66,7 +66,7 @@ class _PrivateChatState extends State<PrivateChat> {
                 itemCount: snapshot.data!.length,
                 itemBuilder: (context, index) {
                   UserProfile? friend = snapshot.data![index];
-                  if (friend == null) return SizedBox.shrink(); // Handle null friend case
+                  if (friend == null) return const SizedBox.shrink();
 
                   return CustomChatTile(
                     leading: CircleAvatar(

@@ -65,9 +65,8 @@ class FriendsChatsState extends State<FriendsChats> {
           chats = List<String>.from(userProfile.get("chats") ?? []);
         });
 
-        sortChatsByLatestMessage(); // Sort chats initially
+        sortChatsByLatestMessage();
 
-        // Listen to profile updates
         profileSubscription =
             userProfile.reference.snapshots().listen((updatedSnapshot) {
           if (updatedSnapshot.exists) {
@@ -77,14 +76,12 @@ class FriendsChatsState extends State<FriendsChats> {
               lastName = updatedSnapshot.get('lastName') ?? 'Name';
               chats = List<String>.from(updatedSnapshot.get("chats") ?? []);
             });
-            sortChatsByLatestMessage(); // Sort chats whenever profile updates
+            sortChatsByLatestMessage();
           }
         });
       } else {
-        // Handle case where user profile is not found
       }
     } catch (e) {
-      // Handle error loading profile
     }
   }
 
@@ -124,7 +121,7 @@ class FriendsChatsState extends State<FriendsChats> {
           }
         }
 
-        sortChatsByLatestMessage(); // Sort chats whenever new messages are received
+        sortChatsByLatestMessage();
       } else {
         setState(() {
           chats = [];
@@ -172,12 +169,10 @@ class FriendsChatsState extends State<FriendsChats> {
           IconButton(
             icon: const Icon(Icons.add),
             onPressed: () {
-              // Action when the plus icon is pressed
               chatCreationMenu(context);
             },
           ),
           const SizedBox(width: 16),
-          // Optional: Add spacing between the icon and the edge
         ],
       ),
       body: buildTabBarSection(),
@@ -194,7 +189,7 @@ class FriendsChatsState extends State<FriendsChats> {
             labelColor: Colors.brown[800],
             unselectedLabelColor: Colors.brown[400],
             tabs: const [
-              Tab(text: 'Private Chats'),
+              Tab(text: 'Private chats'),
               Tab(text: 'Group Chats'),
             ],
           ),
@@ -211,7 +206,6 @@ class FriendsChatsState extends State<FriendsChats> {
       ),
     );
   }
-
   String getFormattedTime(Timestamp? timestamp) {
     if (timestamp != null) {
       final now = DateTime.now();
@@ -230,11 +224,11 @@ class FriendsChatsState extends State<FriendsChats> {
   }
 
   Widget showPrivateChat() {
-    return ShowPrivateChat();
+    return const ShowPrivateChat();
   }
 
   Widget showGroupChat() {
-    return ShowGroupChat();
+    return const ShowGroupChat();
   }
 
   void chatCreationMenu(BuildContext context) {

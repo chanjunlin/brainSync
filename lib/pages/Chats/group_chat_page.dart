@@ -6,6 +6,7 @@ import 'package:brainsync/services/database_service.dart';
 import 'package:brainsync/services/storage_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dash_chat_2/dash_chat_2.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
@@ -13,6 +14,7 @@ import '../../model/group_chat.dart';
 import '../../services/auth_service.dart';
 import '../../services/media_service.dart';
 import '../../services/navigation_service.dart';
+import 'group_chat_details.dart';
 
 class GroupChatPage extends StatefulWidget {
   final String groupID;
@@ -38,7 +40,7 @@ class _GroupChatPageState extends State<GroupChatPage> {
   late StorageService _storageService;
 
   late String groupName;
-  ChatUser? currentUser, otherChatUser;
+  ChatUser? currentUser;
 
   @override
   void initState() {
@@ -49,12 +51,18 @@ class _GroupChatPageState extends State<GroupChatPage> {
     _navigationService = _getIt.get<NavigationService>();
     _storageService = _getIt.get<StorageService>();
     initializeGroupChat();
+    currentUser = ChatUser(
+      id: _authService.currentUser!.uid,
+      firstName: _authService.currentUser!.displayName,
+    );
   }
 
   void initializeGroupChat() async {
-    DocumentSnapshot<Object?> groupChatDetails =
+    DocumentSnapshot? groupChatDetails =
         await _databaseService.getGroupChatDetails(widget.groupID);
-    groupName = groupChatDetails.get("groupName");
+    setState(() {
+      groupName = groupChatDetails?.get("groupName");
+    });
   }
 
   @override
@@ -64,54 +72,29 @@ class _GroupChatPageState extends State<GroupChatPage> {
       appBar: AppBar(
         backgroundColor: Colors.brown[300],
         foregroundColor: Colors.white,
-        title: header(),
+        title: GestureDetector(
+          child: header(),
+          onTap: () {
+            _navigationService.push(
+              MaterialPageRoute(
+                builder: (context) {
+                  return GroupChatDetails(
+                    groupID: widget.groupID,
+                    groupName: widget.groupName,
+                  );
+                },
+              ),
+            );
+          },
+        ),
       ),
       body: buildUI(),
     );
   }
 
-  Widget header() {
-    return Padding(
-      padding: const EdgeInsets.only(right: 8.0, top: 4.0, bottom: 4.0),
-      child: GestureDetector(
-        onTap: () {},
-        child: Row(
-          children: [
-          //   const CircleAvatar(
-          //   radius: 24,
-          //   backgroundImage: NetworkImage(''),
-          // ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    widget.groupName,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            IconButton(
-              icon: const Icon(Icons.more_vert, color: Colors.white),
-              onPressed: () {},
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget buildUI() {
     return StreamBuilder(
-      stream: _databaseService.getGroupChatData(
-        widget.groupID
-      ),
+      stream: _databaseService.getGroupChatData(widget.groupID),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -119,32 +102,73 @@ class _GroupChatPageState extends State<GroupChatPage> {
         if (snapshot.hasError) {
           return const Center(child: Text('Error loading chat'));
         }
-        GroupChat? groupChat = snapshot.data?.data();
-        List<ChatMessage> messages = [];
-        if (groupChat != null && groupChat.messages != null) {
-          messages = _generateChatMessagesList(groupChat.messages!);
+
+        if (!snapshot.hasData || snapshot.data?.data() == null) {
+          return const Center(child: Text('No chat data found'));
         }
-        return DashChat(
-          messageOptions: MessageOptions(
-            currentUserContainerColor: Colors.brown[400],
-            containerColor: Colors.brown.shade100,
-            showOtherUsersAvatar: true,
-            showTime: true,
-          ),
-          inputOptions: InputOptions(
-            alwaysShowSend: true,
-            trailing: [mediaMessageButton()],
-          ),
-          currentUser: currentUser!,
-          onSend: _sendMessage,
-          messages: messages,
+
+        GroupChat chat = snapshot.data!.data()!;
+
+        return FutureBuilder<List<ChatMessage>>(
+          future: generateChatMessagesList(chat.messages ?? []),
+          builder: (context, futureSnapshot) {
+            if (futureSnapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (futureSnapshot.hasError) {
+              return const Center(child: Text('Error loading messages'));
+            }
+
+            List<ChatMessage> messages = futureSnapshot.data ?? [];
+
+            return DashChat(
+              messageOptions: MessageOptions(
+                currentUserContainerColor: Colors.brown[400],
+                containerColor: Colors.brown.shade100,
+                showOtherUsersAvatar: true,
+                showTime: true,
+              ),
+              inputOptions: InputOptions(
+                alwaysShowSend: true,
+                trailing: [mediaMessageButton()],
+              ),
+              currentUser: currentUser!,
+              onSend: sendMessage,
+              messages: messages,
+            );
+          },
         );
       },
     );
   }
 
+  Widget header() {
+    return Padding(
+      padding: const EdgeInsets.only(right: 8.0, top: 4.0, bottom: 4.0),
+      child: Row(
+        children: [
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.groupName,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
-  Future<void> _sendMessage(ChatMessage chatMessage) async {
+  Future<void> sendMessage(ChatMessage chatMessage) async {
     try {
       if (chatMessage.medias?.isNotEmpty ?? false) {
         if (chatMessage.medias!.first.type == MediaType.image) {
@@ -154,6 +178,10 @@ class _GroupChatPageState extends State<GroupChatPage> {
             messageType: MessageType.Image,
             sentAt: Timestamp.fromDate(chatMessage.createdAt),
           );
+          await _databaseService.sendGroupChatMessage(
+            widget.groupID,
+            message,
+          );
         }
       } else {
         Message message = Message(
@@ -162,17 +190,33 @@ class _GroupChatPageState extends State<GroupChatPage> {
           messageType: MessageType.Text,
           sentAt: Timestamp.fromDate(chatMessage.createdAt),
         );
+        await _databaseService.sendGroupChatMessage(
+          widget.groupID,
+          message,
+        );
       }
     } catch (e) {
       print('Error sending message: $e');
     }
   }
 
-  List<ChatMessage> _generateChatMessagesList(List<Message> messages) {
+  Future<List<ChatMessage>> generateChatMessagesList(
+      List<Message> messages) async {
+    final senderIDs = messages.map((m) => m.senderID!).toSet();
+    final usernameFutures =
+        senderIDs.map((id) => _authService.getUserName(id)).toList();
+    final usernames = await Future.wait(usernameFutures);
+
     List<ChatMessage> chatMessages = messages.map((m) {
+      final senderIndex = senderIDs.toList().indexOf(m.senderID!);
+      final otherChatter = ChatUser(
+        id: m.senderID!,
+        firstName: usernames[senderIndex],
+      );
+
       if (m.messageType == MessageType.Image) {
         return ChatMessage(
-          user: m.senderID == currentUser!.id ? currentUser! : otherChatUser!,
+          user: m.senderID == currentUser!.id ? currentUser! : otherChatter,
           createdAt: m.sentAt!.toDate(),
           medias: [
             ChatMedia(
@@ -185,11 +229,12 @@ class _GroupChatPageState extends State<GroupChatPage> {
       } else {
         return ChatMessage(
           text: m.content!,
-          user: m.senderID == currentUser!.id ? currentUser! : otherChatUser!,
+          user: m.senderID == currentUser!.id ? currentUser! : otherChatter,
           createdAt: m.sentAt!.toDate(),
         );
       }
     }).toList();
+
     chatMessages.sort((a, b) => b.createdAt.compareTo(a.createdAt));
     return chatMessages;
   }
@@ -199,7 +244,7 @@ class _GroupChatPageState extends State<GroupChatPage> {
       onPressed: () async {
         File? file = await _mediaService.getImageFromGallery();
         if (file != null) {
-          await _uploadAndSendMediaMessage(file);
+          await uploadAndSendMediaMessage(file);
         }
       },
       icon: Icon(
@@ -209,8 +254,29 @@ class _GroupChatPageState extends State<GroupChatPage> {
     );
   }
 
-  Future<void> _uploadAndSendMediaMessage(File file) async {
-    try {} catch (e) {
+  Future<void> uploadAndSendMediaMessage(File file) async {
+    try {
+      final storageRef = FirebaseStorage.instance
+          .ref()
+          .child('chat_media')
+          .child(DateTime.now().millisecondsSinceEpoch.toString());
+      final uploadTask = storageRef.putFile(file);
+      final snapshot = await uploadTask;
+      final mediaUrl = await snapshot.ref.getDownloadURL();
+
+      final chatMessage = ChatMessage(
+        user: currentUser!,
+        createdAt: DateTime.now(),
+        medias: [
+          ChatMedia(
+            url: mediaUrl,
+            fileName: file.path.split('/').last,
+            type: MediaType.image,
+          ),
+        ],
+      );
+      sendMessage(chatMessage);
+    } catch (e) {
       print('Error uploading media: $e');
     }
   }

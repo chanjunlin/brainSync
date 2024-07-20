@@ -148,28 +148,28 @@ class DatabaseService {
   }
 
   Future<void> createNewGroup(
-      String groupID,
-      String groupName,
-      List<UserProfile?> members
-      ) async {
+      String groupID, String groupName, List<UserProfile?> members) async {
+    final userId = _authService.currentUser!.uid;
+    final DocumentSnapshot? userRef = await fetchCurrentUser();
     final groupDocRef = _groupChatCollection?.doc(groupID);
 
-    final participantIds = members.map((member) => member?.uid ?? '').toList();
-    final participantNames = members
-        .map((member) => "${member?.firstName ?? ''} ${member?.lastName ?? ''}")
-        .toList();
+    var userProfile = userRef?.data() as Map<String, dynamic>;
+    var participantsID = members.map((member) => member?.uid ?? '').toList();
+
+    participantsID.add(userId);
 
     final groupChat = GroupChat(
+      createdBy: userId,
+      createdAt: Timestamp.fromDate(DateTime.now()),
       groupID: groupID,
       groupName: groupName,
-      participantsIds: participantIds,
+      participantsID: participantsID,
       messages: [],
-      participantsNames: participantNames,
     );
 
     await groupDocRef?.set(groupChat);
 
-    final userDocs = participantIds.map((uid) {
+    final userDocs = participantsID.map((uid) {
       return _usersCollection?.doc(uid);
     }).toList();
 
@@ -187,8 +187,6 @@ class DatabaseService {
     }
   }
 
-
-
   // Retrieve chat details in DocumentSnapshot
   Future<DocumentSnapshot<Object?>> getChatDetails(String chatId) async {
     return _firebaseFirestore.collection('chats').doc(chatId).get();
@@ -202,8 +200,21 @@ class DatabaseService {
         .snapshots();
   }
 
-  Future<DocumentSnapshot<Object?>> getGroupChatDetails(String groupID) async {
-    return _firebaseFirestore.collection('groupChats').doc(groupID).get();
+  Future<DocumentSnapshot?> getGroupChatDetails(String groupID) async {
+    try {
+      return _firebaseFirestore.collection('groupChats').doc(groupID).get();
+    } catch (e) {
+      _alertService.showToast(text: "Error fetching group chat details: $e");
+      return null;
+    }
+  }
+
+  // Retrieve all group chats from user
+  Stream<QuerySnapshot> getAllUserGroupChatsStream() {
+    return _firebaseFirestore
+        .collection('groupChats')
+        .where('participantsIds', arrayContains: _authService.currentUser!.uid)
+        .snapshots();
   }
 
   // Send chat message
@@ -264,7 +275,30 @@ class DatabaseService {
       });
     } catch (e) {
       print('Transaction failed: $e');
-      rethrow; // Rethrow the error for handling in the calling function
+      rethrow;
+    }
+  }
+
+  Future<void> sendGroupChatMessage(String groupID, Message message) async {
+    final docRef =
+        FirebaseFirestore.instance.collection('groupChats').doc(groupID);
+    try {
+      await FirebaseFirestore.instance.runTransaction((transaction) async {
+        DocumentSnapshot chatSnapshot = await transaction.get(docRef);
+        if (!chatSnapshot.exists) {
+          throw Exception('Group chat does not exist');
+        }
+        Map<String, dynamic> chatData =
+            chatSnapshot.data() as Map<String, dynamic>;
+        GroupChat chatModel = GroupChat.fromJson(chatData);
+        chatModel.messages!.add(message);
+        chatModel.lastMessage = message;
+        chatModel.updatedAt = Timestamp.now();
+        transaction.update(docRef, chatModel.toJson());
+      });
+    } catch (e) {
+      print('Transaction failed: $e');
+      rethrow;
     }
   }
 
@@ -439,7 +473,7 @@ class DatabaseService {
       return currentModules.contains(moduleCode);
     } catch (error) {
       print("Error checking current module: $error");
-      return false; // Return false in case of an error
+      return false;
     }
   }
 
@@ -581,7 +615,6 @@ class DatabaseService {
   // Removing post from bookmark
   Future<void> removeBookmark(String postId) async {
     try {
-      print(postId);
       final userId = _authService.currentUser!.uid;
       final userRef = _usersCollection!.doc(userId);
       await userRef.update({

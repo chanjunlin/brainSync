@@ -8,6 +8,8 @@ import '../../services/navigation_service.dart';
 import 'group_chat_page.dart';
 
 class GroupChatCreation extends StatefulWidget {
+  const GroupChatCreation({super.key});
+
   @override
   _GroupChatCreationState createState() => _GroupChatCreationState();
 }
@@ -34,14 +36,13 @@ class _GroupChatCreationState extends State<GroupChatCreation> {
       _friends = await _databaseService.getFriends();
       setState(() {});
     } catch (e) {
-      // Handle errors
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error loading friends: $e')),
       );
     }
   }
 
-  void _toggleSelection(UserProfile friend) {
+  void toggleSelection(UserProfile friend) {
     setState(() {
       if (selectedFriends.contains(friend)) {
         selectedFriends.remove(friend);
@@ -53,6 +54,7 @@ class _GroupChatCreationState extends State<GroupChatCreation> {
 
   void createGroupChat() async {
     String groupName = groupNameController.text.trim();
+    print("groupname is ${groupName}");
     if (groupName.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -68,7 +70,7 @@ class _GroupChatCreationState extends State<GroupChatCreation> {
       );
       return;
     }
-    String groupId = Uuid().v4();
+    String groupId = const Uuid().v4();
     try {
       await _databaseService.createNewGroup(groupId, groupName, selectedFriends);
       Navigator.pop(context);
@@ -76,9 +78,8 @@ class _GroupChatCreationState extends State<GroupChatCreation> {
         return GroupChatPage(groupID: groupId, groupName: groupName);
       }));
     } catch (e) {
-      // Handle errors
-      print("ASD?");
-      print(e);
+      print("error creating group");
+      rethrow;
     }
   }
 
@@ -107,8 +108,9 @@ class _GroupChatCreationState extends State<GroupChatCreation> {
                 itemCount: _friends.length,
                 itemBuilder: (context, index) {
                   UserProfile? friend = _friends[index];
-                  if (friend == null)
-                    return SizedBox.shrink(); // Handle null case
+                  if (friend == null) {
+                    return const SizedBox.shrink();
+                  }
 
                   return ListTile(
                     title: Text("${friend.firstName} ${friend.lastName}"),
@@ -120,11 +122,11 @@ class _GroupChatCreationState extends State<GroupChatCreation> {
                       value: selectedFriends.contains(friend),
                       onChanged: (isSelected) {
                         if (isSelected != null) {
-                          _toggleSelection(friend);
+                          toggleSelection(friend);
                         }
                       },
                     ),
-                    onTap: () => _toggleSelection(friend),
+                    onTap: () => toggleSelection(friend),
                   );
                 },
               ),
