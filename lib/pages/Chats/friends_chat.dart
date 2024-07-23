@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:brainsync/pages/Chats/show_group_chat.dart';
-import 'package:brainsync/pages/Chats/show_private_chat.dart';
+import 'package:brainsync/pages/Chats/group_chat/show_group_chat.dart';
+import 'package:brainsync/pages/Chats/private_chat/show_private_chat.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
@@ -14,7 +14,12 @@ import '../../services/database_service.dart';
 import '../../services/navigation_service.dart';
 
 class FriendsChats extends StatefulWidget {
-  const FriendsChats({super.key});
+  final int? tabNumber;
+
+  const FriendsChats({
+    super.key,
+    this.tabNumber,
+  });
 
   @override
   FriendsChatsState createState() => FriendsChatsState();
@@ -69,20 +74,18 @@ class FriendsChatsState extends State<FriendsChats> {
 
         profileSubscription =
             userProfile.reference.snapshots().listen((updatedSnapshot) {
-          if (updatedSnapshot.exists) {
-            setState(() {
-              userProfilePfp = updatedSnapshot.get('pfpURL') ?? PLACEHOLDER_PFP;
-              firstName = updatedSnapshot.get('firstName') ?? 'Name';
-              lastName = updatedSnapshot.get('lastName') ?? 'Name';
-              chats = List<String>.from(updatedSnapshot.get("chats") ?? []);
+              if (updatedSnapshot.exists) {
+                setState(() {
+                  userProfilePfp = updatedSnapshot.get('pfpURL') ?? PLACEHOLDER_PFP;
+                  firstName = updatedSnapshot.get('firstName') ?? 'Name';
+                  lastName = updatedSnapshot.get('lastName') ?? 'Name';
+                  chats = List<String>.from(updatedSnapshot.get("chats") ?? []);
+                });
+                sortChatsByLatestMessage();
+              }
             });
-            sortChatsByLatestMessage();
-          }
-        });
-      } else {
-      }
-    } catch (e) {
-    }
+      } else {}
+    } catch (e) {}
   }
 
   void sortChatsByLatestMessage() {
@@ -99,35 +102,35 @@ class FriendsChatsState extends State<FriendsChats> {
   Future<void> listenToChats() async {
     chatsSubscription =
         _databaseService.getAllUserChatsStream().listen((querySnapshot) {
-      if (querySnapshot.docs.isNotEmpty) {
-        for (var doc in querySnapshot.docs) {
-          String chatId = doc.id;
-          dynamic lastMessageData = doc.get('lastMessage');
-          Timestamp? lastMessageTimestamp =
+          if (querySnapshot.docs.isNotEmpty) {
+            for (var doc in querySnapshot.docs) {
+              String chatId = doc.id;
+              dynamic lastMessageData = doc.get('lastMessage');
+              Timestamp? lastMessageTimestamp =
               lastMessageData != null ? lastMessageData['sentAt'] : null;
-          if (lastMessageTimestamp != null) {
-            if (lastMessageTimestamps[chatId] == null ||
-                lastMessageTimestamps[chatId]!.compareTo(lastMessageTimestamp) <
-                    0) {
-              setState(() {
-                if (chats != null && !chats!.contains(chatId)) {
-                  chats!.add(chatId);
+              if (lastMessageTimestamp != null) {
+                if (lastMessageTimestamps[chatId] == null ||
+                    lastMessageTimestamps[chatId]!.compareTo(lastMessageTimestamp) <
+                        0) {
+                  setState(() {
+                    if (chats != null && !chats!.contains(chatId)) {
+                      chats!.add(chatId);
+                    }
+                    lastMessageTimestamps[chatId] = lastMessageTimestamp;
+                  });
+                  updateChatSubtitle(
+                      chatId, lastMessageData['content'], lastMessageTimestamp);
                 }
-                lastMessageTimestamps[chatId] = lastMessageTimestamp;
-              });
-              updateChatSubtitle(
-                  chatId, lastMessageData['content'], lastMessageTimestamp);
+              }
             }
-          }
-        }
 
-        sortChatsByLatestMessage();
-      } else {
-        setState(() {
-          chats = [];
+            sortChatsByLatestMessage();
+          } else {
+            setState(() {
+              chats = [];
+            });
+          }
         });
-      }
-    });
   }
 
   void updateChatSubtitle(String chatId, String content, Timestamp? sentAt) {
@@ -181,8 +184,11 @@ class FriendsChatsState extends State<FriendsChats> {
   }
 
   Widget buildTabBarSection() {
+    final int initialIndex = widget.tabNumber ?? 0;
+
     return DefaultTabController(
       length: 2,
+      initialIndex: initialIndex,
       child: Column(
         children: [
           TabBar(
@@ -193,8 +199,7 @@ class FriendsChatsState extends State<FriendsChats> {
               Tab(text: 'Group Chats'),
             ],
           ),
-          SizedBox(
-            height: 500,
+          Expanded(
             child: TabBarView(
               children: [
                 showPrivateChat(),
@@ -206,6 +211,7 @@ class FriendsChatsState extends State<FriendsChats> {
       ),
     );
   }
+
   String getFormattedTime(Timestamp? timestamp) {
     if (timestamp != null) {
       final now = DateTime.now();

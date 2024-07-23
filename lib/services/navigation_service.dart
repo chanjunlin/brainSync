@@ -8,9 +8,9 @@ import 'package:brainsync/pages/notifications.dart';
 import 'package:brainsync/splash_screen.dart';
 import 'package:flutter/material.dart';
 
-import '../pages/Chats/create_group_chat.dart';
-import '../pages/Chats/create_private_chat.dart';
 import '../pages/Chats/friends_chat.dart';
+import '../pages/Chats/group_chat/create_group_chat.dart';
+import '../pages/Chats/private_chat/create_private_chat.dart';
 import '../pages/Modules/all_mods.dart';
 import '../pages/Posts/post.dart';
 
@@ -49,7 +49,7 @@ class NavigationService {
     _navigatorKey.currentState?.pop();
   }
 
-  Future<void> pushName(String routeName) async {
+  Future<void> pushName(String routeName, {Object? arguments}) async {
     await _navigatorKey.currentState?.push(
       PageRouteBuilder(
         pageBuilder: (BuildContext context, Animation<double> animation1,
@@ -114,5 +114,22 @@ class NavigationService {
         reverseTransitionDuration: Duration.zero,
       ),
     );
+  }
+
+  Future<void> pushReplacement(MaterialPageRoute route) async {
+    if (_navigatorKey.currentState != null) {
+      await _navigatorKey.currentState!.pushReplacement(
+        PageRouteBuilder(
+          pageBuilder: (BuildContext context, Animation<double> animation1,
+              Animation<double> animation2) {
+            return route.builder(context);
+          },
+          transitionDuration: Duration.zero,
+          reverseTransitionDuration: Duration.zero,
+        ),
+      );
+    } else {
+      throw Exception('Navigator key is null');
+    }
   }
 }

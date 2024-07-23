@@ -4,7 +4,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class GroupChat {
   String? createdBy;
   String? groupID;
+  String? groupDescription;
   String? groupName;
+  String? groupPicture;
+  List<String>? admins;
   List<String>? participantsID;
   List<Message>? messages;
   Message? lastMessage;
@@ -16,7 +19,10 @@ class GroupChat {
     required this.groupID,
     required this.groupName,
     required this.participantsID,
+    this.admins,
     this.createdBy,
+    this.groupDescription,
+    this.groupPicture,
     this.messages,
     this.lastMessage,
     this.createdAt,
@@ -28,7 +34,10 @@ class GroupChat {
     return GroupChat(
       createdBy: json['createdBy'],
       groupID: json['id'],
+      groupDescription: json["groupDescription"],
       groupName: json["groupName"],
+      groupPicture: json["groupPicture"],
+      admins: List<String>.from(json['admins']),
       participantsID: List<String>.from(json['participantsID']),
       messages: json['messages'] != null
           ? List.from(json['messages']).map((m) => Message.fromJson(m)).toList()
@@ -52,7 +61,10 @@ class GroupChat {
     final Map<String, dynamic> data = {
       'createdBy': createdBy,
       'id': groupID,
+      'groupDescription': groupDescription,
       'groupName': groupName,
+      'groupPicture': groupPicture,
+      'admins': admins,
       'participantsID': participantsID,
       'messages': messages?.map((m) => m.toJson()).toList() ?? [],
       'lastMessage': lastMessage?.toJson(),

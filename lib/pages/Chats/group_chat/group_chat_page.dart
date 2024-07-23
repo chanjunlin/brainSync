@@ -2,6 +2,7 @@ import 'dart:core';
 import 'dart:io';
 
 import 'package:brainsync/model/message.dart';
+import 'package:brainsync/pages/Chats/friends_chat.dart';
 import 'package:brainsync/services/database_service.dart';
 import 'package:brainsync/services/storage_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -10,10 +11,10 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
-import '../../model/group_chat.dart';
-import '../../services/auth_service.dart';
-import '../../services/media_service.dart';
-import '../../services/navigation_service.dart';
+import '../../../model/group_chat.dart';
+import '../../../services/auth_service.dart';
+import '../../../services/media_service.dart';
+import '../../../services/navigation_service.dart';
 import 'group_chat_details.dart';
 
 class GroupChatPage extends StatefulWidget {
@@ -59,7 +60,7 @@ class _GroupChatPageState extends State<GroupChatPage> {
 
   void initializeGroupChat() async {
     DocumentSnapshot? groupChatDetails =
-        await _databaseService.getGroupChatDetails(widget.groupID);
+    await _databaseService.getGroupChatDetails(widget.groupID);
     setState(() {
       groupName = groupChatDetails?.get("groupName");
     });
@@ -86,6 +87,18 @@ class _GroupChatPageState extends State<GroupChatPage> {
               ),
             );
           },
+        ),
+        leading: IconButton(
+          onPressed: () {
+            _navigationService.push(
+              MaterialPageRoute(
+                builder: (context) {
+                  return FriendsChats(tabNumber: 1);
+                },
+              ),
+            );
+          },
+          icon: Icon(Icons.arrow_back),
         ),
       ),
       body: buildUI(),
@@ -204,7 +217,7 @@ class _GroupChatPageState extends State<GroupChatPage> {
       List<Message> messages) async {
     final senderIDs = messages.map((m) => m.senderID!).toSet();
     final usernameFutures =
-        senderIDs.map((id) => _authService.getUserName(id)).toList();
+    senderIDs.map((id) => _authService.getUserName(id)).toList();
     final usernames = await Future.wait(usernameFutures);
 
     List<ChatMessage> chatMessages = messages.map((m) {
@@ -249,7 +262,10 @@ class _GroupChatPageState extends State<GroupChatPage> {
       },
       icon: Icon(
         Icons.image,
-        color: Theme.of(context).colorScheme.primary,
+        color: Theme
+            .of(context)
+            .colorScheme
+            .primary,
       ),
     );
   }
@@ -259,7 +275,10 @@ class _GroupChatPageState extends State<GroupChatPage> {
       final storageRef = FirebaseStorage.instance
           .ref()
           .child('chat_media')
-          .child(DateTime.now().millisecondsSinceEpoch.toString());
+          .child(DateTime
+          .now()
+          .millisecondsSinceEpoch
+          .toString());
       final uploadTask = storageRef.putFile(file);
       final snapshot = await uploadTask;
       final mediaUrl = await snapshot.ref.getDownloadURL();
@@ -270,7 +289,9 @@ class _GroupChatPageState extends State<GroupChatPage> {
         medias: [
           ChatMedia(
             url: mediaUrl,
-            fileName: file.path.split('/').last,
+            fileName: file.path
+                .split('/')
+                .last,
             type: MediaType.image,
           ),
         ],

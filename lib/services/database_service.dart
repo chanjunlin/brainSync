@@ -8,6 +8,7 @@ import 'package:brainsync/utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get_it/get_it.dart';
 
+import '../const.dart';
 import '../model/chat.dart';
 import '../model/comment.dart';
 import '../model/message.dart';
@@ -147,6 +148,7 @@ class DatabaseService {
     await docRef.set(chat);
   }
 
+  // Creating a new group
   Future<void> createNewGroup(
       String groupID, String groupName, List<UserProfile?> members) async {
     final userId = _authService.currentUser!.uid;
@@ -159,10 +161,13 @@ class DatabaseService {
     participantsID.add(userId);
 
     final groupChat = GroupChat(
+      admins: [userId],
       createdBy: userId,
       createdAt: Timestamp.fromDate(DateTime.now()),
       groupID: groupID,
+      groupDescription: "Enter group description",
       groupName: groupName,
+      groupPicture: PLACEHOLDER_PFP,
       participantsID: participantsID,
       messages: [],
     );
@@ -192,14 +197,7 @@ class DatabaseService {
     return _firebaseFirestore.collection('chats').doc(chatId).get();
   }
 
-  // Retrieve all chats from user
-  Stream<QuerySnapshot> getAllUserChatsStream() {
-    return _firebaseFirestore
-        .collection('chats')
-        .where('participantsIds', arrayContains: _authService.currentUser!.uid)
-        .snapshots();
-  }
-
+  // Retrieve group chat details in DocumentSnapshot
   Future<DocumentSnapshot?> getGroupChatDetails(String groupID) async {
     try {
       return _firebaseFirestore.collection('groupChats').doc(groupID).get();
@@ -209,11 +207,19 @@ class DatabaseService {
     }
   }
 
+  // Retrieve all chats from user
+  Stream<QuerySnapshot> getAllUserChatsStream() {
+    return _firebaseFirestore
+        .collection('chats')
+        .where('participantsIds', arrayContains: _authService.currentUser!.uid)
+        .snapshots();
+  }
+
   // Retrieve all group chats from user
   Stream<QuerySnapshot> getAllUserGroupChatsStream() {
     return _firebaseFirestore
         .collection('groupChats')
-        .where('participantsIds', arrayContains: _authService.currentUser!.uid)
+        .where('participantsID', arrayContains: _authService.currentUser!.uid)
         .snapshots();
   }
 
@@ -279,6 +285,7 @@ class DatabaseService {
     }
   }
 
+  // Sending a group chat message
   Future<void> sendGroupChatMessage(String groupID, Message message) async {
     final docRef =
         FirebaseFirestore.instance.collection('groupChats').doc(groupID);
@@ -313,6 +320,29 @@ class DatabaseService {
   Stream getGroupChatData(String groupID) {
     final docRef = _groupChatCollection!.doc(groupID);
     return docRef.snapshots() as Stream<DocumentSnapshot<GroupChat>>;
+  }
+
+  // Leaving the group chat
+  Future<void> leaveGroupChat(String groupID, String uid) async {
+    final groupChatRef = _groupChatCollection!.doc(groupID);
+    final userRef = _usersCollection!.doc(uid);
+
+    await _firebaseFirestore.runTransaction((transaction) async {
+      DocumentSnapshot groupChatSnapshot = await transaction.get(groupChatRef);
+      List<dynamic> admins = groupChatSnapshot.get('admins');
+
+      if (admins.contains(uid)) {
+        transaction.update(groupChatRef, {
+          'admins': FieldValue.arrayRemove([uid]),
+        });
+      }
+      transaction.update(groupChatRef, {
+        'participantsID': FieldValue.arrayRemove([uid]),
+      });
+      transaction.update(userRef, {
+        'groupChats': FieldValue.arrayRemove([groupID])
+      });
+    });
   }
 
   // FRIEND REQUEST METHODS
@@ -539,7 +569,6 @@ class DatabaseService {
       await userRef.update({
         'myPosts': FieldValue.arrayUnion([postRef.id])
       });
-      print(newPost.id);
     } catch (e) {}
   }
 

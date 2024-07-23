@@ -1,44 +1,48 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:uuid/uuid.dart';
 
-import '../../model/user_profile.dart';
-import '../../services/database_service.dart';
-import '../../services/navigation_service.dart';
+import '../../../const.dart';
+import '../../../model/user_profile.dart';
+import '../../../services/alert_service.dart';
+import '../../../services/database_service.dart';
+import '../../../services/navigation_service.dart';
 import 'group_chat_page.dart';
 
 class GroupChatCreation extends StatefulWidget {
   const GroupChatCreation({super.key});
 
   @override
-  _GroupChatCreationState createState() => _GroupChatCreationState();
+  GroupChatCreationState createState() => GroupChatCreationState();
 }
 
-class _GroupChatCreationState extends State<GroupChatCreation> {
+class GroupChatCreationState extends State<GroupChatCreation> {
   final GetIt _getIt = GetIt.instance;
+  final TextEditingController groupNameController = TextEditingController();
+
+  late AlertService _alertService;
   late DatabaseService _databaseService;
   late NavigationService _navigationService;
 
-  final TextEditingController groupNameController = TextEditingController();
   List<UserProfile?> _friends = [];
   List<UserProfile?> selectedFriends = [];
 
   @override
   void initState() {
     super.initState();
+    _alertService = _getIt.get<AlertService>();
     _databaseService = _getIt.get<DatabaseService>();
     _navigationService = _getIt.get<NavigationService>();
-    _loadFriends();
+    loadFriends();
   }
 
-  Future<void> _loadFriends() async {
+  Future<void> loadFriends() async {
     try {
       _friends = await _databaseService.getFriends();
       setState(() {});
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error loading friends: $e')),
-      );
+      _alertService.showToast(text: "Error loading friends");
     }
   }
 
@@ -54,38 +58,44 @@ class _GroupChatCreationState extends State<GroupChatCreation> {
 
   void createGroupChat() async {
     String groupName = groupNameController.text.trim();
-    print("groupname is ${groupName}");
     if (groupName.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter a group name'),
-        ),
+      _alertService.showToast(
+        text: "Please enter a group name",
+        icon: Icons.info,
       );
-      return;
     } else if (selectedFriends.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select friends'),
-        ),
+      _alertService.showToast(
+        text: "Please select at least 1 friend",
+        icon: Icons.info,
       );
-      return;
     }
     String groupId = const Uuid().v4();
     try {
-      await _databaseService.createNewGroup(groupId, groupName, selectedFriends);
+      await _databaseService.createNewGroup(
+          groupId, groupName, selectedFriends);
       Navigator.pop(context);
-      _navigationService.push(MaterialPageRoute(builder: (context) {
-        return GroupChatPage(groupID: groupId, groupName: groupName);
-      }));
+      _navigationService.push(
+        MaterialPageRoute(
+          builder: (context) {
+            return GroupChatPage(groupID: groupId, groupName: groupName);
+          },
+        ),
+      );
     } catch (e) {
-      print("error creating group");
-      rethrow;
+      if (kDebugMode) {
+        print("Error => ${e}");
+      }
+      _alertService.showToast(
+        text: "Error creating group",
+        icon: Icons.info,
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text('Create Group Chat'),
         backgroundColor: Colors.brown[300],
@@ -111,12 +121,11 @@ class _GroupChatCreationState extends State<GroupChatCreation> {
                   if (friend == null) {
                     return const SizedBox.shrink();
                   }
-
                   return ListTile(
                     title: Text("${friend.firstName} ${friend.lastName}"),
                     leading: CircleAvatar(
                       backgroundImage:
-                          NetworkImage(friend.pfpURL ?? 'PLACEHOLDER_URL'),
+                          NetworkImage(friend.pfpURL ?? PLACEHOLDER_PFP),
                     ),
                     trailing: Checkbox(
                       value: selectedFriends.contains(friend),
@@ -137,7 +146,12 @@ class _GroupChatCreationState extends State<GroupChatCreation> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.brown[300],
               ),
-              child: const Text('Create Group Chat'),
+              child: const Text(
+                'Create Group Chat',
+                style: TextStyle(
+                  color: Colors.white,
+                ),
+              ),
             ),
           ],
         ),
