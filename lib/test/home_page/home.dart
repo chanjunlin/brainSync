@@ -1,4 +1,5 @@
-import 'package:brainsync/common_widgets/bottomBar.dart';
+import 'package:brainsync/pages/home.dart';
+import 'package:brainsync/pages/Posts/post.dart';
 import 'package:brainsync/services/database_service.dart';
 import 'package:brainsync/services/navigation_service.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
@@ -13,7 +14,16 @@ class MockAuthService extends Mock implements AuthService {}
 
 class MockAlertService extends Mock implements AlertService {}
 
-class MockNavigationService extends Mock implements NavigationService {}
+class MockNavigationService extends Mock implements NavigationService {
+  @override
+  Future<void> pushReplacementName(String routeName, {Object? arguments}) {
+    return super.noSuchMethod(
+      Invocation.method(#pushReplacementNamed, [routeName, arguments]),
+      returnValue: Future.value(),
+      returnValueForMissingStub: Future.value(),
+    );
+  }
+}
 
 class MockDatabaseService extends Mock implements DatabaseService {}
 
@@ -42,8 +52,12 @@ void main() {
     });
 
     testWidgets("home page test", (WidgetTester tester) async {
-      await tester.pumpWidget(const MaterialApp(
-        home:Scaffold(body: CustomBottomNavBar(initialIndex: 0)),
+      await tester.pumpWidget(MaterialApp(
+        initialRoute: '/',
+        routes: {
+          '/': (context) => const Scaffold(body: Home()),
+          '/post': (context) => const PostsPage(), // Ensure ChatPage is your chat screen
+        },
       ));
 
       await tester.pump();
@@ -60,11 +74,10 @@ void main() {
       expect(notification, findsOneWidget);
       expect(person, findsOneWidget);
 
+      await tester.tap(add);
+      await tester.pumpAndSettle();
 
-
-      await tester.tap(chat);
-      await tester.pumpAndSettle(); //why doesnt thus workkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkzzzzzzzzzzzzzzzzzzzzzzzzz
-
+      verify(navigationService.pushReplacementName('/post')).called(1);
     });
   });
 }

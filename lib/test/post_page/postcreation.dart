@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:brainsync/model/module.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -60,10 +58,10 @@ void main() {
         home: PostsPage(),
       ));
 
-      var moduleCodeField = find.byKey(Key('ModuleCodeField'));
+      var moduleCodeField = find.byKey(const Key('ModuleCodeField'));
       expect(moduleCodeField, findsOneWidget);
 
-      var contentField = find.byKey(Key("ContentField"));
+      var contentField = find.byKey(const Key("ContentField"));
       expect(contentField, findsOneWidget);
 
       var createButton = find.text("Create Post");

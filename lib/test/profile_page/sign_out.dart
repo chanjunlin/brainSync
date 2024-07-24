@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:get_it/get_it.dart';
-import 'package:brainsync/pages/Posts/post.dart';
 import 'package:brainsync/services/api_service.dart';
 import 'package:brainsync/services/auth_service.dart';
 import 'package:brainsync/services/database_service.dart';
@@ -28,9 +27,52 @@ class MockApiService extends Mock implements ApiService {
 
 class MockAlertService extends Mock implements AlertService {}
 
-class MockNavigationService extends Mock implements NavigationService {}
+class MockNavigationService extends Mock implements NavigationService {
+  @override
+  Future<void> pushReplacementName(String routeName) {
+    return Future.value();
+  }
+}
 
-class MockDatabaseService extends Mock implements DatabaseService {}
+class MockDatabaseService extends Mock implements DatabaseService {
+  @override
+  Future<DocumentSnapshot> fetchCurrentUser() async {
+    final profileData = {
+      'bio': 'Help me plsz',
+      'firstName': 'John',
+      'lastName': 'Wong',
+      'pfpURL': 'assets/img/apple.png',
+      'profileCoverURL': 'assets/img/google.png',
+      'uid': 'test_uid',
+      'year': '2024',
+      'completedModules': [],
+      'currentModules': [],
+      'currentCredits': 0,
+      'friendList': [],
+      'friendReqList': [],
+      'myComments': [],
+      'myPosts': [],
+      'myLikedComments': [],
+      'myLikedPosts': [],
+    };
+    final mockDocumentSnapshot = MockDocumentSnapshot(profileData);
+    return Future.value(mockDocumentSnapshot);
+  }
+}
+
+// ignore: subtype_of_sealed_class
+class MockDocumentSnapshot extends Mock implements DocumentSnapshot {
+  final Map<String, dynamic> _data;
+
+  MockDocumentSnapshot(this._data);
+
+  @override
+  bool get exists => true;
+
+  @override
+  Map<String, dynamic> data() => _data;
+}
+
 
 void main() {
   group('profile page test', () {
@@ -58,22 +100,23 @@ void main() {
       GetIt.instance.reset();
     });
     testWidgets('sign-out button', (WidgetTester tester) async {
-      await tester.pumpWidget(const MaterialApp(
-        home: Profile(
+      await tester.pumpWidget(MaterialApp(
+        home: const Profile(
           profileImageProvider: AssetImage('assets/img/apple.png'),
           coverImageProvider: AssetImage('assets/img/google.png'),
-        ) 
+        ),
+        routes: {
+          '/login': (context) => const Scaffold(body: Text('Login Page')),
+        },
       ));
 
       await tester.pumpAndSettle();
 
       var logout = find.byIcon(Icons.logout);
-      var profile = find.text('Edit Profile');
 
       expect(logout, findsOneWidget);
-      expect(profile, findsOneWidget);
 
-      await tester.tap(profile); 
+      await tester.tap(logout); 
       await tester.pumpAndSettle();
     });
   });

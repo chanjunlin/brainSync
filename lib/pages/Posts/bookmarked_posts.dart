@@ -100,7 +100,7 @@ class _BookmarkedPostsState extends State<BookmarkedPosts> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Image.asset("assets/img/thinking_brain.png"),
+                  Image.asset("assets/img/brain.png"),
                   const SizedBox(height: 16),
                   Text(
                     'No bookmarked posts',
