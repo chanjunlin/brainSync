@@ -213,7 +213,7 @@ class _PostsPageState extends State<PostsPage> {
               ),
               const SizedBox(height: 10),
               CustomSearchBar(
-                key: Key("ModuleCodeField"),
+                key: const Key("ModuleCodeField"),
                 controller: titleController,
                 onChanged: (value) {
                   filterModules(value);

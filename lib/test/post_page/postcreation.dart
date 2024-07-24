@@ -54,6 +54,7 @@ void main() {
     tearDown(() {
       GetIt.instance.reset();
     });
+
     testWidgets('Empty text fields', (WidgetTester tester) async {
       await tester.pumpWidget(const MaterialApp(
         home: PostsPage(),

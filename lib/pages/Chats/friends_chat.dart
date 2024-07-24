@@ -1,15 +1,17 @@
 import 'dart:async';
+
+import 'package:brainsync/pages/Chats/show_group_chat.dart';
+import 'package:brainsync/pages/Chats/show_private_chat.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:intl/intl.dart';
+
 import '../../common_widgets/bottomBar.dart';
 import '../../const.dart';
-import '../../model/user_profile.dart';
 import '../../services/auth_service.dart';
 import '../../services/database_service.dart';
 import '../../services/navigation_service.dart';
-import 'chat_page.dart';
 
 class FriendsChats extends StatefulWidget {
   const FriendsChats({super.key});
@@ -66,7 +68,8 @@ class FriendsChatsState extends State<FriendsChats> {
         sortChatsByLatestMessage(); // Sort chats initially
 
         // Listen to profile updates
-        profileSubscription = userProfile.reference.snapshots().listen((updatedSnapshot) {
+        profileSubscription =
+            userProfile.reference.snapshots().listen((updatedSnapshot) {
           if (updatedSnapshot.exists) {
             setState(() {
               userProfilePfp = updatedSnapshot.get('pfpURL') ?? PLACEHOLDER_PFP;
@@ -77,7 +80,6 @@ class FriendsChatsState extends State<FriendsChats> {
             sortChatsByLatestMessage(); // Sort chats whenever profile updates
           }
         });
-
       } else {
         // Handle case where user profile is not found
       }
@@ -98,21 +100,26 @@ class FriendsChatsState extends State<FriendsChats> {
   }
 
   Future<void> listenToChats() async {
-    chatsSubscription = _databaseService.getAllUserChatsStream().listen((querySnapshot) {
+    chatsSubscription =
+        _databaseService.getAllUserChatsStream().listen((querySnapshot) {
       if (querySnapshot.docs.isNotEmpty) {
         for (var doc in querySnapshot.docs) {
           String chatId = doc.id;
           dynamic lastMessageData = doc.get('lastMessage');
-          Timestamp? lastMessageTimestamp = lastMessageData != null ? lastMessageData['sentAt'] : null;
+          Timestamp? lastMessageTimestamp =
+              lastMessageData != null ? lastMessageData['sentAt'] : null;
           if (lastMessageTimestamp != null) {
-            if (lastMessageTimestamps[chatId] == null || lastMessageTimestamps[chatId]!.compareTo(lastMessageTimestamp) < 0) {
+            if (lastMessageTimestamps[chatId] == null ||
+                lastMessageTimestamps[chatId]!.compareTo(lastMessageTimestamp) <
+                    0) {
               setState(() {
                 if (chats != null && !chats!.contains(chatId)) {
                   chats!.add(chatId);
                 }
                 lastMessageTimestamps[chatId] = lastMessageTimestamp;
               });
-              updateChatSubtitle(chatId, lastMessageData['content'], lastMessageTimestamp);
+              updateChatSubtitle(
+                  chatId, lastMessageData['content'], lastMessageTimestamp);
             }
           }
         }
@@ -161,144 +168,47 @@ class FriendsChatsState extends State<FriendsChats> {
         backgroundColor: Colors.brown[300],
         foregroundColor: Colors.white,
         automaticallyImplyLeading: false,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: () {
+              // Action when the plus icon is pressed
+              chatCreationMenu(context);
+            },
+          ),
+          const SizedBox(width: 16),
+          // Optional: Add spacing between the icon and the edge
+        ],
       ),
-      body: chats != null
-          ? Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            if (chats!.isEmpty)
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Image.asset("assets/img/meditating_brain.png"),
-                  const SizedBox(height: 16),
-                  Text(
-                    'No active chats',
-                    style: TextStyle(
-                      fontSize: 20,
-                      color: Colors.brown[700],
-                    ),
-                  ),
-                ],
-              )
-            else
-              Expanded(
-                child: ListView.builder(
-                  itemCount: chats!.length,
-                  itemBuilder: (context, index) {
-                    String chatId = chats![index];
-                    return FutureBuilder<DocumentSnapshot?>(
-                      future: _databaseService.getChatDetails(chatId),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const SizedBox.shrink();
-                        } else if (snapshot.hasError) {
-                          return Center(
-                            child: Text(
-                              'Error: ${snapshot.error}',
-                            ),
-                          );
-                        } else if (snapshot.hasData &&
-                            snapshot.data != null) {
-                          DocumentSnapshot<Object?> chatDetails =
-                          snapshot.data!;
-                          String chatSubtitle =
-                              chatSubtitles[chatId] ?? "";
-                          List<dynamic> participantsIds =
-                              chatDetails.get('participantsIds') ?? [];
-                          String otherUserId = participantsIds.firstWhere(
-                                (id) => id != _authService.currentUser!.uid,
-                            orElse: () => '',
-                          );
-                          List<dynamic> participantsNames =
-                              chatDetails.get('participantsNames') ?? [];
-                          String otherUserName =
-                          participantsNames.firstWhere(
-                                (name) =>
-                            name !=
-                                _authService.currentUser!.displayName,
-                            orElse: () => "",
-                          );
-                          return FutureBuilder<DocumentSnapshot?>(
-                            future:
-                            _databaseService.fetchUser(otherUserId),
-                            builder: (context, userSnapshot) {
-                              if (userSnapshot.connectionState ==
-                                  ConnectionState.waiting) {
-                                return const SizedBox.shrink();
-                              } else if (userSnapshot.hasError) {
-                                return Center(
-                                  child: Text(
-                                      'Error: ${userSnapshot.error}'),
-                                );
-                              } else if (userSnapshot.hasData &&
-                                  userSnapshot.data != null) {
-                                UserProfile otherUser =
-                                UserProfile.fromJson(
-                                    userSnapshot.data!.data()
-                                    as Map<String, dynamic>);
-                                return ListTile(
-                                  leading: CircleAvatar(
-                                    radius: 20,
-                                    backgroundImage: NetworkImage(
-                                        otherUser.pfpURL ??
-                                            PLACEHOLDER_PFP),
-                                  ),
-                                  title: Text(otherUserName),
-                                  subtitle: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Expanded(
-                                        child: Text(
-                                          chatSubtitle,
-                                          overflow: TextOverflow.ellipsis,
-                                          maxLines: 1,
-                                        ),
-                                      ),
-                                      Text(
-                                        getFormattedTime(chatDetails.get('lastMessage')['sentAt']),
-                                        style: const TextStyle(
-                                          fontSize: 12,
-                                          color: Colors.grey,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  onTap: () {
-                                    _navigationService.push(
-                                      MaterialPageRoute(
-                                          builder: (context) {
-                                            return ChatPage(
-                                                chatUser: otherUser);
-                                          }),
-                                    );
-                                  },
-                                );
-                              } else {
-                                return const Center(
-                                    child: Text('User data not found'));
-                              }
-                            },
-                          );
-                        } else {
-                          return const Center(
-                            child: Text('Chat details not found'),
-                          );
-                        }
-                      },
-                    );
-                  },
-                ),
-              ),
-          ],
-        ),
-      )
-          : const Center(child: CircularProgressIndicator()),
+      body: buildTabBarSection(),
       bottomNavigationBar: const CustomBottomNavBar(initialIndex: 1),
+    );
+  }
+
+  Widget buildTabBarSection() {
+    return DefaultTabController(
+      length: 2,
+      child: Column(
+        children: [
+          TabBar(
+            labelColor: Colors.brown[800],
+            unselectedLabelColor: Colors.brown[400],
+            tabs: const [
+              Tab(text: 'Private Chats'),
+              Tab(text: 'Group Chats'),
+            ],
+          ),
+          SizedBox(
+            height: 500,
+            child: TabBarView(
+              children: [
+                showPrivateChat(),
+                showGroupChat(),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -317,5 +227,43 @@ class FriendsChatsState extends State<FriendsChats> {
       }
     }
     return '';
+  }
+
+  Widget showPrivateChat() {
+    return ShowPrivateChat();
+  }
+
+  Widget showGroupChat() {
+    return ShowGroupChat();
+  }
+
+  void chatCreationMenu(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return SafeArea(
+          child: Wrap(
+            children: <Widget>[
+              ListTile(
+                leading: const Icon(Icons.person),
+                title: const Text('New Private Chat'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _navigationService.pushName("/privateChat");
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.group),
+                title: const Text('New Group Chat'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _navigationService.pushName("/groupChat");
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 }
