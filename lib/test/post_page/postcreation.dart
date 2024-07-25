@@ -28,7 +28,6 @@ class MockNavigationService extends Mock implements NavigationService {}
 class MockDatabaseService extends Mock implements DatabaseService {}
 
 
-
 void main() {
   group('ApiService', () {
     late AuthService authService;
@@ -71,11 +70,11 @@ void main() {
       expect(createButton, findsOneWidget);
 
       await tester.tap(createButton);
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       var validationMessage = find.text("Please enter content");
-      await Future.delayed(const Duration(seconds: 5));
       expect(validationMessage, findsOneWidget);
+      await Future.delayed(Duration(seconds: 5));
     });
 
     testWidgets('Empty module code field', (WidgetTester tester) async {
@@ -95,12 +94,11 @@ void main() {
       await tester.enterText(contentField, 'Sample content');
 
       await tester.tap(createButton);
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       var validationMessage = find.text('Please enter a valid module code');
-      await Future.delayed(const Duration(seconds: 5));
       expect(validationMessage, findsOneWidget);
-
+      await Future.delayed(Duration(seconds: 5));
     });
 
     testWidgets('Empty content field', (WidgetTester tester) async {
@@ -117,15 +115,15 @@ void main() {
       var createButton = find.text("Create Post");
       expect(createButton, findsOneWidget);
 
+
       await tester.enterText(moduleCodeField, 'CS2040S');
 
       await tester.tap(createButton);
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       var validationMessage = find.text('Please enter content');
-      await Future.delayed(const Duration(seconds: 5));
       expect(validationMessage, findsOneWidget);
-
+      await Future.delayed(Duration(seconds: 5));
     });
 
     testWidgets('Invalid module code', (WidgetTester tester) async {
@@ -146,15 +144,13 @@ void main() {
       await tester.enterText(contentField, 'What is this?');
 
       await tester.tap(createButton);
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       alertService.showToast(text: 'Invalid module code!');
       await tester.pumpAndSettle();
 
       var validationMessage = find.text('Invalid module code!');
-      await Future.delayed(const Duration(seconds: 5));
       expect(validationMessage, findsOneWidget);
-
     });
   });
 }
