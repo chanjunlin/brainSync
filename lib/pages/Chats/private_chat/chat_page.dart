@@ -11,11 +11,11 @@ import 'package:dash_chat_2/dash_chat_2.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
-import '../../model/user_profile.dart';
-import '../../services/auth_service.dart';
-import '../../services/media_service.dart';
-import '../../services/navigation_service.dart';
-import '../Profile/visiting_profile.dart';
+import '../../../model/user_profile.dart';
+import '../../../services/auth_service.dart';
+import '../../../services/media_service.dart';
+import '../../../services/navigation_service.dart';
+import '../../Profile/visiting_profile.dart';
 
 class ChatPage extends StatefulWidget {
   final UserProfile chatUser;
@@ -144,7 +144,7 @@ class _ChatPageState extends State<ChatPage> {
         Chat? chat = snapshot.data?.data();
         List<ChatMessage> messages = [];
         if (chat != null && chat.messages != null) {
-          messages = _generateChatMessagesList(chat.messages!);
+          messages = generateChatMessagesList(chat.messages!);
         }
         return DashChat(
           messageOptions: MessageOptions(
@@ -158,14 +158,14 @@ class _ChatPageState extends State<ChatPage> {
             trailing: [mediaMessageButton()],
           ),
           currentUser: currentUser!,
-          onSend: _sendMessage,
+          onSend: sendMessage,
           messages: messages,
         );
       },
     );
   }
 
-  Future<void> _sendMessage(ChatMessage chatMessage) async {
+  Future<void> sendMessage(ChatMessage chatMessage) async {
     try {
       if (chatMessage.medias?.isNotEmpty ?? false) {
         if (chatMessage.medias!.first.type == MediaType.image) {
@@ -199,7 +199,7 @@ class _ChatPageState extends State<ChatPage> {
     }
   }
 
-  List<ChatMessage> _generateChatMessagesList(List<Message> messages) {
+  List<ChatMessage> generateChatMessagesList(List<Message> messages) {
     List<ChatMessage> chatMessages = messages.map((m) {
       if (m.messageType == MessageType.Image) {
         return ChatMessage(
@@ -230,7 +230,7 @@ class _ChatPageState extends State<ChatPage> {
       onPressed: () async {
         File? file = await _mediaService.getImageFromGallery();
         if (file != null) {
-          await _uploadAndSendMediaMessage(file);
+          await uploadAndSendMediaMessage(file);
         }
       },
       icon: Icon(
@@ -240,7 +240,7 @@ class _ChatPageState extends State<ChatPage> {
     );
   }
 
-  Future<void> _uploadAndSendMediaMessage(File file) async {
+  Future<void> uploadAndSendMediaMessage(File file) async {
     try {
       String chatID = generateChatID(
         uid1: currentUser!.id,
@@ -262,7 +262,7 @@ class _ChatPageState extends State<ChatPage> {
             ),
           ],
         );
-        await _sendMessage(chatMessage);
+        await sendMessage(chatMessage);
       }
     } catch (e) {
       print('Error uploading media: $e');

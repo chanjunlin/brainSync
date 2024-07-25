@@ -113,6 +113,7 @@ class _EditProfilePageState extends State<EditProfilePage> with RouteAware {
 
   void saveProfile() async {
     if (_formKey.currentState!.validate()) {
+      print(selectedProfileImage);
       try {
         await _storageService.saveData(
           coverFile: selectedCoverImage,
@@ -360,7 +361,7 @@ class _EditProfilePageState extends State<EditProfilePage> with RouteAware {
             const SizedBox(height: 16),
             const Divider(),
             SizedBox(
-              width: double.infinity, // Ensure modules list stretches full width
+              width: double.infinity,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

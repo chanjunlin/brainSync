@@ -55,6 +55,22 @@ class StorageService {
     });
   }
 
+  Future<String?> uploadGroupChatPicture({
+    required File groupChatPicture,
+    required String groupID,
+  }) async {
+    Reference groupPicture = _fireBaseStorage
+        .ref('groupChat/groupChatPicture')
+        .child('$groupID${p.extension(groupChatPicture.path)}');
+    UploadTask coverTask = groupPicture.putFile(groupChatPicture);
+    return coverTask.then((p) {
+      if (p.state == TaskState.success) {
+        return groupPicture.getDownloadURL();
+      }
+      return null;
+    });
+  }
+
   Future<String> saveData({
     File? coverFile,
     File? profileFile,
@@ -112,5 +128,37 @@ class StorageService {
       }
       return null;
     });
+  }
+
+  Future<String> saveGroupChatData({
+    File? groupPictureFile,
+    String? groupDescription,
+    String? groupName,
+    required String groupID,
+    List<String>? adminList,
+  }) async {
+    String userId = _authService.currentUser!.uid;
+    String? downloadPictureURL;
+
+
+    if (groupPictureFile != null) {
+      downloadPictureURL = await uploadGroupChatPicture(
+        groupChatPicture: groupPictureFile,
+        groupID: groupID,
+      );
+    }
+
+    Map<String, dynamic> updateData = {
+      'groupDescription': groupDescription,
+      'groupName': groupName,
+      'admins': adminList,
+    };
+
+    if (downloadPictureURL != null) {
+      updateData['groupPicture'] = downloadPictureURL;
+    }
+    await _firestore.collection('groupChats').doc(groupID).update(updateData);
+
+    return "passed";
   }
 }

@@ -66,7 +66,6 @@ class AuthService {
     }
   }
 
-
   Future<bool> signInWithGoogle(BuildContext context) async {
     try {
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
@@ -197,4 +196,21 @@ class AuthService {
     }
   }
 
+  Future<String> getUserName(String uid) async {
+    try {
+      DocumentSnapshot<Map<String, dynamic>> userProfileSnapshot =
+          await _firebaseFirestore.collection('users').doc(uid).get();
+      if (userProfileSnapshot.exists) {
+        UserProfile userProfile =
+            UserProfile.fromJson(userProfileSnapshot.data()!);
+        String userName = userProfile.firstName! + userProfile.lastName!;
+        return userName;
+      } else {
+        return "Null user";
+      }
+    } catch (e) {
+      print("Invalid user");
+      rethrow;
+    }
+  }
 }

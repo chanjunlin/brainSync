@@ -2,36 +2,43 @@ import 'package:brainsync/model/message.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class GroupChat {
+  String? createdBy;
   String? groupID;
+  String? groupDescription;
   String? groupName;
-  List<String>? participantsNames;
-  List<String>? participantsIds;
+  String? groupPicture;
+  List<String>? admins;
+  List<String>? participantsID;
   List<Message>? messages;
   Message? lastMessage;
   Timestamp? createdAt;
   Timestamp? updatedAt;
-  bool? isGroupChat;
   int? unreadCount;
 
   GroupChat({
     required this.groupID,
     required this.groupName,
-    required this.participantsIds,
-    required this.participantsNames,
+    required this.participantsID,
+    this.admins,
+    this.createdBy,
+    this.groupDescription,
+    this.groupPicture,
     this.messages,
     this.lastMessage,
     this.createdAt,
     this.updatedAt,
-    this.isGroupChat,
     this.unreadCount,
   });
 
   factory GroupChat.fromJson(Map<String, dynamic> json) {
     return GroupChat(
+      createdBy: json['createdBy'],
       groupID: json['id'],
+      groupDescription: json["groupDescription"],
       groupName: json["groupName"],
-      participantsIds: List<String>.from(json['participantsIds']),
-      participantsNames: List<String>.from(json['participantsNames']),
+      groupPicture: json["groupPicture"],
+      admins: List<String>.from(json['admins']),
+      participantsID: List<String>.from(json['participantsID']),
       messages: json['messages'] != null
           ? List.from(json['messages']).map((m) => Message.fromJson(m)).toList()
           : [],
@@ -40,28 +47,29 @@ class GroupChat {
           : null,
       createdAt: json['createdAt'] != null
           ? Timestamp.fromMillisecondsSinceEpoch(
-          json['createdAt'].millisecondsSinceEpoch)
+              json['createdAt'].millisecondsSinceEpoch)
           : null,
       updatedAt: json['updatedAt'] != null
           ? Timestamp.fromMillisecondsSinceEpoch(
-          json['updatedAt'].millisecondsSinceEpoch)
+              json['updatedAt'].millisecondsSinceEpoch)
           : null,
-      isGroupChat: json['isGroupChat'] ?? false,
       unreadCount: json['unreadCount'] ?? 0,
     );
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = {
+      'createdBy': createdBy,
       'id': groupID,
+      'groupDescription': groupDescription,
       'groupName': groupName,
-      'participantsIds': participantsIds,
-      'participantsNames': participantsNames,
+      'groupPicture': groupPicture,
+      'admins': admins,
+      'participantsID': participantsID,
       'messages': messages?.map((m) => m.toJson()).toList() ?? [],
       'lastMessage': lastMessage?.toJson(),
       'createdAt': createdAt,
       'updatedAt': updatedAt,
-      'isGroupChat': isGroupChat ?? false,
       'unreadCount': unreadCount ?? 0,
     };
     return data;

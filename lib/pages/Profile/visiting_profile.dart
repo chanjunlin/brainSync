@@ -11,7 +11,7 @@ import '../../const.dart';
 import '../../model/user_profile.dart';
 import '../../services/auth_service.dart';
 import '../../services/database_service.dart';
-import '../Chats/chat_page.dart';
+import '../Chats/private_chat/chat_page.dart';
 import 'friends.dart';
 
 class VisitProfile extends StatefulWidget {
@@ -295,8 +295,8 @@ class _VisitProfileState extends State<VisitProfile> {
     return ElevatedButton(
       onPressed: onPressed,
       style: ElevatedButton.styleFrom(
-        backgroundColor: backgroundColor, // background color
-        foregroundColor: textColor, // text color
+        backgroundColor: backgroundColor,
+        foregroundColor: textColor,
       ),
       child: Text(buttonText),
     );

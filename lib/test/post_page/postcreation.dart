@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:brainsync/model/module.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -24,6 +26,7 @@ class MockAlertService extends Mock implements AlertService {}
 class MockNavigationService extends Mock implements NavigationService {}
 
 class MockDatabaseService extends Mock implements DatabaseService {}
+
 
 
 void main() {
@@ -68,9 +71,10 @@ void main() {
       expect(createButton, findsOneWidget);
 
       await tester.tap(createButton);
-      await tester.pump();
+      await tester.pumpAndSettle();
 
       var validationMessage = find.text("Please enter content");
+      await Future.delayed(const Duration(seconds: 5));
       expect(validationMessage, findsOneWidget);
     });
 
@@ -91,11 +95,66 @@ void main() {
       await tester.enterText(contentField, 'Sample content');
 
       await tester.tap(createButton);
-      await tester.pump();
+      await tester.pumpAndSettle();
 
       var validationMessage = find.text('Please enter a valid module code');
+      await Future.delayed(const Duration(seconds: 5));
       expect(validationMessage, findsOneWidget);
+
     });
 
+    testWidgets('Empty content field', (WidgetTester tester) async {
+      await tester.pumpWidget(const MaterialApp(
+        home: PostsPage(),
+      ));
+
+      var moduleCodeField = find.byKey(const Key('ModuleCodeField'));
+      expect(moduleCodeField, findsOneWidget);
+
+      var contentField = find.byKey(const Key("ContentField"));
+      expect(contentField, findsOneWidget);
+
+      var createButton = find.text("Create Post");
+      expect(createButton, findsOneWidget);
+
+      await tester.enterText(moduleCodeField, 'CS2040S');
+
+      await tester.tap(createButton);
+      await tester.pumpAndSettle();
+
+      var validationMessage = find.text('Please enter content');
+      await Future.delayed(const Duration(seconds: 5));
+      expect(validationMessage, findsOneWidget);
+
+    });
+
+    testWidgets('Invalid module code', (WidgetTester tester) async {
+      await tester.pumpWidget(const MaterialApp(
+        home: PostsPage(),
+      ));
+
+      var moduleCodeField = find.byKey(const Key('ModuleCodeField'));
+      expect(moduleCodeField, findsOneWidget);
+
+      var contentField = find.byKey(const Key("ContentField"));
+      expect(contentField, findsOneWidget);
+
+      var createButton = find.text("Create Post");
+      expect(createButton, findsOneWidget);
+
+      await tester.enterText(moduleCodeField, 'CS2040');
+      await tester.enterText(contentField, 'What is this?');
+
+      await tester.tap(createButton);
+      await tester.pumpAndSettle();
+
+      alertService.showToast(text: 'Invalid module code!');
+      await tester.pumpAndSettle();
+
+      var validationMessage = find.text('Invalid module code!');
+      await Future.delayed(const Duration(seconds: 5));
+      expect(validationMessage, findsOneWidget);
+
+    });
   });
 }
