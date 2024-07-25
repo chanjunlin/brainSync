@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:brainsync/pages/Chats/private_chat/chat_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -11,7 +12,6 @@ import '../../model/user_profile.dart';
 import '../../services/auth_service.dart';
 import '../../services/database_service.dart';
 import '../../services/navigation_service.dart';
-import 'chat_page.dart';
 
 class ShowPrivateChat extends StatefulWidget {
   const ShowPrivateChat({super.key});

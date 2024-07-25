@@ -52,9 +52,9 @@ class _GroupChatPageState extends State<GroupChatPage> {
   }
 
   void initializeGroupChat() async {
-    DocumentSnapshot<Object?> groupChatDetails =
+    DocumentSnapshot<Object?>? groupChatDetails =
         await _databaseService.getGroupChatDetails(widget.groupID);
-    groupName = groupChatDetails.get("groupName");
+    groupName = groupChatDetails?.get("groupName");
   }
 
   @override
