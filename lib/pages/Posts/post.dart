@@ -200,91 +200,98 @@ class _PostsPageState extends State<PostsPage> {
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "Module Code",
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.brown[800],
-                ),
+          child: SingleChildScrollView(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height - 150,
               ),
-              const SizedBox(height: 10),
-              CustomSearchBar(
-                key: const Key("ModuleCodeField"),
-                controller: titleController,
-                onChanged: (value) {
-                  filterModules(value);
-                },
-                suggestions: filteredModules,
-                onSuggestionSelected: handleSuggestionSelected,
-              ),
-              const SizedBox(height: 30),
-              Text(
-                "Content",
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.brown[800],
-                ),
-              ),
-              const SizedBox(height: 10),
-              TextFormField(
-                key: const Key("ContentField"),
-                cursorColor: Colors.brown[300],
-                controller: contentController,
-                decoration: InputDecoration(
-                  labelText: 'Content',
-                  labelStyle: TextStyle(
-                    color: Colors.brown[800],
-                  ),
-                  prefixIcon: Icon(
-                    Icons.text_fields,
-                    color: Colors.brown[300],
-                  ),
-                  focusColor: Colors.brown[300],
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.brown[300]!),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.brown[300]!),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  border: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.brown[300]!),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                maxLines: null,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter content';
-                  }
-                  return null;
-                },
-              ),
-              const Spacer(),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.only(right: 8.0),
-                      child: discardButton(),
+                  Text(
+                    "Module Code",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.brown[800],
                     ),
                   ),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 8.0),
-                      child: sendButton(),
+                  const SizedBox(height: 10),
+                  CustomSearchBar(
+                    key: const Key("ModuleCodeField"),
+                    controller: titleController,
+                    onChanged: (value) {
+                      filterModules(value);
+                    },
+                    suggestions: filteredModules,
+                    onSuggestionSelected: handleSuggestionSelected,
+                  ),
+                  const SizedBox(height: 30),
+                  Text(
+                    "Content",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.brown[800],
                     ),
+                  ),
+                  const SizedBox(height: 10),
+                  TextFormField(
+                    key: const Key("ContentField"),
+                    cursorColor: Colors.brown[300],
+                    controller: contentController,
+                    decoration: InputDecoration(
+                      labelText: 'Content',
+                      labelStyle: TextStyle(
+                        color: Colors.brown[800],
+                      ),
+                      prefixIcon: Icon(
+                        Icons.text_fields,
+                        color: Colors.brown[300],
+                      ),
+                      focusColor: Colors.brown[300],
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.brown[300]!),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.brown[300]!),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      border: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.brown[300]!),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    maxLines: null,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter content';
+                      }
+                      return null;
+                    },
+                  ),
+                  const Spacer(),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: 8.0),
+                          child: discardButton(),
+                        ),
+                      ),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 8.0),
+                          child: sendButton(),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ],
+            ),
           ),
         ),
       ),
