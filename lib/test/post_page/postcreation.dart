@@ -1,11 +1,9 @@
-import 'dart:io';
-
 import 'package:brainsync/model/module.dart';
+import 'package:brainsync/pages/Posts/postfortest.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:get_it/get_it.dart';
-import 'package:brainsync/pages/Posts/post.dart';
 import 'package:brainsync/services/api_service.dart';
 import 'package:brainsync/services/auth_service.dart';
 import 'package:brainsync/services/database_service.dart';
@@ -57,7 +55,7 @@ void main() {
 
     testWidgets('Empty text fields', (WidgetTester tester) async {
       await tester.pumpWidget(const MaterialApp(
-        home: PostsPage(),
+        home: PostsPageTest(),
       ));
 
       var moduleCodeField = find.byKey(const Key('ModuleCodeField'));
@@ -74,12 +72,11 @@ void main() {
 
       var validationMessage = find.text("Please enter content");
       expect(validationMessage, findsOneWidget);
-      await Future.delayed(Duration(seconds: 5));
     });
 
     testWidgets('Empty module code field', (WidgetTester tester) async {
       await tester.pumpWidget(const MaterialApp(
-        home: PostsPage(),
+        home: PostsPageTest(),
       ));
 
       var moduleCodeField = find.byKey(const Key('ModuleCodeField'));
@@ -98,12 +95,11 @@ void main() {
 
       var validationMessage = find.text('Please enter a valid module code');
       expect(validationMessage, findsOneWidget);
-      await Future.delayed(Duration(seconds: 5));
     });
 
     testWidgets('Empty content field', (WidgetTester tester) async {
       await tester.pumpWidget(const MaterialApp(
-        home: PostsPage(),
+        home: PostsPageTest(),
       ));
 
       var moduleCodeField = find.byKey(const Key('ModuleCodeField'));
@@ -115,20 +111,19 @@ void main() {
       var createButton = find.text("Create Post");
       expect(createButton, findsOneWidget);
 
-
       await tester.enterText(moduleCodeField, 'CS2040S');
+      await tester.tap(contentField);
 
       await tester.tap(createButton);
       await tester.pump();
 
       var validationMessage = find.text('Please enter content');
       expect(validationMessage, findsOneWidget);
-      await Future.delayed(Duration(seconds: 5));
     });
 
     testWidgets('Invalid module code', (WidgetTester tester) async {
       await tester.pumpWidget(const MaterialApp(
-        home: PostsPage(),
+        home: PostsPageTest(),
       ));
 
       var moduleCodeField = find.byKey(const Key('ModuleCodeField'));
@@ -140,17 +135,42 @@ void main() {
       var createButton = find.text("Create Post");
       expect(createButton, findsOneWidget);
 
-      await tester.enterText(moduleCodeField, 'CS2040');
+      await tester.enterText(moduleCodeField, 'C');
       await tester.enterText(contentField, 'What is this?');
+      await tester.tap(contentField);
 
       await tester.tap(createButton);
-      await tester.pump();
-
-      alertService.showToast(text: 'Invalid module code!');
       await tester.pumpAndSettle();
 
-      var validationMessage = find.text('Invalid module code!');
-      expect(validationMessage, findsOneWidget);
+      verify(alertService.showToast(
+      text: 'Invalid module code!',
+      icon: Icons.error,
+    )).called(1);
+    });
+    testWidgets("Inappropriate language", (WidgetTester tester) async {
+      await tester.pumpWidget(const MaterialApp(
+        home: PostsPageTest(),
+      ));
+      var moduleCodeField = find.byKey(const Key('ModuleCodeField'));
+      expect(moduleCodeField, findsOneWidget);
+
+      var contentField = find.byKey(const Key("ContentField"));
+      expect(contentField, findsOneWidget);
+
+      var createButton = find.text("Create Post");
+      expect(createButton, findsOneWidget);
+
+      await tester.enterText(moduleCodeField, 'CS2040S');
+      await tester.enterText(contentField, 'shit');
+      await tester.tap(contentField);
+
+      await tester.tap(createButton);
+      await tester.pumpAndSettle();
+
+      verify(alertService.showToast(
+      text: 'Post contains inappropriate content!',
+      icon: Icons.error,
+    )).called(1);
     });
   });
 }

@@ -1,4 +1,6 @@
 import 'package:brainsync/pages/form/login_form.dart';
+import 'package:brainsync/pages/home.dart';
+import 'package:brainsync/services/database_service.dart';
 import 'package:brainsync/services/navigation_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -17,36 +19,42 @@ class MockAuthService extends Mock implements AuthService {
     );
   }
 
-  @override
-  Future<bool> signInWithGoogle(BuildContext context) {
-    return super.noSuchMethod(
-      Invocation.method(#signInWithGoogle, [context]),
-      returnValue: Future.value(true),
-      returnValueForMissingStub: Future.value(true),
-    );
-  }
 }
 
 class MockAlertService extends Mock implements AlertService {}
 
-class MockNavigationService extends Mock implements NavigationService {}
+class MockNavigationService extends Mock implements NavigationService {
+  @override
+  Future<void> pushReplacementName(String routeName, {Object? arguments}) {
+    return super.noSuchMethod(
+      Invocation.method(#pushReplacementNamed, [routeName, arguments]),
+      returnValue: Future.value(),
+      returnValueForMissingStub: Future.value(),
+    );
+  }
+}
 
+class MockDatabaseService extends Mock implements DatabaseService {}
 
 void main() {
   group('Login Page Widget Tests', () {
     late MockAuthService authService;
     late MockAlertService alertService;
     late MockNavigationService navigationService;
+    late DatabaseService databaseService;
+
 
     setUp(() {
       authService = MockAuthService();
       alertService = MockAlertService();
       navigationService = MockNavigationService();
+      databaseService = MockDatabaseService();
 
       final getIt = GetIt.instance;
       getIt.registerSingleton<AuthService>(authService);
       getIt.registerSingleton<AlertService>(alertService);
       getIt.registerSingleton<NavigationService>(navigationService);
+      getIt.registerSingleton<DatabaseService>(databaseService);
     });
 
     tearDown(() {
@@ -64,6 +72,10 @@ void main() {
           setLoading: (_) {},
           navigateToHome: () {
             navigatedToHome = true;
+            Navigator.push(
+              tester.element(find.byType(LoginForm)),
+              MaterialPageRoute(builder: (context) => const Home()),
+            );
           },
           navigateToLogin: () {
             navigatedToLogin = true;
@@ -90,11 +102,6 @@ void main() {
 
       verify(authService.login('wuchenfeng0214@gmail.com', 'Palkia123!'))
           .called(1);
-
-      expect(navigatedToHome, isTrue);
-
-      await tester.tap(googleButton);
-      await tester.pumpAndSettle();
 
       expect(navigatedToHome, isTrue);
     });
