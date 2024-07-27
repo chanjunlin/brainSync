@@ -26,20 +26,22 @@ class _AnimatedChatListState extends State<AnimatedChatList> {
       key: _listKey,
       initialItemCount: _messages.length,
       itemBuilder: (context, index, animation) {
-        return _buildMessage(_messages[index], animation);
+        return buildMessage(_messages[index], animation);
       },
     );
   }
 
-  Widget _buildMessage(ChatMessage message, Animation<double> animation) {
+  Widget buildMessage(ChatMessage message, Animation<double> animation) {
     return FadeTransition(
       opacity: animation,
       child: SizeTransition(
         sizeFactor: animation,
         child: ListTile(
           title: Text(message.text ?? ''),
-          subtitle: Text(message.user.firstName!),
-          // Add more styling based on message properties
+          subtitle: Text(
+            message.user.firstName!,
+            style: TextStyle(color: Colors.red),
+          ),
         ),
       ),
     );
@@ -47,7 +49,7 @@ class _AnimatedChatListState extends State<AnimatedChatList> {
 
   void insertMessage(ChatMessage message) {
     setState(() {
-      _messages.insert(0, message); // Add to the beginning of the list
+      _messages.insert(0, message);
       _listKey.currentState?.insertItem(0);
     });
   }
@@ -58,7 +60,7 @@ class _AnimatedChatListState extends State<AnimatedChatList> {
       _messages.removeAt(index);
       _listKey.currentState?.removeItem(
         index,
-            (context, animation) => _buildMessage(removedMessage, animation),
+        (context, animation) => buildMessage(removedMessage, animation),
       );
     });
   }

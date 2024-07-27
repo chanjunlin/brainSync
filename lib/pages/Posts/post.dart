@@ -68,7 +68,7 @@ class _PostsPageState extends State<PostsPage> {
       } else {
         filteredModules = modules
             .where((module) =>
-                module.code.toLowerCase().contains(query.toLowerCase()))
+            module.code.toLowerCase().contains(query.toLowerCase()))
             .toList();
       }
     });
@@ -133,7 +133,7 @@ class _PostsPageState extends State<PostsPage> {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
         backgroundColor: Colors.red[300],
-        padding: const EdgeInsets.symmetric(vertical: 14),
+        padding: EdgeInsets.symmetric(vertical: MediaQuery.of(context).size.height * 0.02),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
         ),
@@ -151,10 +151,10 @@ class _PostsPageState extends State<PostsPage> {
           },
         );
       },
-      child: const Text(
+      child: Text(
         'Discard Post',
         style: TextStyle(
-          fontSize: 16,
+          fontSize: MediaQuery.of(context).size.width * 0.04,
           color: Colors.white,
         ),
       ),
@@ -165,16 +165,16 @@ class _PostsPageState extends State<PostsPage> {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
         backgroundColor: Colors.brown[300],
-        padding: const EdgeInsets.symmetric(vertical: 14),
+        padding: EdgeInsets.symmetric(vertical: MediaQuery.of(context).size.height * 0.02),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
         ),
       ),
       onPressed: createPost,
-      child: const Text(
+      child: Text(
         'Create Post',
         style: TextStyle(
-          fontSize: 16,
+          fontSize: MediaQuery.of(context).size.width * 0.04,
           color: Colors.white,
         ),
       ),
@@ -183,115 +183,112 @@ class _PostsPageState extends State<PostsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: const Text(
+        title: Text(
           "Create a Post!",
           style: TextStyle(
             color: Colors.white,
+            fontSize: screenWidth * 0.05,
           ),
         ),
         backgroundColor: Colors.brown[300],
         elevation: 0,
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(screenWidth * 0.04),
         child: Form(
           key: _formKey,
-          child: SingleChildScrollView(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                maxHeight: MediaQuery.of(context).size.height - 150,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "Module Code",
+                style: TextStyle(
+                  fontSize: screenWidth * 0.05,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.brown[800],
+                ),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              SizedBox(height: screenHeight * 0.02),
+              CustomSearchBar(
+                key: const Key("ModuleCodeField"),
+                controller: titleController,
+                onChanged: (value) {
+                  filterModules(value);
+                },
+                suggestions: filteredModules,
+                onSuggestionSelected: handleSuggestionSelected,
+              ),
+              SizedBox(height: screenHeight * 0.03),
+              Text(
+                "Content",
+                style: TextStyle(
+                  fontSize: screenWidth * 0.05,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.brown[800],
+                ),
+              ),
+              SizedBox(height: screenHeight * 0.02),
+              TextFormField(
+                key: const Key("ContentField"),
+                cursorColor: Colors.brown[300],
+                controller: contentController,
+                decoration: InputDecoration(
+                  labelText: 'Content',
+                  labelStyle: TextStyle(
+                    color: Colors.brown[800],
+                  ),
+                  prefixIcon: Icon(
+                    Icons.text_fields,
+                    color: Colors.brown[300],
+                  ),
+                  focusColor: Colors.brown[300],
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.brown[300]!),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.brown[300]!),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  border: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.brown[300]!),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                maxLines: null,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter content';
+                  }
+                  return null;
+                },
+              ),
+              Spacer(),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    "Module Code",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.brown[800],
+                  Expanded(
+                    child: Padding(
+                      padding: EdgeInsets.only(right: screenWidth * 0.02),
+                      child: discardButton(),
                     ),
                   ),
-                  const SizedBox(height: 10),
-                  CustomSearchBar(
-                    key: const Key("ModuleCodeField"),
-                    controller: titleController,
-                    onChanged: (value) {
-                      filterModules(value);
-                    },
-                    suggestions: filteredModules,
-                    onSuggestionSelected: handleSuggestionSelected,
-                  ),
-                  const SizedBox(height: 30),
-                  Text(
-                    "Content",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.brown[800],
+                  Expanded(
+                    child: Padding(
+                      padding: EdgeInsets.only(left: screenWidth * 0.02),
+                      child: sendButton(),
                     ),
-                  ),
-                  const SizedBox(height: 10),
-                  TextFormField(
-                    key: const Key("ContentField"),
-                    cursorColor: Colors.brown[300],
-                    controller: contentController,
-                    decoration: InputDecoration(
-                      labelText: 'Content',
-                      labelStyle: TextStyle(
-                        color: Colors.brown[800],
-                      ),
-                      prefixIcon: Icon(
-                        Icons.text_fields,
-                        color: Colors.brown[300],
-                      ),
-                      focusColor: Colors.brown[300],
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.brown[300]!),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.brown[300]!),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      border: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.brown[300]!),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    maxLines: null,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter content';
-                      }
-                      return null;
-                    },
-                  ),
-                  const Spacer(),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.only(right: 8.0),
-                          child: discardButton(),
-                        ),
-                      ),
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 8.0),
-                          child: sendButton(),
-                        ),
-                      ),
-                    ],
                   ),
                 ],
               ),
-            ),
+            ],
           ),
         ),
       ),

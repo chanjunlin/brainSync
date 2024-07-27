@@ -1,11 +1,12 @@
+import 'package:brainsync/common_widgets/custom_form_field.dart';
 import 'package:brainsync/pages/form/signup_form.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
-import 'package:get_it/get_it.dart';
+import 'package:brainsync/services/alert_service.dart';
 import 'package:brainsync/services/auth_service.dart';
 import 'package:brainsync/services/database_service.dart';
 import 'package:brainsync/services/navigation_service.dart';
-import 'package:brainsync/services/alert_service.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:get_it/get_it.dart';
 import 'package:mockito/mockito.dart';
 
 class MockAlertService extends Mock implements AlertService {}
@@ -22,6 +23,7 @@ void main() {
     late MockAlertService alertService;
     late MockDatabaseService databaseService;
     late MockNavigationService navigationService;
+    late Widget registerPage;
 
     setUp(() {
       authService = MockAuthService();
@@ -40,38 +42,37 @@ void main() {
       GetIt.instance.reset();
     });
 
-    tearDown(() {
-      GetIt.instance.reset();
+    testWidgets('Form fields and SignUp button are rendered correctly',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(body: SignUpForm()),
+        ),
+      );
+
+      expect(find.byType(CustomFormField), findsNWidgets(5));
+      expect(find.byType(DropdownButtonFormField<String>), findsOneWidget);
+      expect(find.byType(ElevatedButton), findsOneWidget);
+      expect(find.text('Sign Up'), findsOneWidget);
     });
 
-    testWidgets("Valid fields -> Account created", (WidgetTester tester) async {
-      bool isLoading = false;
-      await tester.pumpWidget(const MaterialApp(
-        home: Scaffold(body: SignUpForm()),
-      ));
+    testWidgets('Empty form fields',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(body: SignUpForm()),
+        ),
+      );
 
-      await tester.pump();
+      await tester.tap(find.byKey(const Key('signupbutton')));
+      await tester.pumpAndSettle();
 
-      var firstNameField = find.byKey(const Key('firstNameField'));
-      var lastNameField = find.byKey(const Key('lastNameField'));
-      var emailField = find.byKey(const Key('emailField'));
-      var passwordField = find.byKey(const Key('passwordField'));
-      var repasswordField = find.byKey(const Key('repasswordField'));
-      var yearField = find.byKey(const Key('yearField'));
-      var button = find.byKey(const Key('signupbutton'));
-
-      expect(firstNameField, findsOneWidget);
-      expect(lastNameField, findsOneWidget);
-      expect(emailField, findsOneWidget);
-      expect(passwordField, findsOneWidget);
-      expect(repasswordField, findsOneWidget);
-      expect(yearField, findsOneWidget);
-      expect(button, findsOneWidget);
-
-      expect(
-          await authService.register(
-              "JunLin", "Test123!", "e1115706@u.nus.edu"),
-          'true');
+      expect(find.text('Name is required'), findsOneWidget);
+      expect(find.text('Name is required '), findsOneWidget);
+      expect(find.text('Email is required'), findsOneWidget);
+      expect(find.text('Password is required '), findsOneWidget);
+      expect(find.text('Please confirm your password'), findsOneWidget);
+      expect(find.text('Please select a year'), findsOneWidget);
     });
   });
 }

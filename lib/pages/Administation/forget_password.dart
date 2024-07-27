@@ -17,7 +17,7 @@ class _ForgetPasswordState extends State<ForgetPassword> {
   final GetIt _getIt = GetIt.instance;
   final TextEditingController _emailController = TextEditingController();
   final _authService = GetIt.instance.get<AuthService>();
-  
+
   late AlertService _alertService;
   late NavigationService _navigationService;
 
@@ -47,14 +47,21 @@ class _ForgetPasswordState extends State<ForgetPassword> {
 
   Widget sendButton() {
     return SizedBox(
-      width: MediaQuery.sizeOf(context).width,
-      child: MaterialButton(
-        color: Colors.brown[300],
+      width: double.infinity,
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.brown[300],
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
         onPressed: sendPasswordResetEmail,
         child: const Text(
           'Continue',
           style: TextStyle(
             color: Colors.white,
+            fontSize: 16,
           ),
         ),
       ),
@@ -63,12 +70,21 @@ class _ForgetPasswordState extends State<ForgetPassword> {
 
   Widget entryField(String title, TextEditingController controller,
       {IconData? prefixIcon}) {
-    return TextField(
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: TextField(
         controller: controller,
         decoration: InputDecoration(
           labelText: title,
           prefixIcon: prefixIcon != null ? Icon(prefixIcon) : null,
-        ));
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+        keyboardType: TextInputType.emailAddress,
+        autocorrect: false,
+      ),
+    );
   }
 
   @override
@@ -88,7 +104,9 @@ class _ForgetPasswordState extends State<ForgetPassword> {
       ),
       body: SingleChildScrollView(
         child: Container(
-          width: double.infinity,
+          constraints: BoxConstraints(
+            maxWidth: MediaQuery.of(context).size.width * 0.9,
+          ),
           padding: const EdgeInsets.all(20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -99,21 +117,23 @@ class _ForgetPasswordState extends State<ForgetPassword> {
                 "Forgot Password?",
                 style: TextStyle(
                   fontSize: 30,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 20),
               const Text(
-                "Enter you email below to reset your password",
+                "Enter your email below to reset your password",
                 style: TextStyle(
                   color: Color.fromARGB(255, 79, 78, 78),
                 ),
+                textAlign: TextAlign.center,
               ),
               const SizedBox(height: 20),
               Image.asset(
                 "assets/img/lock.png",
-                alignment: Alignment.topCenter,
+                height: 150,
               ),
-              entryField("email", _emailController, prefixIcon: Icons.email),
+              entryField("Email", _emailController, prefixIcon: Icons.email),
               const SizedBox(height: 30),
               sendButton(),
             ],

@@ -93,12 +93,12 @@ class _GroupChatPageState extends State<GroupChatPage> {
             _navigationService.push(
               MaterialPageRoute(
                 builder: (context) {
-                  return FriendsChats(tabNumber: 1);
+                  return const FriendsChats(tabNumber: 1);
                 },
               ),
             );
           },
-          icon: Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back),
         ),
       ),
       body: buildUI(),

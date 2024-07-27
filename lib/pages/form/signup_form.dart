@@ -20,7 +20,13 @@ class SignUpForm extends StatefulWidget {
 }
 
 class SignUpFormState extends State<SignUpForm> {
-  String? bio, firstName, lastName, email, password, repassword, selectedYear;
+  final TextEditingController firstName = TextEditingController();
+  final TextEditingController lastName = TextEditingController();
+  final TextEditingController email = TextEditingController();
+  final TextEditingController password = TextEditingController();
+  final TextEditingController repassword = TextEditingController();
+
+  String? bio, selectedYear;
   List<String>? chats,
       friendList,
       friendReqList,
@@ -38,6 +44,8 @@ class SignUpFormState extends State<SignUpForm> {
   late DatabaseService _databaseService;
 
   bool isLoading = false;
+  bool obscurePassword = true;
+  bool obscureRepassword = true;
 
   @override
   void initState() {
@@ -61,78 +69,100 @@ class SignUpFormState extends State<SignUpForm> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                Expanded(
-                  child: CustomFormField(
-                    key: const Key('firstNameField'),
-                    labelText: "First Name",
-                    hintText: "First Name",
-                    height: MediaQuery.sizeOf(context).height * 0.09,
-                    validationRegEx: NAME_VALIDATION_REGEX,
-                    onSaved: (value) {
-                      setState(() {
-                        firstName = value?.trim();
-                      });
-                    },
-                  ),
+            Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+              Expanded(
+                child: CustomFormField(
+                  key: const Key('firstNameField'),
+                  labelText: "First Name",
+                  hintText: "First Name",
+                  height: MediaQuery.sizeOf(context).height * 0.09,
+                  validator: (value) => validateName(value?.trim()),
+                  onSaved: (value) {
+                    setState(() {
+                      firstName.text = value!.trim();
+                    });
+                  },
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: CustomFormField(
-                    key: const Key('lastNameField'),
-                    labelText: "Last Name",
-                    hintText: "Last Name",
-                    height: MediaQuery.sizeOf(context).height * 0.09,
-                    validationRegEx: NAME_VALIDATION_REGEX,
-                    onSaved: (value) {
-                      setState(() {
-                        lastName = value?.trim();
-                      });
-                    },
-                  ),
+              ),
+              const SizedBox(width: 15),
+              Expanded(
+                child: CustomFormField(
+                  key: const Key('lastNameField'),
+                  labelText: "Last Name",
+                  hintText: "Last Name",
+                  height: MediaQuery.sizeOf(context).height * 0.09,
+                  validator: (value) => validateName(value?.trim()),
+                  onSaved: (value) {
+                    setState(() {
+                      lastName.text = value!.trim();
+                    });
+                  },
                 ),
-              ],
-            ),
+              ),
+            ]),
+            const SizedBox(height: 15),
             CustomFormField(
               key: const Key('emailField'),
               labelText: "Email",
               hintText: "Email",
               height: MediaQuery.sizeOf(context).height * 0.09,
-              validationRegEx: EMAIL_VALIDATION_REGEX,
+              validator: (value) => validateEmail(value?.trim()),
               obscureText: false,
               onSaved: (value) {
                 setState(() {
-                  email = value?.trim();
+                  email.text = value!.trim();
                 });
               },
             ),
+            const SizedBox(height: 15),
             CustomFormField(
               key: const Key('passwordField'),
               labelText: "Password",
               hintText: "Password",
               height: MediaQuery.sizeOf(context).height * 0.09,
-              validationRegEx: PASSWORD_VALIDATION_REGEX,
-              obscureText: true,
+              validator: (value) => validatePassword(value?.trim()),
+              obscureText: obscurePassword,
+              suffixIcon: IconButton(
+                icon: Icon(
+                  obscurePassword ? Icons.visibility_off : Icons.visibility,
+                ),
+                onPressed: () {
+                  setState(() {
+                    obscurePassword = !obscurePassword;
+                  });
+                },
+              ),
               onSaved: (value) {
                 setState(() {
-                  password = value?.trim();
+                  password.text = value!.trim();
                 });
               },
             ),
+            const SizedBox(height: 15),
             CustomFormField(
               key: const Key('repasswordField'),
               labelText: "Retype Password",
               hintText: "Retype Password",
               height: MediaQuery.sizeOf(context).height * 0.09,
-              validationRegEx: PASSWORD_VALIDATION_REGEX,
-              obscureText: true,
+              validator: (value) => validatePassword(value?.trim()),
+              obscureText: obscureRepassword,
+              suffixIcon: IconButton(
+                icon: Icon(
+                  obscureRepassword ? Icons.visibility_off : Icons.visibility,
+                ),
+                onPressed: () {
+                  setState(() {
+                    obscureRepassword = !obscureRepassword;
+                  });
+                },
+              ),
               onSaved: (value) {
                 setState(() {
-                  repassword = value?.trim();
+                  repassword.text = value!.trim();
                 });
               },
             ),
+            const SizedBox(height: 15),
             DropdownButtonFormField<String>(
               key: const Key('yearField'),
               decoration: InputDecoration(
@@ -200,18 +230,18 @@ class SignUpFormState extends State<SignUpForm> {
                         try {
                           if (_signupFormKey.currentState!.validate()) {
                             _signupFormKey.currentState!.save();
-                            if (repassword == password) {
+                            if (repassword.text == password.text) {
                               String result = await _authService.register(
-                                firstName!,
-                                password!,
-                                email!,
+                                firstName.text,
+                                password.text,
+                                email.text,
                               );
                               if (result == "true") {
                                 await _databaseService.createUserProfile(
                                   userProfile: UserProfile(
                                     bio: bio,
-                                    firstName: firstName,
-                                    lastName: lastName,
+                                    firstName: firstName.text,
+                                    lastName: lastName.text,
                                     pfpURL: PLACEHOLDER_PFP,
                                     profileCoverURL: PLACEHOLDER_PROFILE_COVER,
                                     uid: _authService.user!.uid,

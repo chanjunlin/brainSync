@@ -16,7 +16,7 @@ import '../../../main.dart';
 import '../../../services/database_service.dart';
 import '../../../services/media_service.dart';
 import '../../../services/storage_service.dart';
-import '../../Profile/visiting_profile.dart';
+import '../../Profile/visiting_profile/visiting_profile.dart';
 import 'group_chat_details.dart';
 
 class EditGroupChatDetails extends StatefulWidget {

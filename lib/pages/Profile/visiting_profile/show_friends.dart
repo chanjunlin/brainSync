@@ -1,27 +1,37 @@
-import 'package:brainsync/common_widgets/chat_tile.dart';
-import 'package:brainsync/const.dart';
-import 'package:brainsync/model/user_profile.dart';
-import 'package:brainsync/pages/Profile/visiting_profile.dart';
-import 'package:brainsync/services/database_service.dart';
-import 'package:brainsync/services/navigation_service.dart';
+import 'package:brainsync/pages/Profile/visiting_profile/visiting_profile.dart';
+import 'package:brainsync/services/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
-class ShowMyFriends extends StatefulWidget {
-  const ShowMyFriends({super.key});
+import '../../../common_widgets/chat_tile.dart';
+import '../../../const.dart';
+import '../../../model/user_profile.dart';
+import '../../../services/database_service.dart';
+import '../../../services/navigation_service.dart';
+
+class ShowUserFriends extends StatefulWidget {
+  final String userID;
+
+  const ShowUserFriends({
+    super.key,
+    required this.userID,
+  });
 
   @override
-  State<ShowMyFriends> createState() => _ShowMyFriendsState();
+  State<ShowUserFriends> createState() => _ShowUserFriendsState();
 }
 
-class _ShowMyFriendsState extends State<ShowMyFriends> {
+class _ShowUserFriendsState extends State<ShowUserFriends> {
   final GetIt _getIt = GetIt.instance;
+
+  late AuthService _authService;
   late DatabaseService _databaseService;
   late NavigationService _navigationService;
 
   @override
   void initState() {
     super.initState();
+    _authService = _getIt.get<AuthService>();
     _databaseService = _getIt.get<DatabaseService>();
     _navigationService = _getIt.get<NavigationService>();
   }
@@ -29,7 +39,8 @@ class _ShowMyFriendsState extends State<ShowMyFriends> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<List<UserProfile?>>(
-      future: _databaseService.getFriends(),
+      future: _databaseService.getMutualFriends(
+          _authService.currentUser!.uid, widget.userID),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -38,24 +49,24 @@ class _ShowMyFriendsState extends State<ShowMyFriends> {
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
           return Center(
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Image.asset("assets/img/sad_brain.png"),
-                const SizedBox(height: 16),
-                Text(
-                  'No friends found',
-                  style: TextStyle(
-                    fontSize: 20,
-                    color: Colors.brown[700],
-                  ),
+                Image.asset(
+                  "assets/img/sad_brain.png",
+                  height: MediaQuery.of(context).size.height * 0.3,
+                  width: MediaQuery.of(context).size.width * 0.5,
+                  fit: BoxFit.cover,
                 ),
+                const SizedBox(height: 15),
+                const Text('No mutual friends')
               ],
             ),
           );
         } else {
           return ListView.builder(
-            padding: EdgeInsets.zero,
+            padding: EdgeInsets.symmetric(
+              horizontal: MediaQuery.of(context).size.width *
+                  0.02,
+            ),
             itemCount: snapshot.data!.length,
             itemBuilder: (context, index) {
               UserProfile? friend = snapshot.data![index];

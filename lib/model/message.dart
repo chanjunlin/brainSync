@@ -5,6 +5,7 @@ enum MessageType { Text, Image }
 class Message {
   String? senderID;
   String? content;
+  String? key;
   MessageType? messageType;
   Timestamp? sentAt;
 
@@ -13,9 +14,11 @@ class Message {
     required this.content,
     required this.messageType,
     required this.sentAt,
+    this.key,
   });
 
   Message.fromJson(Map<String, dynamic> json) {
+    key = json['key'];
     senderID = json['senderID'];
     content = json['content'];
     sentAt = json['sentAt'] != null
@@ -28,6 +31,7 @@ class Message {
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
+    data['key'] = key;
     data['senderID'] = senderID;
     data['content'] = content;
     data['sentAt'] = sentAt;

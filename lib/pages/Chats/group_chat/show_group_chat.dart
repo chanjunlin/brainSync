@@ -51,92 +51,95 @@ class _ShowGroupChatState extends State<ShowGroupChat> {
       backgroundColor: Colors.white,
       body: chats != null
           ? chats!.isEmpty
-          ? Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Image.asset("assets/img/meditating_brain.png"),
-            const SizedBox(height: 16),
-            Text(
-              'No active group chats',
-              style: TextStyle(
-                fontSize: 20,
-                color: Colors.brown[700],
-              ),
-            ),
-          ],
-        ),
-      )
-          : ListView.builder(
-        itemCount: chats!.length,
-        itemBuilder: (context, index) {
-          String groupId = chats![index];
-          return FutureBuilder<DocumentSnapshot?>(
-            future: _databaseService.getGroupChatDetails(groupId),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState ==
-                  ConnectionState.waiting) {
-                return const SizedBox.shrink();
-              } else if (snapshot.hasError) {
-                return Center(
-                  child: Text('Error: ${snapshot.error}'),
-                );
-              } else if (snapshot.hasData && snapshot.data != null) {
-                DocumentSnapshot<Object?> chatDetails =
-                snapshot.data!;
-                String chatSubtitle = chatSubtitles[groupId] ?? "";
-                String groupName = chatDetails.get("groupName");
-                String groupPicture = chatDetails.get("groupPicture") ?? PLACEHOLDER_PFP;
-                return ListTile(
-                  leading: CircleAvatar(
-                    radius: 20,
-                    backgroundImage: NetworkImage(groupPicture,
-                    ),
-                  ),
-                  title: Text(groupName),
-                  subtitle: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Expanded(
-                        child: Text(
-                          chatSubtitle,
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
-                        ),
-                      ),
+                      Image.asset("assets/img/meditating_brain.png"),
+                      const SizedBox(height: 16),
                       Text(
-                        getFormattedTime(
-                          chatDetails.get('lastMessage')?['sentAt'],
-                        ),
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey,
+                        'No active group chats',
+                        style: TextStyle(
+                          fontSize: 20,
+                          color: Colors.brown[700],
                         ),
                       ),
                     ],
                   ),
-                  onTap: () {
-                    _navigationService.push(
-                      MaterialPageRoute(
-                        builder: (context) {
-                          return GroupChatPage(
-                            groupID: groupId,
-                            groupName: groupName,
+                )
+              : ListView.builder(
+                  itemCount: chats!.length,
+                  itemBuilder: (context, index) {
+                    String groupId = chats![index];
+                    return FutureBuilder<DocumentSnapshot?>(
+                      future: _databaseService.getGroupChatDetails(groupId),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const SizedBox.shrink();
+                        } else if (snapshot.hasError) {
+                          return Center(
+                            child: Text('Error: ${snapshot.error}'),
                           );
-                        },
-                      ),
+                        } else if (snapshot.hasData && snapshot.data != null) {
+                          DocumentSnapshot<Object?> chatDetails =
+                              snapshot.data!;
+                          String chatSubtitle = chatSubtitles[groupId] ?? "";
+                          String groupName = chatDetails.get("groupName");
+                          String groupPicture =
+                              chatDetails.get("groupPicture") ??
+                                  PLACEHOLDER_PFP;
+                          return ListTile(
+                            leading: CircleAvatar(
+                              radius: 20,
+                              backgroundImage: NetworkImage(
+                                groupPicture,
+                              ),
+                            ),
+                            title: Text(groupName),
+                            subtitle: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    chatSubtitle,
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
+                                  ),
+                                ),
+                                Text(
+                                  getFormattedTime(
+                                    chatDetails.get('lastMessage')?['sentAt'],
+                                  ),
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            onTap: () {
+                              _navigationService.push(
+                                MaterialPageRoute(
+                                  builder: (context) {
+                                    return GroupChatPage(
+                                      groupID: groupId,
+                                      groupName: groupName,
+                                    );
+                                  },
+                                ),
+                              );
+                            },
+                          );
+                        } else {
+                          return const Center(
+                              child: Text('Chat details not found'));
+                        }
+                      },
                     );
                   },
-                );
-              } else {
-                return const Center(
-                    child: Text('Chat details not found'));
-              }
-            },
-          );
-        },
-      )
+                )
           : const Center(child: CircularProgressIndicator()),
     );
   }
@@ -157,18 +160,18 @@ class _ShowGroupChatState extends State<ShowGroupChat> {
 
         profileSubscription =
             userProfile.reference.snapshots().listen((updatedSnapshot) {
-              if (updatedSnapshot.exists) {
-                if (mounted) {
-                  setState(() {
-                    firstName = updatedSnapshot.get('firstName') ?? 'Name';
-                    lastName = updatedSnapshot.get('lastName') ?? 'Name';
-                    chats =
+          if (updatedSnapshot.exists) {
+            if (mounted) {
+              setState(() {
+                firstName = updatedSnapshot.get('firstName') ?? 'Name';
+                lastName = updatedSnapshot.get('lastName') ?? 'Name';
+                chats =
                     List<String>.from(updatedSnapshot.get("groupChats") ?? []);
-                  });
-                  sortChatsByLatestMessage();
-                }
-              }
-            });
+              });
+              sortChatsByLatestMessage();
+            }
+          }
+        });
       }
     } catch (e) {
       rethrow;
@@ -178,39 +181,39 @@ class _ShowGroupChatState extends State<ShowGroupChat> {
   Future<void> listenToChats() async {
     chatsSubscription =
         _databaseService.getAllUserGroupChatsStream().listen((querySnapshot) {
-          if (querySnapshot.docs.isNotEmpty) {
-            if (mounted) {
-              setState(() {
-                for (var doc in querySnapshot.docs) {
-                  String groupChatId = doc.id;
-                  dynamic lastMessageData = doc.get('lastMessage');
-                  Timestamp? lastMessageTimestamp =
+      if (querySnapshot.docs.isNotEmpty) {
+        if (mounted) {
+          setState(() {
+            for (var doc in querySnapshot.docs) {
+              String groupChatId = doc.id;
+              dynamic lastMessageData = doc.get('lastMessage');
+              Timestamp? lastMessageTimestamp =
                   lastMessageData != null ? lastMessageData['sentAt'] : null;
-                  if (lastMessageTimestamp != null) {
-                    if (lastMessageTimestamps[groupChatId] == null ||
-                        lastMessageTimestamps[groupChatId]!
+              if (lastMessageTimestamp != null) {
+                if (lastMessageTimestamps[groupChatId] == null ||
+                    lastMessageTimestamps[groupChatId]!
                             .compareTo(lastMessageTimestamp) <
-                            0) {
-                      chats!.remove(groupChatId);
-                      chats!.add(groupChatId);
-                      lastMessageTimestamps[groupChatId] = lastMessageTimestamp;
-                      updateChatSubtitle(groupChatId, lastMessageData['content'],
-                          lastMessageTimestamp);
-                    }
-                  }
+                        0) {
+                  chats!.remove(groupChatId);
+                  chats!.add(groupChatId);
+                  lastMessageTimestamps[groupChatId] = lastMessageTimestamp;
+                  updateChatSubtitle(groupChatId, lastMessageData['content'],
+                      lastMessageTimestamp);
                 }
+              }
+            }
 
-                sortChatsByLatestMessage();
-              });
-            }
-          } else {
-            if (mounted) {
-              setState(() {
-                chats = [];
-              });
-            }
-          }
-        });
+            sortChatsByLatestMessage();
+          });
+        }
+      } else {
+        if (mounted) {
+          setState(() {
+            chats = [];
+          });
+        }
+      }
+    });
   }
 
   String getFormattedTime(Timestamp? timestamp) {
@@ -254,13 +257,25 @@ class _ShowGroupChatState extends State<ShowGroupChat> {
   }
 
   void sortChatsByLatestMessage() {
-    if (chats != null && chats!.isNotEmpty) {
+    if (chats != null && lastMessageTimestamps.isNotEmpty) {
       chats!.sort((a, b) {
-        Timestamp? aTimestamp = lastMessageTimestamps[a];
-        Timestamp? bTimestamp = lastMessageTimestamps[b];
-        if (aTimestamp == null || bTimestamp == null) return 0;
-        return bTimestamp.compareTo(aTimestamp);
+        Timestamp? timestampA = lastMessageTimestamps[a];
+        Timestamp? timestampB = lastMessageTimestamps[b];
+        if (timestampA == null && timestampB == null) {
+          return 0;
+        } else if (timestampA == null) {
+          return 1;
+        } else if (timestampB == null) {
+          return -1;
+        } else {
+          return timestampB.compareTo(timestampA);
+        }
       });
+      if (mounted) {
+        setState(() {
+          chats = chats;
+        });
+      }
     }
   }
 

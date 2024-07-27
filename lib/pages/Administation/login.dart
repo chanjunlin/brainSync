@@ -36,10 +36,11 @@ class _LoginPageState extends State<LoginPage> {
     return SafeArea(
       child: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          padding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width * 0.05),
           child: Column(
             children: [
               headerText(),
+              SizedBox(height: MediaQuery.of(context).size.height * 0.02),
               LoginForm(
                 setLoading: (bool isLoading) {
                   setState(() {
@@ -63,7 +64,7 @@ class _LoginPageState extends State<LoginPage> {
 
   Widget headerText() {
     return SizedBox(
-      width: MediaQuery.sizeOf(context).width,
+      width: MediaQuery.of(context).size.width,
       child: Column(
         mainAxisSize: MainAxisSize.max,
         mainAxisAlignment: MainAxisAlignment.center,
@@ -72,7 +73,7 @@ class _LoginPageState extends State<LoginPage> {
           Text(
             "Welcome Back!",
             style: TextStyle(
-              fontSize: 30,
+              fontSize: MediaQuery.of(context).size.width * 0.08,
               fontWeight: FontWeight.bold,
               color: Colors.brown[800],
             ),
@@ -80,11 +81,14 @@ class _LoginPageState extends State<LoginPage> {
           Text(
             "Please sign in to continue",
             style: TextStyle(
+              fontSize: MediaQuery.of(context).size.width * 0.04,
               color: Colors.brown[800],
             ),
           ),
+          SizedBox(height: MediaQuery.of(context).size.height * 0.01),
           Image.asset(
             "assets/img/study.png",
+            width: MediaQuery.of(context).size.width * 1,
             alignment: Alignment.topCenter,
             fit: BoxFit.fitWidth,
           ),
@@ -94,26 +98,35 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Widget createAnAccount() {
-    return Row(
-      mainAxisSize: MainAxisSize.max,
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Text(
-          'Don\'t have an account? ',
-          style: TextStyle(color: Colors.brown[800]),
-        ),
-        TextButton(
-          child: Text(
-            "Sign Up",
+    return Padding(
+      padding: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.02),
+      child: Row(
+        mainAxisSize: MainAxisSize.max,
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(
+            'Don\'t have an account? ',
             style: TextStyle(
-                fontWeight: FontWeight.w800, color: Colors.brown[300]),
+              color: Colors.brown[800],
+              fontSize: MediaQuery.of(context).size.width * 0.04,
+            ),
           ),
-          onPressed: () async {
-            _navigationService.pushName("/register");
-          },
-        )
-      ],
+          TextButton(
+            child: Text(
+              "Sign Up",
+              style: TextStyle(
+                fontWeight: FontWeight.w800,
+                color: Colors.brown[300],
+                fontSize: MediaQuery.of(context).size.width * 0.04,
+              ),
+            ),
+            onPressed: () async {
+              _navigationService.pushName("/register");
+            },
+          ),
+        ],
+      ),
     );
   }
 

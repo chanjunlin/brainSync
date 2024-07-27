@@ -41,12 +41,12 @@ class _BookmarkedPostsState extends State<BookmarkedPosts> {
   Future<void> loadBookmarks() async {
     try {
       final userRef =
-          FirebaseFirestore.instance.collection('users').doc(userID);
+      FirebaseFirestore.instance.collection('users').doc(userID);
       final userSnapshot = await userRef.get();
 
       if (userSnapshot.exists) {
         List<String> bookmarks =
-            List<String>.from(userSnapshot.data()?['bookmarks'] ?? []);
+        List<String>.from(userSnapshot.data()?['bookmarks'] ?? []);
         setState(() {
           _bookmarks.clear();
           for (var postId in bookmarks) {
@@ -68,13 +68,16 @@ class _BookmarkedPostsState extends State<BookmarkedPosts> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isLargeScreen = screenWidth > 600;
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.brown[300],
-        title: const Text(
+        title: Text(
           "Bookmarked posts",
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: Colors.white, fontSize: isLargeScreen ? 24 : 20),
         ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -105,7 +108,7 @@ class _BookmarkedPostsState extends State<BookmarkedPosts> {
                   Text(
                     'No bookmarked posts',
                     style: TextStyle(
-                      fontSize: 20,
+                      fontSize: isLargeScreen ? 24 : 20,
                       color: Colors.brown[700],
                     ),
                   ),
