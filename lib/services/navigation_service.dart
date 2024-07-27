@@ -1,7 +1,6 @@
 import 'package:brainsync/pages/Administation/login.dart';
 import 'package:brainsync/pages/Administation/register.dart';
-import 'package:brainsync/pages/Chats/create_group_chat.dart';
-import 'package:brainsync/pages/Chats/create_private_chat.dart';
+
 import 'package:brainsync/pages/Posts/bookmarked_posts.dart';
 import 'package:brainsync/pages/Profile/user_profile/edit_profile.dart';
 import 'package:brainsync/pages/Profile/user_profile/profile.dart';
@@ -11,6 +10,8 @@ import 'package:brainsync/splash_screen.dart';
 import 'package:flutter/material.dart';
 
 import '../pages/Chats/friends_chat.dart';
+import '../pages/Chats/group_chat/create_group_chat.dart';
+import '../pages/Chats/private_chat/create_private_chat.dart';
 import '../pages/Modules/all_mods.dart';
 import '../pages/Posts/post.dart';
 
