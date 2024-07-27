@@ -99,7 +99,7 @@ flutter:
   assets:
     - assets/img/
     - assets/img/sad_brain.png
-#    - assets/img/brainsync.png
+    - assets/img/brainsync.png
 
 
 

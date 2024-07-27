@@ -135,7 +135,9 @@ class _GroupChatCreationState extends State<GroupChatCreation> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.brown[300],
               ),
-              child: const Text('Create Group Chat'),
+              child: const Text('Create Group Chat', style: TextStyle(
+                color: Colors.white,
+              ),),
             ),
           ],
         ),

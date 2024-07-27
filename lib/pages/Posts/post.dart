@@ -204,91 +204,98 @@ class _PostsPageState extends State<PostsPage> {
         padding: EdgeInsets.all(screenWidth * 0.04),
         child: Form(
           key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "Module Code",
-                style: TextStyle(
-                  fontSize: screenWidth * 0.05,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.brown[800],
-                ),
+          child: SingleChildScrollView(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height - 150,
               ),
-              SizedBox(height: screenHeight * 0.02),
-              CustomSearchBar(
-                key: const Key("ModuleCodeField"),
-                controller: titleController,
-                onChanged: (value) {
-                  filterModules(value);
-                },
-                suggestions: filteredModules,
-                onSuggestionSelected: handleSuggestionSelected,
-              ),
-              SizedBox(height: screenHeight * 0.03),
-              Text(
-                "Content",
-                style: TextStyle(
-                  fontSize: screenWidth * 0.05,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.brown[800],
-                ),
-              ),
-              SizedBox(height: screenHeight * 0.02),
-              TextFormField(
-                key: const Key("ContentField"),
-                cursorColor: Colors.brown[300],
-                controller: contentController,
-                decoration: InputDecoration(
-                  labelText: 'Content',
-                  labelStyle: TextStyle(
-                    color: Colors.brown[800],
-                  ),
-                  prefixIcon: Icon(
-                    Icons.text_fields,
-                    color: Colors.brown[300],
-                  ),
-                  focusColor: Colors.brown[300],
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.brown[300]!),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.brown[300]!),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  border: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.brown[300]!),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                maxLines: null,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter content';
-                  }
-                  return null;
-                },
-              ),
-              Spacer(),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: Padding(
-                      padding: EdgeInsets.only(right: screenWidth * 0.02),
-                      child: discardButton(),
+                  Text(
+                    "Module Code",
+                    style: TextStyle(
+                      fontSize: screenWidth * 0.05,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.brown[800],
                     ),
                   ),
-                  Expanded(
-                    child: Padding(
-                      padding: EdgeInsets.only(left: screenWidth * 0.02),
-                      child: sendButton(),
+                  SizedBox(height: screenHeight * 0.02),
+                  CustomSearchBar(
+                    key: const Key("ModuleCodeField"),
+                    controller: titleController,
+                    onChanged: (value) {
+                      filterModules(value);
+                    },
+                    suggestions: filteredModules,
+                    onSuggestionSelected: handleSuggestionSelected,
+                  ),
+                  SizedBox(height: screenHeight * 0.03),
+                  Text(
+                    "Content",
+                    style: TextStyle(
+                      fontSize: screenWidth * 0.05,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.brown[800],
                     ),
+                  ),
+                  SizedBox(height: screenHeight * 0.02),
+                  TextFormField(
+                    key: const Key("ContentField"),
+                    cursorColor: Colors.brown[300],
+                    controller: contentController,
+                    decoration: InputDecoration(
+                      labelText: 'Content',
+                      labelStyle: TextStyle(
+                        color: Colors.brown[800],
+                      ),
+                      prefixIcon: Icon(
+                        Icons.text_fields,
+                        color: Colors.brown[300],
+                      ),
+                      focusColor: Colors.brown[300],
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.brown[300]!),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.brown[300]!),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      border: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.brown[300]!),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    maxLines: null,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter content';
+                      }
+                      return null;
+                    },
+                  ),
+                  Spacer(),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Padding(
+                          padding: EdgeInsets.only(right: screenWidth * 0.02),
+                          child: discardButton(),
+                        ),
+                      ),
+                      Expanded(
+                        child: Padding(
+                          padding: EdgeInsets.only(left: screenWidth * 0.02),
+                          child: sendButton(),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ],
+            ),
           ),
         ),
       ),

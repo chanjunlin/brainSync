@@ -8,7 +8,6 @@ import '../../const.dart';
 import '../../model/user_profile.dart';
 import '../../services/database_service.dart';
 import '../../services/navigation_service.dart';
-import '../Profile/visiting_profile.dart';
 
 class PrivateChat extends StatefulWidget {
   @override

@@ -1,5 +1,5 @@
 import 'package:brainsync/model/module.dart';
-import 'package:brainsync/pages/Profile/profile.dart';
+import 'package:brainsync/pages/Profile/user_profile/profile.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
