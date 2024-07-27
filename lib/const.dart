@@ -14,17 +14,33 @@ const String PLACEHOLDER_PFP =
 const String PLACEHOLDER_PROFILE_COVER =
     'https://www.comp.nus.edu.sg/~ngne/WEFiles/Image/Gallery/ee8928e7-a052-4ad9-9e41-be48898249fa/c835da5a-2.jpg';
 
-String? validateName(String? value) {
+String? validateFirstName(String? value) {
   if (value == null || value.isEmpty) {
-    return 'Name is required';
+    return 'First name is required';
   }
 
   if (!NAME_VALIDATION_REGEX.hasMatch(value)) {
-    return 'Name can only contain letters & space';
+    return 'First name can only contain letters & space';
   }
 
   if (value.isEmpty || value.length > 50) {
-    return 'Name must be between 1 and 20 characters';
+    return 'First name must be between 1 and 20 characters';
+  }
+
+  return null;
+}
+
+String? validateLastName(String? value) {
+  if (value == null || value.isEmpty) {
+    return 'Last name is required';
+  }
+
+  if (!NAME_VALIDATION_REGEX.hasMatch(value)) {
+    return 'Last name can only contain letters & space';
+  }
+
+  if (value.isEmpty || value.length > 50) {
+    return 'Last name must be between 1 and 20 characters';
   }
 
   return null;
@@ -47,8 +63,12 @@ String? validatePassword(String? value) {
     return 'Password is required';
   }
 
+  if (value.length < 8 || value.isEmpty) {
+    return 'Password must be at least 8 characters long';
+  }
+
   if (!PASSWORD_VALIDATION_REGEX.hasMatch(value)) {
-    return 'Password must be at least 8 characters long, and include a mix of uppercase, lowercase letters, and digits';
+    return 'Password must include Uppercase and lowercase letters, numbers and special characters';
   }
 
   return null;

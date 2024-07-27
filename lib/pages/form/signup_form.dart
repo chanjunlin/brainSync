@@ -76,7 +76,7 @@ class SignUpFormState extends State<SignUpForm> {
                   labelText: "First Name",
                   hintText: "First Name",
                   height: MediaQuery.sizeOf(context).height * 0.09,
-                  validator: (value) => validateName(value?.trim()),
+                  validator: (value) => validateFirstName(value?.trim()),
                   onSaved: (value) {
                     setState(() {
                       firstName.text = value!.trim();
@@ -91,7 +91,7 @@ class SignUpFormState extends State<SignUpForm> {
                   labelText: "Last Name",
                   hintText: "Last Name",
                   height: MediaQuery.sizeOf(context).height * 0.09,
-                  validator: (value) => validateName(value?.trim()),
+                  validator: (value) => validateLastName(value?.trim()),
                   onSaved: (value) {
                     setState(() {
                       lastName.text = value!.trim();

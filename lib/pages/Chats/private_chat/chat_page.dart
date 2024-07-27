@@ -44,6 +44,7 @@ class _ChatPageState extends State<ChatPage> {
   @override
   void initState() {
     super.initState();
+    print(widget.chatUser.uid);
     _initializeServices();
     _initializeUsers();
   }
@@ -182,6 +183,7 @@ class _ChatPageState extends State<ChatPage> {
           );
         }
       } else {
+        print('${currentUser!.id} ${otherUser.uid!}');
         Message message = Message(
           senderID: currentUser!.id,
           content: chatMessage.text.trim(),
