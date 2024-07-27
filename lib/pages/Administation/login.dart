@@ -83,7 +83,6 @@ class _LoginPageState extends State<LoginPage> {
               color: Colors.brown[800],
             ),
           ),
-          const SizedBox(height: 10),
           Image.asset(
             "assets/img/study.png",
             alignment: Alignment.topCenter,
