@@ -86,13 +86,13 @@ class _PrivateChatState extends State<PrivateChat> {
                   subtitle: friend.bio ?? 'No bio available',
                   onTap: () async {
                     final chatExists = await _databaseService.checkChatExist(
-                        _authService.currentUser!.uid, friend!.uid!);
+                        _authService.currentUser!.uid, friend.uid!);
                     if (!chatExists) {
                       await _databaseService.createNewChat(
-                          _authService.currentUser!.uid, friend!.uid!);
+                          _authService.currentUser!.uid, friend.uid!);
                     }
                     UserProfile? user =
-                        await _databaseService.fetchUserProfile(friend!.uid!);
+                        await _databaseService.fetchUserProfile(friend.uid!);
                     _navigationService.push(
                       MaterialPageRoute(
                         builder: (context) {
