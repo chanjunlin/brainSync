@@ -1,3 +1,4 @@
+import 'package:brainsync/common_widgets/edit_text_field.dart';
 import 'package:brainsync/services/auth_service.dart';
 import 'package:brainsync/services/navigation_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -72,17 +73,12 @@ class _ForgetPasswordState extends State<ForgetPassword> {
       {IconData? prefixIcon}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
-      child: TextField(
-        controller: controller,
-        decoration: InputDecoration(
-          labelText: title,
-          prefixIcon: prefixIcon != null ? Icon(prefixIcon) : null,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
-        ),
-        keyboardType: TextInputType.emailAddress,
-        autocorrect: false,
+      child: CustomTextField(
+        textController: controller,
+        labelText: "Email address",
+        vertical: 15,
+        horizontal: 15,
+        maxLines: 5,
       ),
     );
   }
