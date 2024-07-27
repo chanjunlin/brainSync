@@ -14,8 +14,7 @@ class SplashScreenState extends State<SplashScreen> with SingleTickerProviderSta
 
   late AuthService _authService;
   late AnimationController _controller;
-  late Animation<Offset> brainAnimation;
-  late Animation<Offset> syncAnimation;
+  late Animation<double> _animation;
 
   @override
   void initState() {
@@ -27,17 +26,9 @@ class SplashScreenState extends State<SplashScreen> with SingleTickerProviderSta
       vsync: this,
     );
 
-    brainAnimation = Tween<Offset>(
-      begin: const Offset(-1.0, 0.0),
-      end: const Offset(0.0, 0.0),
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeInOut,
-    ));
-
-    syncAnimation = Tween<Offset>(
-      begin: const Offset(1.0, 0.0),
-      end: const Offset(0.0, 0.0),
+    _animation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
     ).animate(CurvedAnimation(
       parent: _controller,
       curve: Curves.easeInOut,
@@ -62,42 +53,15 @@ class SplashScreenState extends State<SplashScreen> with SingleTickerProviderSta
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.brown.shade300,
+      backgroundColor: Colors.brown.shade100,
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            SlideTransition(
-              position: brainAnimation,
-              child: SizedBox(
-                width: MediaQuery.of(context).size.width,
-                child: const Text(
-                  'Brain',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 40,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
-            SlideTransition(
-              position: syncAnimation,
-              child: SizedBox(
-                width: MediaQuery.of(context).size.width,
-                child: const Text(
-                  'Sync',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 40,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
-          ],
+        child: FadeTransition(
+          opacity: _animation,
+          child: Image.asset(
+            'assets/img/brainsync.png',
+            width: MediaQuery.of(context).size.width * 1,
+            height: MediaQuery.of(context).size.height * 1,
+          ),
         ),
       ),
     );

@@ -1,8 +1,8 @@
 import 'package:brainsync/pages/Administation/login.dart';
 import 'package:brainsync/pages/Administation/register.dart';
 import 'package:brainsync/pages/Posts/bookmarked_posts.dart';
-import 'package:brainsync/pages/Profile/edit_profile.dart';
-import 'package:brainsync/pages/Profile/profile.dart';
+import 'package:brainsync/pages/Profile/user_profile/edit_profile.dart';
+import 'package:brainsync/pages/Profile/user_profile/profile.dart';
 import 'package:brainsync/pages/home.dart';
 import 'package:brainsync/pages/notifications.dart';
 import 'package:brainsync/splash_screen.dart';

@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
-import '../pages/Profile/visiting_profile.dart';
+import '../pages/Profile/visiting_profile/visiting_profile.dart';
 import '../services/alert_service.dart';
 import '../services/auth_service.dart';
 import '../services/database_service.dart';

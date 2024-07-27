@@ -1,3 +1,5 @@
+import 'package:brainsync/common_widgets/custom_read_only.dart';
+import 'package:brainsync/pages/Chats/group_chat/add_people_to_group_chat.dart';
 import 'package:brainsync/pages/Chats/group_chat/edit_group_chat_details.dart';
 import 'package:brainsync/services/alert_service.dart';
 import 'package:brainsync/services/auth_service.dart';
@@ -12,7 +14,7 @@ import '../../../common_widgets/chat_tile.dart';
 import '../../../common_widgets/custom_dialog.dart';
 import '../../../const.dart';
 import '../../../services/database_service.dart';
-import '../../Profile/visiting_profile.dart';
+import '../../Profile/visiting_profile/visiting_profile.dart';
 import '../friends_chat.dart';
 import 'group_chat_page.dart';
 
@@ -181,10 +183,9 @@ class _GroupChatDetailsState extends State<GroupChatDetails> {
           buildTop(),
           const SizedBox(height: 20),
           buildGroupDescription(),
-          const SizedBox(height: 20),
           buildAdminList(),
           buildMemberList(),
-          const SizedBox(height: 20),
+          const SizedBox(height: 10),
           buildGroupInfo(),
         ],
       ),
@@ -250,31 +251,11 @@ class _GroupChatDetailsState extends State<GroupChatDetails> {
   }
 
   Widget buildGroupDescription() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        buildSectionHeader("Group Description"),
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(16.0),
-          decoration: BoxDecoration(
-            color: Colors.grey[200],
-            borderRadius: BorderRadius.circular(10),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.3),
-                spreadRadius: 2,
-                blurRadius: 4,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Text(
-            groupDescription,
-            style: const TextStyle(fontSize: 16),
-          ),
-        ),
-      ],
+    return CustomReadOnlyField(
+      labelText: "Group Description",
+      hintText: groupDescription,
+      height: 70,
+      text: groupDescription,
     );
   }
 
@@ -285,52 +266,82 @@ class _GroupChatDetailsState extends State<GroupChatDetails> {
       return fullNameA.compareTo(fullNameB);
     });
 
-    if (members.isEmpty) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          buildSectionHeader("Members"),
-          const Text("No members found"),
-        ],
-      );
-    }
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         buildSectionHeader("Members"),
-        ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: members.length,
-          itemBuilder: (context, index) {
-            var member = members[index];
-            String fullName =
-                (member["firstName"] ?? '') + (member["lastName"] ?? '');
-            String displayName = member["uid"] == _authService.currentUser!.uid
-                ? "Me"
-                : fullName;
-            return CustomChatTile(
-              leading: CircleAvatar(
-                backgroundImage: NetworkImage(
-                    member['profilePictureUrl'] ?? PLACEHOLDER_PFP),
+        if (members.isEmpty) ...[
+          const Text("No members found"),
+          Center(
+            child: TextButton.icon(
+              onPressed: addPeople,
+              icon: const Icon(Icons.person_add),
+              label: const Text("Add People"),
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.white,
+                backgroundColor: Colors.brown[300],
+                padding: const EdgeInsets.symmetric(
+                    vertical: 12.0, horizontal: 20.0),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
               ),
-              title: displayName,
-              subtitle: member["bio"] ?? 'No bio available',
-              onTap: () {
-                _navigationService.push(
-                  MaterialPageRoute(
-                    builder: (context) {
-                      return VisitProfile(
-                        userId: member['uid'] as String,
-                      );
-                    },
+            ),
+          ),
+        ] else ...[
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 0),
+            child: ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: members.length,
+              itemBuilder: (context, index) {
+                var member = members[index];
+                String fullName =
+                    (member["firstName"] ?? '') + (member["lastName"] ?? '');
+                String displayName =
+                    member["uid"] == _authService.currentUser!.uid
+                        ? "Me"
+                        : fullName;
+                return CustomChatTile(
+                  leading: CircleAvatar(
+                    backgroundImage: NetworkImage(
+                        member['profilePictureUrl'] ?? PLACEHOLDER_PFP),
                   ),
+                  title: displayName,
+                  subtitle: member["bio"] ?? 'No bio available',
+                  onTap: () {
+                    _navigationService.push(
+                      MaterialPageRoute(
+                        builder: (context) {
+                          return VisitProfile(
+                            userId: member['uid'] as String,
+                          );
+                        },
+                      ),
+                    );
+                  },
                 );
               },
-            );
-          },
-        ),
+            ),
+          ),
+          Center(
+            child: TextButton.icon(
+              onPressed: addPeople,
+              icon: const Icon(Icons.person_add),
+              label: const Text("Add People"),
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.white,
+                backgroundColor: Colors.brown[300],
+                padding: const EdgeInsets.symmetric(
+                    vertical: 12.0, horizontal: 20.0),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+              ),
+            ),
+          ),
+        ],
       ],
     );
   }
@@ -471,6 +482,19 @@ class _GroupChatDetailsState extends State<GroupChatDetails> {
         );
       }
     }
+  }
+
+  void addPeople() {
+    _navigationService.push(
+      MaterialPageRoute(
+        builder: (context) {
+          return AddPeople(
+            groupID: widget.groupID,
+            groupName: widget.groupName,
+          );
+        },
+      ),
+    );
   }
 
   void exitGroup() async {

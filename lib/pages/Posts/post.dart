@@ -68,7 +68,7 @@ class _PostsPageState extends State<PostsPage> {
       } else {
         filteredModules = modules
             .where((module) =>
-                module.code.toLowerCase().contains(query.toLowerCase()))
+            module.code.toLowerCase().contains(query.toLowerCase()))
             .toList();
       }
     });
@@ -133,7 +133,7 @@ class _PostsPageState extends State<PostsPage> {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
         backgroundColor: Colors.red[300],
-        padding: const EdgeInsets.symmetric(vertical: 14),
+        padding: EdgeInsets.symmetric(vertical: MediaQuery.of(context).size.height * 0.02),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
         ),
@@ -151,10 +151,10 @@ class _PostsPageState extends State<PostsPage> {
           },
         );
       },
-      child: const Text(
+      child: Text(
         'Discard Post',
         style: TextStyle(
-          fontSize: 16,
+          fontSize: MediaQuery.of(context).size.width * 0.04,
           color: Colors.white,
         ),
       ),
@@ -165,16 +165,16 @@ class _PostsPageState extends State<PostsPage> {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
         backgroundColor: Colors.brown[300],
-        padding: const EdgeInsets.symmetric(vertical: 14),
+        padding: EdgeInsets.symmetric(vertical: MediaQuery.of(context).size.height * 0.02),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
         ),
       ),
       onPressed: createPost,
-      child: const Text(
+      child: Text(
         'Create Post',
         style: TextStyle(
-          fontSize: 16,
+          fontSize: MediaQuery.of(context).size.width * 0.04,
           color: Colors.white,
         ),
       ),
@@ -183,21 +183,25 @@ class _PostsPageState extends State<PostsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: const Text(
+        title: Text(
           "Create a Post!",
           style: TextStyle(
             color: Colors.white,
+            fontSize: screenWidth * 0.05,
           ),
         ),
         backgroundColor: Colors.brown[300],
         elevation: 0,
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(screenWidth * 0.04),
         child: Form(
           key: _formKey,
           child: Column(
@@ -206,12 +210,12 @@ class _PostsPageState extends State<PostsPage> {
               Text(
                 "Module Code",
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: screenWidth * 0.05,
                   fontWeight: FontWeight.bold,
                   color: Colors.brown[800],
                 ),
               ),
-              const SizedBox(height: 10),
+              SizedBox(height: screenHeight * 0.02),
               CustomSearchBar(
                 key: const Key("ModuleCodeField"),
                 controller: titleController,
@@ -221,16 +225,16 @@ class _PostsPageState extends State<PostsPage> {
                 suggestions: filteredModules,
                 onSuggestionSelected: handleSuggestionSelected,
               ),
-              const SizedBox(height: 30),
+              SizedBox(height: screenHeight * 0.03),
               Text(
                 "Content",
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: screenWidth * 0.05,
                   fontWeight: FontWeight.bold,
                   color: Colors.brown[800],
                 ),
               ),
-              const SizedBox(height: 10),
+              SizedBox(height: screenHeight * 0.02),
               TextFormField(
                 key: const Key("ContentField"),
                 cursorColor: Colors.brown[300],
@@ -266,19 +270,19 @@ class _PostsPageState extends State<PostsPage> {
                   return null;
                 },
               ),
-              const Spacer(),
+              Spacer(),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(
                     child: Padding(
-                      padding: const EdgeInsets.only(right: 8.0),
+                      padding: EdgeInsets.only(right: screenWidth * 0.02),
                       child: discardButton(),
                     ),
                   ),
                   Expanded(
                     child: Padding(
-                      padding: const EdgeInsets.only(left: 8.0),
+                      padding: EdgeInsets.only(left: screenWidth * 0.02),
                       child: sendButton(),
                     ),
                   ),

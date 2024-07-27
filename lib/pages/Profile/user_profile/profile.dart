@@ -2,9 +2,9 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:brainsync/const.dart';
-import 'package:brainsync/pages/Profile/show_my_friends.dart';
-import 'package:brainsync/pages/Profile/show_my_modules.dart';
-import 'package:brainsync/pages/Profile/show_my_posts.dart';
+import 'package:brainsync/pages/Profile/user_profile/show_my_friends.dart';
+import 'package:brainsync/pages/Profile/user_profile/show_my_modules.dart';
+import 'package:brainsync/pages/Profile/user_profile/show_my_posts.dart';
 import 'package:brainsync/services/alert_service.dart';
 import 'package:brainsync/services/auth_service.dart';
 import 'package:brainsync/services/database_service.dart';
@@ -13,8 +13,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
-import '../../common_widgets/bottomBar.dart';
-import '../../main.dart';
+import '../../../common_widgets/bottomBar.dart';
+import '../../../main.dart';
 
 class Profile extends StatefulWidget {
   const Profile({super.key});
@@ -284,7 +284,7 @@ class _ProfileState extends State<Profile> with RouteAware {
             ],
           ),
           SizedBox(
-            height: 500,
+            height: MediaQuery.of(context).size.height * 0.5,
             child: TabBarView(
               children: [
                 showModule(),

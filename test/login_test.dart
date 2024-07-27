@@ -1,11 +1,12 @@
 import 'package:brainsync/pages/form/login_form.dart';
+import 'package:brainsync/services/alert_service.dart';
+import 'package:brainsync/services/auth_service.dart';
 import 'package:brainsync/services/navigation_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
+import 'package:integration_test/integration_test.dart';
 import 'package:mockito/mockito.dart';
-import 'package:brainsync/services/auth_service.dart';
-import 'package:brainsync/services/alert_service.dart';
 
 class MockAuthService extends Mock implements AuthService {
   @override
@@ -23,6 +24,7 @@ class MockAlertService extends Mock implements AlertService {}
 class MockNavigationService extends Mock implements NavigationService {}
 
 void main() {
+
   group('Login Page Widget Tests', () {
     late MockAuthService authService;
     late MockAlertService alertService;
@@ -115,7 +117,6 @@ void main() {
 
       expect(navigatedToHome, isFalse);
     });
-
     testWidgets("Invalid password", (WidgetTester tester) async {
       bool navigatedToHome = false;
 
@@ -148,7 +149,6 @@ void main() {
 
       expect(navigatedToHome, isFalse);
     });
-
     testWidgets("Forget password", (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
         home: Scaffold(

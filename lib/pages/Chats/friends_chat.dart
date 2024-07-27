@@ -239,6 +239,7 @@ class FriendsChatsState extends State<FriendsChats> {
 
   void chatCreationMenu(BuildContext context) {
     showModalBottomSheet(
+      backgroundColor: Colors.white,
       context: context,
       builder: (BuildContext context) {
         return SafeArea(

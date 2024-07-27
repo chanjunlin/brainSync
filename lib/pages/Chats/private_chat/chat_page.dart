@@ -15,7 +15,7 @@ import '../../../model/user_profile.dart';
 import '../../../services/auth_service.dart';
 import '../../../services/media_service.dart';
 import '../../../services/navigation_service.dart';
-import '../../Profile/visiting_profile.dart';
+import '../../Profile/visiting_profile/visiting_profile.dart';
 
 class ChatPage extends StatefulWidget {
   final UserProfile chatUser;

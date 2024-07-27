@@ -1,8 +1,9 @@
-import 'package:brainsync/services/alert_service.dart';
-import 'package:brainsync/services/auth_service.dart';
-import 'package:brainsync/services/database_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+
+import '../../services/alert_service.dart';
+import '../../services/auth_service.dart';
+import '../../services/database_service.dart';
 
 class ModulePage extends StatefulWidget {
   final Future<Map<String, dynamic>> moduleInfo;
@@ -26,16 +27,13 @@ class _ModulePageState extends State<ModulePage> {
       prerequisite,
       moduleCredit,
       moduleCode;
-
   final GetIt _getIt = GetIt.instance;
   late AuthService _authService;
   late AlertService _alertService;
   late DatabaseService _databaseService;
-
   bool modulesAdded = false;
   bool? current;
   bool? completed;
-
   String? userId;
 
   @override
@@ -137,6 +135,9 @@ class _ModulePageState extends State<ModulePage> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final fontSize = screenWidth < 600 ? 14.0 : 16.0;
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -159,7 +160,7 @@ class _ModulePageState extends State<ModulePage> {
                 children: [
                   buildHeader(),
                   const SizedBox(height: 8),
-                  buildTitle(),
+                  buildTitle(fontSize),
                   const SizedBox(height: 16),
                   const Divider(),
                   buildDetails(),
@@ -255,11 +256,11 @@ class _ModulePageState extends State<ModulePage> {
     );
   }
 
-  Widget buildTitle() {
+  Widget buildTitle(double fontSize) {
     return Text(
       title ?? '',
-      style: const TextStyle(
-        fontSize: 18,
+      style: TextStyle(
+        fontSize: fontSize,
         fontWeight: FontWeight.bold,
         color: Colors.brown,
       ),
@@ -299,7 +300,7 @@ class _ModulePageState extends State<ModulePage> {
       elevation: 5,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10),
-        side: BorderSide(color: Colors.brown[100]!, width: 2), // Specify the border color and width
+        side: BorderSide(color: Colors.brown[100]!, width: 2),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),

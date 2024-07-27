@@ -165,7 +165,7 @@ class DatabaseService {
       createdBy: userId,
       createdAt: Timestamp.fromDate(DateTime.now()),
       groupID: groupID,
-      groupDescription: "Enter group description",
+      groupDescription: "No description",
       groupName: groupName,
       groupPicture: PLACEHOLDER_PFP,
       participantsID: participantsID,
@@ -322,6 +322,24 @@ class DatabaseService {
     return docRef.snapshots() as Stream<DocumentSnapshot<GroupChat>>;
   }
 
+  // Add friends to group
+  Future<void> addFriend(String groupID, List<UserProfile?> members) async {
+    var participantsID = members.map((member) => member?.uid ?? '').toList();
+    final groupChatRef = _groupChatCollection!.doc(groupID);
+    await _firebaseFirestore.runTransaction((transaction) async {
+      DocumentSnapshot groupChatSnapshot = await transaction.get(groupChatRef);
+      for (var participant in participantsID) {
+        final userRef = _usersCollection!.doc(participant);
+        transaction.update(userRef, {
+          'groupChats': FieldValue.arrayUnion([groupID]),
+        });
+      }
+      transaction.update(groupChatRef, {
+        'participantsID': FieldValue.arrayUnion(participantsID),
+      });
+    });
+  }
+
   // Leaving the group chat
   Future<void> leaveGroupChat(String groupID, String uid) async {
     final groupChatRef = _groupChatCollection!.doc(groupID);
@@ -415,7 +433,6 @@ class DatabaseService {
 
       List<dynamic> userFriendList = userData['friendList'] ?? [];
       List<dynamic> friendFriendList = friendData['friendList'] ?? [];
-
       for (String friendId in userFriendList) {
         if (friendFriendList.contains(friendId)) {
           DocumentSnapshot? mutualFriendDoc = await fetchUser(friendId);
@@ -426,6 +443,7 @@ class DatabaseService {
     } else {
       _alertService.showToast(text: "User profile doesn't exists.");
     }
+    print(commonFriends);
     return commonFriends;
   }
 

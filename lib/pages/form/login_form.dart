@@ -43,10 +43,7 @@ class _LoginFormState extends State<LoginForm> {
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-        margin: EdgeInsets.symmetric(
-          vertical: MediaQuery.sizeOf(context).height * 0.05,
-        ),
+        padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 5),
         child: Form(
           key: _loginFormKey,
           child: Column(
@@ -57,14 +54,14 @@ class _LoginFormState extends State<LoginForm> {
                 labelText: "Email",
                 hintText: "Enter a valid email",
                 height: MediaQuery.sizeOf(context).height * 0.07,
-                validationRegEx: EMAIL_VALIDATION_REGEX,
+                validator: (value) => validateEmail(value),
                 onSaved: (value) {
                   setState(() {
                     email = value?.trim();
                   });
                 },
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 15),
               CustomFormField(
                 key: const Key('passwordField'),
                 labelText: "Password",
@@ -81,10 +78,9 @@ class _LoginFormState extends State<LoginForm> {
                   },
                 ),
                 height: MediaQuery.sizeOf(context).height * 0.07,
-                validationRegEx: PASSWORD_VALIDATION_REGEX,
+                validator: (value) => validatePassword(value),
                 onSaved: (value) {
                   setState(() {
-                    
                     password = value?.trim();
                   });
                 },
@@ -140,7 +136,7 @@ class _LoginFormState extends State<LoginForm> {
                   ),
                 ),
               ),
-              const SizedBox(height: 30),
+              const SizedBox(height: 15),
               Row(
                 children: [
                   const Expanded(
@@ -193,6 +189,7 @@ class _LoginFormState extends State<LoginForm> {
                   label: "Sign in with Google",
                 ),
               ),
+              const SizedBox(height: 20),
             ],
           ),
         ),

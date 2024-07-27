@@ -11,10 +11,10 @@ class ModuleListPage extends StatefulWidget {
   const ModuleListPage({super.key});
 
   @override
-  _ModuleListPageState createState() => _ModuleListPageState();
+  ModuleListPageState createState() => ModuleListPageState();
 }
 
-class _ModuleListPageState extends State<ModuleListPage> {
+class ModuleListPageState extends State<ModuleListPage> {
   late Future<List<Module>> futureModules;
   late List<Module> filteredModules = [];
   late TextEditingController searchController;
@@ -43,8 +43,7 @@ class _ModuleListPageState extends State<ModuleListPage> {
 
   String getCurrentAcadYear() {
     final DateTime now = DateTime.now();
-    final DateTime midJuly =
-        DateTime(now.year, 7, 15); // Assuming mid-July is the 15th
+    final DateTime midJuly = DateTime(now.year, 7, 15);
     final int startYear = now.isBefore(midJuly) ? now.year - 1 : now.year;
     final int endYear = startYear + 1;
     return '$startYear-$endYear';
@@ -106,9 +105,9 @@ class _ModuleListPageState extends State<ModuleListPage> {
         centerTitle: false,
         elevation: 0,
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(60.0),
+          preferredSize: const Size.fromHeight(80.0),
           child: Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: TextField(
               controller: searchController,
               onChanged: filterModules,
@@ -124,7 +123,7 @@ class _ModuleListPageState extends State<ModuleListPage> {
                       )
                     : null,
                 contentPadding: const EdgeInsets.symmetric(
-                    vertical: 15.0, horizontal: 10.0),
+                    vertical: 15.0, horizontal: 20.0),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(30.0),
                   borderSide: const BorderSide(color: Colors.grey, width: 1.0),

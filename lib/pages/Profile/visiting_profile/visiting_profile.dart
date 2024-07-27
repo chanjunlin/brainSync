@@ -1,18 +1,20 @@
 import 'dart:async';
 
+import 'package:brainsync/pages/Profile/user_profile/show_my_posts.dart';
+import 'package:brainsync/pages/Profile/visiting_profile/show_friends.dart';
+import 'package:brainsync/pages/Profile/visiting_profile/show_modules.dart';
 import 'package:brainsync/services/alert_service.dart';
 import 'package:brainsync/services/navigation_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
-import '../../common_widgets/custom_dialog.dart';
-import '../../const.dart';
-import '../../model/user_profile.dart';
-import '../../services/auth_service.dart';
-import '../../services/database_service.dart';
-import '../Chats/private_chat/chat_page.dart';
-import 'friends.dart';
+import '../../../common_widgets/custom_dialog.dart';
+import '../../../const.dart';
+import '../../../model/user_profile.dart';
+import '../../../services/auth_service.dart';
+import '../../../services/database_service.dart';
+import '../../Chats/private_chat/chat_page.dart';
 
 class VisitProfile extends StatefulWidget {
   final String userId;
@@ -113,6 +115,7 @@ class _VisitProfileState extends State<VisitProfile> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.brown[300],
         foregroundColor: Colors.white,
@@ -170,21 +173,20 @@ class _VisitProfileState extends State<VisitProfile> {
   }
 
   Widget buildProfileInfo() {
-    return Column(
-      children: [
-        const SizedBox(height: 10),
-        Text(
-          "$firstName $lastName",
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 24,
-            color: Colors.brown[800],
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
+      child: Column(
+        children: [
+          Text(
+            "$firstName $lastName",
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 24,
+              color: Colors.brown[800],
+            ),
           ),
-        ),
-        const SizedBox(height: 10),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: Text(
+          const SizedBox(height: 10),
+          Text(
             bio ?? "No bio",
             style: TextStyle(
               fontSize: 16,
@@ -192,11 +194,11 @@ class _VisitProfileState extends State<VisitProfile> {
             ),
             textAlign: TextAlign.center,
           ),
-        ),
-        const SizedBox(height: 16),
-        buildFriendButton(),
-        const SizedBox(height: 16),
-      ],
+          const SizedBox(height: 16),
+          buildFriendButton(),
+          const SizedBox(height: 16),
+        ],
+      ),
     );
   }
 
@@ -304,29 +306,25 @@ class _VisitProfileState extends State<VisitProfile> {
 
   Widget buildTabBarSection() {
     return DefaultTabController(
-      length: 4,
+      length: 3,
       child: Column(
         children: [
           TabBar(
             labelColor: Colors.brown[800],
             unselectedLabelColor: Colors.brown[400],
-            isScrollable: true,
-            indicatorColor: Colors.brown[800],
             tabs: const [
               Tab(text: 'Modules'),
               Tab(text: 'Posts'),
-              Tab(text: 'Comments'),
-              Tab(text: 'Mutual friends'),
+              Tab(text: 'Mutual Friends'),
             ],
           ),
           SizedBox(
-            height: 400,
+            height: MediaQuery.of(context).size.height * 0.5,
             child: TabBarView(
               children: [
-                showModule(),
-                const Center(child: Text('Posts Content')),
-                const Center(child: Text('Comments Content')),
-                showFriendsTab(),
+                showModule(widget.userId),
+                showPosts(),
+                showFriends(),
               ],
             ),
           ),
@@ -335,105 +333,18 @@ class _VisitProfileState extends State<VisitProfile> {
     );
   }
 
-  Widget showModule() {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(height: 16),
-          Text(
-            'Current Modules:',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 18,
-              color: Colors.brown[800],
-            ),
-          ),
-          const SizedBox(height: 8),
-          StreamBuilder<DocumentSnapshot>(
-            stream:
-                firestore.collection('users').doc(widget.userId).snapshots(),
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) {
-                return const Center(child: CircularProgressIndicator());
-              }
-
-              var userData = snapshot.data!.data() as Map<String, dynamic>;
-              var currentModules = userData['currentModules'] ?? [];
-              var completedModules = userData['completedModules'] ?? [];
-
-              return Expanded(
-                child: ListView(
-                  padding: EdgeInsets.zero,
-                  children: [
-                    if (currentModules.isNotEmpty)
-                      ...currentModules.map<Widget>((module) {
-                        return ListTile(
-                          contentPadding: EdgeInsets.zero,
-                          title: Text(
-                            '$module',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.brown[700],
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                    if (currentModules.isEmpty)
-                      const Text('No current modules'),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Completed Modules:',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                        color: Colors.brown[800],
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    if (completedModules.isNotEmpty)
-                      ...completedModules.map<Widget>((module) {
-                        return ListTile(
-                          contentPadding: EdgeInsets.zero,
-                          title: Text(
-                            '$module',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.brown[700],
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                    if (completedModules.isEmpty)
-                      const Text('No completed modules'),
-                  ],
-                ),
-              );
-            },
-          ),
-          const SizedBox(height: 16),
-        ],
-      ),
+  Widget showModule(String userID) {
+    return ShowUserModules(
+      userID: userID,
     );
   }
 
-  Widget showFriendsTab() {
-    return FutureBuilder<List<UserProfile?>>(
-      future: _databaseService.getMutualFriends(
-          _authService.currentUser!.uid, widget.userId),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        } else if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
-        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Center(child: Text('No mutual friends'));
-        } else {
-          return FriendListPage(friendList: snapshot.data!);
-        }
-      },
-    );
+  Widget showPosts() {
+    return ShowMyPosts(myPosts: myPosts);
+  }
+
+  Widget showFriends() {
+    return ShowUserFriends(userID: widget.userId);
   }
 
   void updateFriendRequestStatus(bool isSent) {

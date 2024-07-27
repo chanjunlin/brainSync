@@ -8,11 +8,8 @@ import '../common_widgets/bottomBar.dart';
 import '../common_widgets/nav_bar.dart';
 import '../services/alert_service.dart';
 
-
 class Home extends StatefulWidget {
-  const Home({
-    super.key,
-  });
+  const Home({super.key});
 
   @override
   State<Home> createState() => _HomeState();
@@ -87,6 +84,9 @@ class _HomeState extends State<Home> with RouteAware {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       drawer: const NavBar(),
       backgroundColor: Colors.white,
@@ -95,9 +95,9 @@ class _HomeState extends State<Home> with RouteAware {
         foregroundColor: Colors.white,
         title: const Text('BrainSync'),
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(60.0),
+          preferredSize: Size.fromHeight(screenHeight * 0.1),
           child: Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: EdgeInsets.all(screenWidth * 0.04),
             child: TextField(
               cursorColor: Colors.brown[300],
               style: TextStyle(
@@ -119,20 +119,19 @@ class _HomeState extends State<Home> with RouteAware {
                   onPressed: clearSearch,
                 )
                     : null,
-                contentPadding: const EdgeInsets.symmetric(
-                    vertical: 15.0, horizontal: 10.0),
+                contentPadding: EdgeInsets.symmetric(
+                    vertical: screenHeight * 0.02, horizontal: screenWidth * 0.04),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(30.0),
+                  borderRadius: BorderRadius.circular(screenWidth * 0.05),
                   borderSide: const BorderSide(color: Colors.grey, width: 1.0),
                 ),
                 enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(30.0),
+                  borderRadius: BorderRadius.circular(screenWidth * 0.05),
                   borderSide: const BorderSide(color: Colors.grey, width: 1.0),
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(30.0),
-                  borderSide:
-                  BorderSide(color: Colors.brown.shade300, width: 2.0),
+                  borderRadius: BorderRadius.circular(screenWidth * 0.05),
+                  borderSide: BorderSide(color: Colors.brown.shade300, width: 2.0),
                 ),
               ),
             ),
@@ -150,7 +149,7 @@ class _HomeState extends State<Home> with RouteAware {
           }
           if (snapshot.hasData) {
             allPosts = snapshot.data!.docs;
-            filteredPosts = filteredPosts.isEmpty ? [] : filteredPosts;
+            filteredPosts = filteredPosts.isEmpty ? allPosts : filteredPosts;
             filteredPosts.sort((a, b) {
               Timestamp timestampA = a['timestamp'];
               Timestamp timestampB = b['timestamp'];
@@ -178,11 +177,15 @@ class _HomeState extends State<Home> with RouteAware {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Image.asset("assets/img/magnifying_glass_brain.png"),
+                  Image.asset(
+                    "assets/img/magnifying_glass_brain.png",
+                    width: screenWidth * 0.5,
+                    height: screenHeight * 0.3,
+                  ),
                   Text(
                     'No posts found',
                     style: TextStyle(
-                      fontSize: 20,
+                      fontSize: screenWidth * 0.05,
                       color: Colors.brown[700],
                     ),
                   ),

@@ -9,7 +9,7 @@ import 'package:timeago/timeago.dart' as timeago;
 
 import '../../model/comment.dart';
 import '../../services/auth_service.dart';
-import '../Profile/visiting_profile.dart';
+import '../Profile/visiting_profile/visiting_profile.dart';
 
 class PostDetailPage extends StatefulWidget {
   final String postId;
@@ -99,14 +99,18 @@ class _PostDetailPageState extends State<PostDetailPage> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isLargeScreen = screenWidth > 600;
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.brown[300],
-        title: const Text(
+        title: Text(
           'Post Details',
           style: TextStyle(
             color: Colors.white,
+            fontSize: isLargeScreen ? 20 : 20,
           ),
         ),
         leading: IconButton(
@@ -117,29 +121,34 @@ class _PostDetailPageState extends State<PostDetailPage> {
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(isLargeScreen ? 24 : 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               widget.title,
               style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.brown[800]),
+                fontSize: isLargeScreen ? 32 : 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.brown[800],
+              ),
             ),
             const SizedBox(height: 10),
             Text(
               'By ${currentUser ?? "Loading..."}',
               style: TextStyle(
-                  fontSize: 16,
-                  fontStyle: FontStyle.italic,
-                  color: Colors.brown[800]),
+                fontSize: isLargeScreen ? 18 : 16,
+                fontStyle: FontStyle.italic,
+                color: Colors.brown[800],
+              ),
             ),
             const SizedBox(height: 10),
             Text(
               widget.content,
-              style: TextStyle(fontSize: 16, color: Colors.brown[800]),
+              style: TextStyle(
+                fontSize: isLargeScreen ? 20 : 16,
+                color: Colors.brown[800],
+              ),
             ),
             const SizedBox(height: 20),
             const Divider(),
@@ -147,7 +156,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
             Text(
               'Comments',
               style: TextStyle(
-                fontSize: 18,
+                fontSize: isLargeScreen ? 22 : 18,
                 fontWeight: FontWeight.bold,
                 color: Colors.brown[800],
               ),
@@ -224,8 +233,12 @@ class _PostDetailPageState extends State<PostDetailPage> {
                                     );
                                   },
                             child: Container(
-                              margin: const EdgeInsets.symmetric(vertical: 8.0),
-                              padding: const EdgeInsets.all(12.0),
+                              margin: EdgeInsets.symmetric(
+                                vertical: isLargeScreen ? 12.0 : 8.0,
+                              ),
+                              padding: EdgeInsets.all(
+                                isLargeScreen ? 16.0 : 12.0,
+                              ),
                               decoration: BoxDecoration(
                                 color: Colors.brown[50],
                                 borderRadius: BorderRadius.circular(8.0),
@@ -248,12 +261,13 @@ class _PostDetailPageState extends State<PostDetailPage> {
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
                                           color: Colors.brown[800],
+                                          fontSize: isLargeScreen ? 18 : 14,
                                         ),
                                       ),
                                       Text(
                                         formattedDate,
                                         style: TextStyle(
-                                          fontSize: 12,
+                                          fontSize: isLargeScreen ? 14 : 12,
                                           color: Colors.brown[500],
                                         ),
                                       ),
@@ -262,7 +276,10 @@ class _PostDetailPageState extends State<PostDetailPage> {
                                   const SizedBox(height: 4),
                                   Text(
                                     comment['content'],
-                                    style: TextStyle(color: Colors.brown[700]),
+                                    style: TextStyle(
+                                      color: Colors.brown[700],
+                                      fontSize: isLargeScreen ? 18 : 14,
+                                    ),
                                   ),
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.end,
@@ -272,10 +289,11 @@ class _PostDetailPageState extends State<PostDetailPage> {
                                           Icons.reply,
                                           color: Colors.brown[300],
                                         ),
-                                        label: const Text(
+                                        label: Text(
                                           'Reply',
                                           style: TextStyle(
                                             color: Colors.black,
+                                            fontSize: isLargeScreen ? 16 : 14,
                                           ),
                                         ),
                                         onPressed: () {},
@@ -299,7 +317,12 @@ class _PostDetailPageState extends State<PostDetailPage> {
                                           }
                                         },
                                       ),
-                                      Text('$likeCount'),
+                                      Text(
+                                        '$likeCount',
+                                        style: TextStyle(
+                                          fontSize: isLargeScreen ? 16 : 14,
+                                        ),
+                                      ),
                                     ],
                                   ),
                                 ],
@@ -318,8 +341,12 @@ class _PostDetailPageState extends State<PostDetailPage> {
                 Expanded(
                   child: TextField(
                     controller: _commentController,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       hintText: 'Add a comment',
+                      contentPadding: EdgeInsets.symmetric(
+                        vertical: isLargeScreen ? 16 : 12,
+                        horizontal: isLargeScreen ? 20 : 12,
+                      ),
                     ),
                   ),
                 ),
