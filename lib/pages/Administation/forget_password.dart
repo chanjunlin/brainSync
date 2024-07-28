@@ -75,7 +75,7 @@ class _ForgetPasswordState extends State<ForgetPassword> {
         labelText: "Email address",
         vertical: 15,
         horizontal: 15,
-        maxLines: 5,
+        maxLines: 1,
       ),
     );
   }
@@ -96,40 +96,40 @@ class _ForgetPasswordState extends State<ForgetPassword> {
         centerTitle: true,
       ),
       body: SingleChildScrollView(
-        child: Container(
-          constraints: BoxConstraints(
-            maxWidth: MediaQuery.of(context).size.width * 0.9,
-          ),
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const SizedBox(height: 20),
-              const Text(
-                "Forgot Password?",
-                style: TextStyle(
-                  fontSize: 30,
-                  fontWeight: FontWeight.bold,
+        child: Center(
+          child: Container(
+            width: MediaQuery.of(context).size.width * 0.9,
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const SizedBox(height: 20),
+                const Text(
+                  "Forgot Password?",
+                  style: TextStyle(
+                    fontSize: 30,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 20),
-              const Text(
-                "Enter your email below to reset your password",
-                style: TextStyle(
-                  color: Color.fromARGB(255, 79, 78, 78),
+                const SizedBox(height: 20),
+                const Text(
+                  "Enter your email below to reset your password",
+                  style: TextStyle(
+                    color: Color.fromARGB(255, 79, 78, 78),
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 20),
-              Image.asset(
-                "assets/img/lock.png",
-                height: 150,
-              ),
-              entryField("Email", _emailController, prefixIcon: Icons.email),
-              const SizedBox(height: 30),
-              sendButton(),
-            ],
+                const SizedBox(height: 20),
+                Image.asset(
+                  "assets/img/lock.png",
+                  height: 300,
+                ),
+                entryField("Email", _emailController, prefixIcon: Icons.email),
+                const SizedBox(height: 30),
+                sendButton(),
+              ],
+            ),
           ),
         ),
       ),

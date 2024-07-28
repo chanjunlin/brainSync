@@ -240,7 +240,7 @@ class EditProfilePageState extends State<EditProfilePage> with RouteAware {
         }
       },
       child: Container(
-        color: Colors.grey,
+        color: Colors.brown.shade100,
         child: selectedCoverImage != null
             ? Image.file(
                 selectedCoverImage!,

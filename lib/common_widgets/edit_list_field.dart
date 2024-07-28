@@ -81,8 +81,8 @@ class CustomListFieldState extends State<CustomListField> {
     String moduleCredit = totalInfo[1];
     CustomDialog.show(
       context: context,
-      title: 'Complete Module',
-      content: 'Are you sure you want to mark this module as completed?',
+      title: 'Complete Module - $moduleCode',
+      content: 'Are you sure you want to mark $moduleCode as completed?',
       cancelText: 'Cancel',
       discardText: 'Mark as Complete',
       toastText: 'Module marked as completed!',

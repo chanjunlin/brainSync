@@ -267,6 +267,8 @@ class _GroupChatDetailsState extends State<GroupChatDetails> {
       return fullNameA.compareTo(fullNameB);
     });
 
+    bool isAdmin = adminIDs.contains(_authService.currentUser!.uid);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -274,22 +276,23 @@ class _GroupChatDetailsState extends State<GroupChatDetails> {
         if (members.isEmpty) ...[
           const Text("No members found"),
           const SizedBox(height: 10),
-          Center(
-            child: TextButton.icon(
-              onPressed: addPeople,
-              icon: const Icon(Icons.person_add),
-              label: const Text("Add People"),
-              style: TextButton.styleFrom(
-                foregroundColor: Colors.white,
-                backgroundColor: Colors.brown[300],
-                padding: const EdgeInsets.symmetric(
-                    vertical: 12.0, horizontal: 20.0),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8.0),
+          if (isAdmin)
+            Center(
+              child: TextButton.icon(
+                onPressed: addPeople,
+                icon: const Icon(Icons.person_add),
+                label: const Text("Add People"),
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  backgroundColor: Colors.brown[300],
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 12.0, horizontal: 20.0),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
                 ),
               ),
             ),
-          ),
         ] else ...[
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 0),
@@ -331,22 +334,23 @@ class _GroupChatDetailsState extends State<GroupChatDetails> {
               },
             ),
           ),
-          Center(
-            child: TextButton.icon(
-              onPressed: addPeople,
-              icon: const Icon(Icons.person_add),
-              label: const Text("Add People"),
-              style: TextButton.styleFrom(
-                foregroundColor: Colors.white,
-                backgroundColor: Colors.brown[300],
-                padding: const EdgeInsets.symmetric(
-                    vertical: 12.0, horizontal: 20.0),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8.0),
+          if (isAdmin)
+            Center(
+              child: TextButton.icon(
+                onPressed: addPeople,
+                icon: const Icon(Icons.person_add),
+                label: const Text("Add People"),
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  backgroundColor: Colors.brown[300],
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 12.0, horizontal: 20.0),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
                 ),
               ),
             ),
-          ),
         ],
       ],
     );

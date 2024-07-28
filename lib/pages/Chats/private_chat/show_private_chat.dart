@@ -32,7 +32,7 @@ class _ShowPrivateChatState extends State<ShowPrivateChat> {
   late Future<void> listenedToChats;
 
   List<String>? chats;
-  String? userProfilePfp, firstName, lastName;
+  String? userProfilePfp, firstName, lastName, fullName;
   StreamSubscription<DocumentSnapshot>? profileSubscription;
   StreamSubscription<QuerySnapshot>? chatsSubscription;
   Map<String, String> chatSubtitles = {};
@@ -99,8 +99,7 @@ class _ShowPrivateChatState extends State<ShowPrivateChat> {
                           List<dynamic> participantsNames =
                               chatDetails.get('participantsNames') ?? [];
                           String otherUserName = participantsNames.firstWhere(
-                            (name) =>
-                                name != _authService.currentUser!.displayName,
+                            (name) => name != fullName,
                             orElse: () => "",
                           );
                           return FutureBuilder<DocumentSnapshot?>(
@@ -204,6 +203,7 @@ class _ShowPrivateChatState extends State<ShowPrivateChat> {
             userProfilePfp = userProfile.get('pfpURL') ?? placeholderPFP;
             firstName = userProfile.get('firstName') ?? 'Name';
             lastName = userProfile.get('lastName') ?? 'Name';
+            fullName = "${firstName!} ${lastName!}";
             chats = List<String>.from(userProfile.get("chats") ?? []);
           });
 

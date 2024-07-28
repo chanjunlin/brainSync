@@ -156,7 +156,7 @@ class _VisitProfileState extends State<VisitProfile> {
     return Container(
       height: 280,
       width: double.infinity,
-      color: Colors.grey,
+      color: Colors.brown.shade100,
       child: Image.network(
         profileCoverURL ?? placeholderProfileCover,
         fit: BoxFit.cover,
