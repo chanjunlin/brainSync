@@ -12,7 +12,7 @@ const String PLACEHOLDER_PFP =
     "https://t3.ftcdn.net/jpg/05/16/27/58/360_F_516275801_f3Fsp17x6HQK0xQgDQEELoTuERO4SsWV.jpg";
 
 const String PLACEHOLDER_PROFILE_COVER =
-    'https://www.comp.nus.edu.sg/~ngne/WEFiles/Image/Gallery/ee8928e7-a052-4ad9-9e41-be48898249fa/c835da5a-2.jpg';
+    'https://firebasestorage.googleapis.com/v0/b/brainsync6325.appspot.com/o/brainsync.png?alt=media&token=6f290b30-f675-4aae-a1c9-75084c49840f';
 
 String? validateFirstName(String? value) {
   if (value == null || value.isEmpty) {

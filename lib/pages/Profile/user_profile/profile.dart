@@ -191,26 +191,28 @@ class _ProfileState extends State<Profile> with RouteAware {
   }
 
   Widget buildCoverImage() {
-  return Container(
-    height: coverHeight,
-    width: double.infinity,
-    color: Colors.grey,
-    child: Image(
-      image: widget.coverImageProvider ?? NetworkImage(profileCoverURL ?? PLACEHOLDER_PROFILE_COVER),
-      fit: BoxFit.cover,
-    ),
-  );
-}
+    return Container(
+      height: coverHeight,
+      width: double.infinity,
+      color: Colors.brown.shade100,
+      child: Image(
+        image: widget.coverImageProvider ??
+            NetworkImage(profileCoverURL ?? PLACEHOLDER_PROFILE_COVER),
+        fit: BoxFit.cover,
+      ),
+    );
+  }
 
   Widget buildProfileImage() {
-  return CircleAvatar(
-    radius: profileHeight / 2,
-    backgroundColor: Colors.grey,
-    backgroundImage: selectedImage != null
-        ? FileImage(selectedImage!)
-        : (widget.profileImageProvider ?? NetworkImage(pfpURL ?? PLACEHOLDER_PFP)),
-  );
-}
+    return CircleAvatar(
+      radius: profileHeight / 2,
+      backgroundColor: Colors.grey,
+      backgroundImage: selectedImage != null
+          ? FileImage(selectedImage!)
+          : (widget.profileImageProvider ??
+              NetworkImage(pfpURL ?? PLACEHOLDER_PFP)),
+    );
+  }
 
   Widget buildSignOutButton() {
     return IconButton(
