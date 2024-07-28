@@ -197,6 +197,7 @@ class _PostsPageState extends State<PostsPage> {
             fontSize: screenWidth * 0.05,
           ),
         ),
+        centerTitle: true,
         backgroundColor: Colors.brown[300],
         elevation: 0,
       ),

@@ -144,6 +144,7 @@ class _ModulePageState extends State<ModulePage> {
         backgroundColor: Colors.brown[300],
         foregroundColor: Colors.white,
         title: const Text("Module Details"),
+        centerTitle: true,
       ),
       body: FutureBuilder<Map<String, dynamic>>(
         future: widget.moduleInfo,

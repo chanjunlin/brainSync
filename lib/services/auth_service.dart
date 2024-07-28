@@ -68,7 +68,10 @@ class AuthService {
 
   Future<bool> signInWithGoogle(BuildContext context) async {
     try {
+      print("in authService");
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      print("after google sign in");
+      print(googleUser?.email);
       if (googleUser == null) {
         _firebaseAuth.signOut();
         return false;
@@ -76,6 +79,7 @@ class AuthService {
 
       final GoogleSignInAuthentication googleAuth =
           await googleUser.authentication;
+      print(googleAuth);
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
@@ -87,6 +91,7 @@ class AuthService {
 
       if (userCredential.user != null) {
         bool userExists = await checkIfUserExists(userCredential.user!.uid);
+        print(userExists);
         if (!userExists) {
           await createUserProfile(
             userProfile: UserProfile(
@@ -105,8 +110,8 @@ class AuthService {
           );
           return true;
         } else {
-          signOut();
-          return false;
+          print("userExists!!");
+          return true;
         }
       }
       return false;
@@ -119,6 +124,7 @@ class AuthService {
   Future<bool> signOut() async {
     try {
       await _firebaseAuth.signOut();
+      await GoogleSignIn().signOut();
       return true;
     } catch (e) {
       print(e);

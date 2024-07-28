@@ -79,6 +79,7 @@ class _BookmarkedPostsState extends State<BookmarkedPosts> {
           "Bookmarked posts",
           style: TextStyle(color: Colors.white, fontSize: isLargeScreen ? 24 : 20),
         ),
+        centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
