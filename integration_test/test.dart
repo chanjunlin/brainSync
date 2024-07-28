@@ -1,4 +1,3 @@
-import 'package:brainsync/common_widgets/custom_form_field.dart';
 import 'package:brainsync/pages/Administation/login.dart';
 import 'package:brainsync/pages/Administation/register.dart';
 import 'package:brainsync/services/alert_service.dart';
@@ -14,6 +13,7 @@ import '../test/login_test.dart';
 
 class MockNavigationService extends Mock implements NavigationService {
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
   @override
   Future<void> pushName(String routeName, {Object? arguments}) async {
     await navigatorKey.currentState?.push(
@@ -57,8 +57,9 @@ void main() {
     getIt.reset();
   });
 
-  testWidgets('Navigates from LoginPage to RegisterPage on Sign Up button click', (WidgetTester tester) async {
-    // Build the LoginPage widget
+  testWidgets(
+      'Navigates from LoginPage to RegisterPage on Sign Up button click',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: const LoginPage(),
@@ -85,4 +86,5 @@ void main() {
 
     // Check if RegisterPage is displayed
     expect(find.byType(RegisterPage), findsOneWidget);
-  });}
+  });
+}
