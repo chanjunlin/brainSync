@@ -28,10 +28,10 @@ class PostDetailPage extends StatefulWidget {
   });
 
   @override
-  _PostDetailPageState createState() => _PostDetailPageState();
+  PostDetailPageState createState() => PostDetailPageState();
 }
 
-class _PostDetailPageState extends State<PostDetailPage> {
+class PostDetailPageState extends State<PostDetailPage> {
   final GetIt _getIt = GetIt.instance;
   final userId = FirebaseAuth.instance.currentUser!.uid;
 

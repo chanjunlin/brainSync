@@ -137,9 +137,7 @@ class StorageService {
     required String groupID,
     List<String>? adminList,
   }) async {
-    String userId = _authService.currentUser!.uid;
     String? downloadPictureURL;
-
 
     if (groupPictureFile != null) {
       downloadPictureURL = await uploadGroupChatPicture(

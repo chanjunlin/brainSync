@@ -36,7 +36,6 @@ void main() {
     late ApiService apiService;
     late DatabaseService databaseService;
     late NavigationService navigationService;
-    late MockHttpClient mockHttpClient;
 
     setUp(() {
       apiService = MockApiService();

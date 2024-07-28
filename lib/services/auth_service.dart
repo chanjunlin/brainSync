@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 import '../const.dart';
@@ -68,10 +69,7 @@ class AuthService {
 
   Future<bool> signInWithGoogle(BuildContext context) async {
     try {
-      print("in authService");
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-      print("after google sign in");
-      print(googleUser?.email);
       if (googleUser == null) {
         _firebaseAuth.signOut();
         return false;
@@ -79,7 +77,6 @@ class AuthService {
 
       final GoogleSignInAuthentication googleAuth =
           await googleUser.authentication;
-      print(googleAuth);
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
@@ -91,15 +88,14 @@ class AuthService {
 
       if (userCredential.user != null) {
         bool userExists = await checkIfUserExists(userCredential.user!.uid);
-        print(userExists);
         if (!userExists) {
           await createUserProfile(
             userProfile: UserProfile(
               uid: userCredential.user!.uid,
               firstName: userCredential.user!.displayName,
               lastName: lastName,
-              pfpURL: PLACEHOLDER_PFP,
-              profileCoverURL: PLACEHOLDER_PROFILE_COVER,
+              pfpURL: placeholderPFP,
+              profileCoverURL: placeholderProfileCover,
               friendList: friendList,
               friendReqList: friendReqList,
               year: selectedYear,
@@ -110,13 +106,11 @@ class AuthService {
           );
           return true;
         } else {
-          print("userExists!!");
           return true;
         }
       }
       return false;
     } catch (e) {
-      print(e);
       rethrow;
     }
   }
@@ -127,7 +121,9 @@ class AuthService {
       await GoogleSignIn().signOut();
       return true;
     } catch (e) {
-      print(e);
+      if (kDebugMode) {
+        print(e);
+      }
       return false;
     }
   }
@@ -160,9 +156,10 @@ class AuthService {
     try {
       User? user = FirebaseAuth.instance.currentUser;
       await user?.sendEmailVerification();
-      print("Email verification sent");
     } catch (e) {
-      print('Error sending verification email: $e');
+      if (kDebugMode) {
+        print('Error sending verification email: $e');
+      }
     }
   }
 
@@ -176,7 +173,9 @@ class AuthService {
         throw throw Exception("User profile not found");
       }
     } catch (e) {
-      print('Error retrieving user profile: $e');
+      if (kDebugMode) {
+        print('Error retrieving user profile: $e');
+      }
       rethrow;
     }
   }
@@ -184,9 +183,10 @@ class AuthService {
   Future<void> createUserProfile({required UserProfile userProfile}) async {
     try {
       await _usersCollection?.doc(userProfile.uid).set(userProfile);
-      print("Profile created");
     } catch (e) {
-      print('Error creating user profile: $e');
+      if (kDebugMode) {
+        print('Error creating user profile: $e');
+      }
       rethrow;
     }
   }
@@ -197,7 +197,9 @@ class AuthService {
           await _firebaseFirestore.collection('users').doc(uid).get();
       return userData.exists;
     } catch (e) {
-      print('Error checking if user exists: $e');
+      if (kDebugMode) {
+        print('Error checking if user exists: $e');
+      }
       return false;
     }
   }
@@ -215,7 +217,9 @@ class AuthService {
         return "Null user";
       }
     } catch (e) {
-      print("Invalid user");
+      if (kDebugMode) {
+        print("Invalid user");
+      }
       rethrow;
     }
   }

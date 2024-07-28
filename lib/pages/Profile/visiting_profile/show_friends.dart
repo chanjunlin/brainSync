@@ -73,7 +73,7 @@ class _ShowUserFriendsState extends State<ShowUserFriends> {
               return CustomChatTile(
                 leading: CircleAvatar(
                   backgroundImage:
-                      NetworkImage(friend!.pfpURL ?? PLACEHOLDER_PFP),
+                      NetworkImage(friend!.pfpURL ?? placeholderPFP),
                 ),
                 title: "${friend.firstName} ${friend.lastName}",
                 subtitle: friend.bio ?? 'No bio available',

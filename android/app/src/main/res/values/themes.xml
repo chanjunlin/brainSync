@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Base.Theme.AndroidPlayground" parent="Theme.Material33.DayNight.NoActionBar">
+        <item name = "android:windowIsTranslucent"></item>
+    </style>
+
+    <style name="Theme.AndroidPlayground" parent="Base.Theme.AndroidPlayground">
+    </style>
+</resources>

@@ -13,10 +13,10 @@ class PrivateChat extends StatefulWidget {
   const PrivateChat({super.key});
 
   @override
-  _PrivateChatState createState() => _PrivateChatState();
+  PrivateChatState createState() => PrivateChatState();
 }
 
-class _PrivateChatState extends State<PrivateChat> {
+class PrivateChatState extends State<PrivateChat> {
   final GetIt _getIt = GetIt.instance;
   late AuthService _authService;
   late DatabaseService _databaseService;
@@ -76,23 +76,22 @@ class _PrivateChatState extends State<PrivateChat> {
               itemBuilder: (context, index) {
                 UserProfile? friend = snapshot.data![index];
                 if (friend == null) return const SizedBox.shrink();
-                print(friend);
                 return CustomChatTile(
                   leading: CircleAvatar(
                     backgroundImage:
-                        NetworkImage(friend.pfpURL ?? PLACEHOLDER_PFP),
+                        NetworkImage(friend.pfpURL ?? placeholderPFP),
                   ),
                   title: "${friend.firstName} ${friend.lastName}",
                   subtitle: friend.bio ?? 'No bio available',
                   onTap: () async {
                     final chatExists = await _databaseService.checkChatExist(
-                        _authService.currentUser!.uid, friend!.uid!);
+                        _authService.currentUser!.uid, friend.uid!);
                     if (!chatExists) {
                       await _databaseService.createNewChat(
-                          _authService.currentUser!.uid, friend!.uid!);
+                          _authService.currentUser!.uid, friend.uid!);
                     }
                     UserProfile? user =
-                        await _databaseService.fetchUserProfile(friend!.uid!);
+                        await _databaseService.fetchUserProfile(friend.uid!);
                     _navigationService.push(
                       MaterialPageRoute(
                         builder: (context) {

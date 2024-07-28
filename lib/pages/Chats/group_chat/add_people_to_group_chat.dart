@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import 'package:uuid/uuid.dart';
 
 import '../../../const.dart';
 import '../../../model/user_profile.dart';
@@ -69,7 +68,7 @@ class AddPeopleState extends State<AddPeople> {
             createdBy = groupChatDetails['createdBy'] ?? 'Null User';
             groupID = groupChatDetails["id"] ?? widget.groupID;
             groupName = groupChatDetails["groupName"] ?? "Null Group";
-            groupPicture = groupChatDetails["groupPicture"] ?? PLACEHOLDER_PFP;
+            groupPicture = groupChatDetails["groupPicture"] ?? placeholderPFP;
             createdAt = groupChatDetails["createdAt"];
             adminIDs = List<String>.from(groupChatDetails["admins"] ?? []);
             memberIDs = List<String>.from(groupChatDetails["participantsID"] ?? []);
@@ -129,7 +128,6 @@ class AddPeopleState extends State<AddPeople> {
         icon: Icons.info,
       );
     } else {
-      String groupId = const Uuid().v4();
       try {
         await _databaseService.addFriend(widget.groupID, selectedFriends);
         Navigator.pop(context);
@@ -170,7 +168,7 @@ class AddPeopleState extends State<AddPeople> {
           children: [
             Expanded(
               child: _friends.isEmpty
-                  ? Center(
+                  ? const Center(
                 child: Text('No friends available', style: TextStyle(fontSize: 18, color: Colors.grey)),
               )
                   : ListView.builder(
@@ -184,7 +182,7 @@ class AddPeopleState extends State<AddPeople> {
                     title: Text("${friend.firstName} ${friend.lastName}"),
                     leading: CircleAvatar(
                       backgroundImage:
-                      NetworkImage(friend.pfpURL ?? PLACEHOLDER_PFP),
+                      NetworkImage(friend.pfpURL ?? placeholderPFP),
                     ),
                     trailing: Checkbox(
                       value: selectedFriends.contains(friend),

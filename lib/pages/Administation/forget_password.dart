@@ -1,6 +1,5 @@
 import 'package:brainsync/common_widgets/edit_text_field.dart';
 import 'package:brainsync/services/auth_service.dart';
-import 'package:brainsync/services/navigation_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
@@ -20,7 +19,6 @@ class _ForgetPasswordState extends State<ForgetPassword> {
   final _authService = GetIt.instance.get<AuthService>();
 
   late AlertService _alertService;
-  late NavigationService _navigationService;
 
   String? errorMessage = " ";
 
@@ -28,7 +26,6 @@ class _ForgetPasswordState extends State<ForgetPassword> {
   void initState() {
     super.initState();
     _alertService = _getIt.get<AlertService>();
-    _navigationService = _getIt.get<NavigationService>();
   }
 
   Future<void> sendPasswordResetEmail() async {

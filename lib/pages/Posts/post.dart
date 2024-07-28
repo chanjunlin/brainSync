@@ -19,10 +19,10 @@ class PostsPage extends StatefulWidget {
   const PostsPage({super.key});
 
   @override
-  _PostsPageState createState() => _PostsPageState();
+  PostsPageState createState() => PostsPageState();
 }
 
-class _PostsPageState extends State<PostsPage> {
+class PostsPageState extends State<PostsPage> {
   String? userProfilePfp, name;
   final TextEditingController titleController = TextEditingController();
   final TextEditingController contentController = TextEditingController();
@@ -276,7 +276,7 @@ class _PostsPageState extends State<PostsPage> {
                       return null;
                     },
                   ),
-                  Spacer(),
+                  const Spacer(),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [

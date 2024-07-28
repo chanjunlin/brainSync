@@ -7,10 +7,10 @@ class AnimatedChatList extends StatefulWidget {
   const AnimatedChatList({super.key, required this.messages});
 
   @override
-  _AnimatedChatListState createState() => _AnimatedChatListState();
+  AnimatedChatListState createState() => AnimatedChatListState();
 }
 
-class _AnimatedChatListState extends State<AnimatedChatList> {
+class AnimatedChatListState extends State<AnimatedChatList> {
   final GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();
   late List<ChatMessage> _messages;
 
@@ -37,10 +37,10 @@ class _AnimatedChatListState extends State<AnimatedChatList> {
       child: SizeTransition(
         sizeFactor: animation,
         child: ListTile(
-          title: Text(message.text ?? ''),
+          title: Text(message.text),
           subtitle: Text(
             message.user.firstName!,
-            style: TextStyle(color: Colors.red),
+            style: const TextStyle(color: Colors.red),
           ),
         ),
       ),

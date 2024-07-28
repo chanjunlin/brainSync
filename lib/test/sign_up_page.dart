@@ -14,7 +14,6 @@ class MockAlertService extends Mock implements AlertService {}
 class MockAuthService extends Mock implements AuthService {
   @override
   Future<String> register(String name, String password, String email) async {
-    // Return a mocked value or handle different scenarios
     return "true"; // Example of a mocked successful registration
   }
 }
@@ -29,7 +28,6 @@ void main() {
     late MockAlertService alertService;
     late MockDatabaseService databaseService;
     late MockNavigationService navigationService;
-    late Widget registerPage;
 
     setUp(() {
       authService = MockAuthService();

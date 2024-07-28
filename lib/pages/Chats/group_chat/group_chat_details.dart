@@ -76,7 +76,7 @@ class _GroupChatDetailsState extends State<GroupChatDetails> {
           createdBy = groupChatDetails['createdBy'] ?? 'Null User';
           groupID = groupChatDetails["id"] ?? widget.groupID;
           groupName = groupChatDetails["groupName"] ?? "Null Group";
-          groupPicture = groupChatDetails["groupPicture"] ?? PLACEHOLDER_PFP;
+          groupPicture = groupChatDetails["groupPicture"] ?? placeholderPFP;
           createdAt = groupChatDetails["createdAt"];
           adminIDs = List<String>.from(groupChatDetails["admins"] ?? []);
           memberIDs =
@@ -308,7 +308,7 @@ class _GroupChatDetailsState extends State<GroupChatDetails> {
                 return CustomChatTile(
                   leading: CircleAvatar(
                     backgroundImage: NetworkImage(
-                        member['profilePictureUrl'] ?? PLACEHOLDER_PFP),
+                        member['profilePictureUrl'] ?? placeholderPFP),
                   ),
                   title: displayName,
                   subtitle: member["bio"] ?? 'No bio available',
@@ -383,7 +383,7 @@ class _GroupChatDetailsState extends State<GroupChatDetails> {
                 CustomChatTile(
                   leading: CircleAvatar(
                     backgroundImage: NetworkImage(
-                        admin['profilePictureUrl'] ?? PLACEHOLDER_PFP),
+                        admin['profilePictureUrl'] ?? placeholderPFP),
                   ),
                   title: displayName,
                   subtitle: admin["bio"] ?? 'No bio available',

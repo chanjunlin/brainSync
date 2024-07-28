@@ -80,14 +80,14 @@ class GroupChatCreationState extends State<GroupChatCreation> {
             return GroupChatPage(
               groupID: groupId,
               groupName: groupName,
-              groupPicture: PLACEHOLDER_PFP,
+              groupPicture: placeholderPFP,
             );
           },
         ),
       );
     } catch (e) {
       if (kDebugMode) {
-        print("Error => ${e}");
+        print("Error => $e");
       }
       _alertService.showToast(
         text: "Error creating group",
@@ -129,7 +129,7 @@ class GroupChatCreationState extends State<GroupChatCreation> {
                     title: Text("${friend.firstName} ${friend.lastName}"),
                     leading: CircleAvatar(
                       backgroundImage:
-                          NetworkImage(friend.pfpURL ?? PLACEHOLDER_PFP),
+                          NetworkImage(friend.pfpURL ?? placeholderPFP),
                     ),
                     trailing: Checkbox(
                       value: selectedFriends.contains(friend),

@@ -11,6 +11,7 @@ import 'package:brainsync/services/media_service.dart';
 import 'package:brainsync/services/navigation_service.dart';
 import 'package:brainsync/services/storage_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
@@ -20,10 +21,10 @@ class EditProfilePage extends StatefulWidget {
   const EditProfilePage({super.key});
 
   @override
-  _EditProfilePageState createState() => _EditProfilePageState();
+  EditProfilePageState createState() => EditProfilePageState();
 }
 
-class _EditProfilePageState extends State<EditProfilePage> with RouteAware {
+class EditProfilePageState extends State<EditProfilePage> with RouteAware {
   final double coverHeight = 280;
   final double profileHeight = 144;
   final _formKey = GlobalKey<FormState>();
@@ -92,8 +93,8 @@ class _EditProfilePageState extends State<EditProfilePage> with RouteAware {
       if (userProfile != null && userProfile.exists) {
         setState(() {
           userProfileCover =
-              userProfile.get('profileCoverURL') ?? PLACEHOLDER_PROFILE_COVER;
-          userProfilePfp = userProfile.get('pfpURL') ?? PLACEHOLDER_PFP;
+              userProfile.get('profileCoverURL') ?? placeholderProfileCover;
+          userProfilePfp = userProfile.get('pfpURL') ?? placeholderPFP;
           firstNameController.text = userProfile.get('firstName') ?? 'Name';
           lastNameController.text = userProfile.get('lastName') ?? 'Name';
           selectedYear = userProfile.get("year");
@@ -104,16 +105,19 @@ class _EditProfilePageState extends State<EditProfilePage> with RouteAware {
           completedModules = userProfile.get("completedModules") ?? [];
         });
       } else {
-        print('User profile not found');
+        if (kDebugMode) {
+          print('User profile not found');
+        }
       }
     } catch (e) {
-      print('Error loading profile: $e');
+      if (kDebugMode) {
+        print('Error loading profile: $e');
+      }
     }
   }
 
   void saveProfile() async {
     if (_formKey.currentState!.validate()) {
-      print(selectedProfileImage);
       try {
         await _storageService.saveData(
           coverFile: selectedCoverImage,
@@ -130,7 +134,6 @@ class _EditProfilePageState extends State<EditProfilePage> with RouteAware {
         );
         _navigationService.pushReplacementName("/profile");
       } catch (e) {
-        print(e);
         _alertService.showToast(
           text: "Failed to update profile",
           icon: Icons.error,
@@ -246,7 +249,7 @@ class _EditProfilePageState extends State<EditProfilePage> with RouteAware {
                 fit: BoxFit.cover,
               )
             : Image.network(
-                userProfileCover ?? PLACEHOLDER_PROFILE_COVER,
+                userProfileCover ?? placeholderProfileCover,
                 height: coverHeight,
                 width: double.infinity,
                 fit: BoxFit.cover,
@@ -272,7 +275,7 @@ class _EditProfilePageState extends State<EditProfilePage> with RouteAware {
           backgroundColor: Colors.grey,
           backgroundImage: selectedProfileImage != null
               ? FileImage(selectedProfileImage!)
-              : NetworkImage(userProfilePfp ?? PLACEHOLDER_PFP)
+              : NetworkImage(userProfilePfp ?? placeholderPFP)
                   as ImageProvider,
         ),
       ),

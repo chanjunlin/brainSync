@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
-import '../common_widgets/bottomBar.dart';
+import '../common_widgets/bottom_bar.dart';
 import '../common_widgets/nav_bar.dart';
 import '../services/alert_service.dart';
 
@@ -61,7 +61,6 @@ class _HomeState extends State<Home> with RouteAware {
         final title = post['title'].toString().toLowerCase();
         return query.isEmpty || title.startsWith(query);
       }).toList();
-      print(filteredPosts);
     });
   }
 

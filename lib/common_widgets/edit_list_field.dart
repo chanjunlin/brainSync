@@ -26,10 +26,10 @@ class CustomListField extends StatefulWidget {
   });
 
   @override
-  _CustomListFieldState createState() => _CustomListFieldState();
+  CustomListFieldState createState() => CustomListFieldState();
 }
 
-class _CustomListFieldState extends State<CustomListField> {
+class CustomListFieldState extends State<CustomListField> {
   final GetIt _getIt = GetIt.instance;
 
   late AuthService _authService;

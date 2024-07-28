@@ -4,14 +4,13 @@ import 'dart:io';
 import 'package:brainsync/model/message.dart';
 import 'package:brainsync/pages/Chats/friends_chat.dart';
 import 'package:brainsync/services/database_service.dart';
-import 'package:brainsync/services/storage_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dash_chat_2/dash_chat_2.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
-import '../../../const.dart';
 import '../../../model/group_chat.dart';
 import '../../../services/auth_service.dart';
 import '../../../services/media_service.dart';
@@ -41,7 +40,6 @@ class _GroupChatPageState extends State<GroupChatPage> {
   late DatabaseService _databaseService;
   late MediaService _mediaService;
   late NavigationService _navigationService;
-  late StorageService _storageService;
 
   late String groupName;
   ChatUser? currentUser;
@@ -53,7 +51,6 @@ class _GroupChatPageState extends State<GroupChatPage> {
     _databaseService = _getIt.get<DatabaseService>();
     _mediaService = _getIt.get<MediaService>();
     _navigationService = _getIt.get<NavigationService>();
-    _storageService = _getIt.get<StorageService>();
     initializeGroupChat();
     currentUser = ChatUser(
       id: _authService.currentUser!.uid,
@@ -165,7 +162,7 @@ class _GroupChatPageState extends State<GroupChatPage> {
         children: [
           CircleAvatar(
             radius: 24,
-            backgroundImage: NetworkImage(widget.groupPicture ?? PLACEHOLDER_PFP),
+            backgroundImage: NetworkImage(widget.groupPicture),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -195,7 +192,7 @@ class _GroupChatPageState extends State<GroupChatPage> {
           Message message = Message(
             senderID: chatMessage.user.id,
             content: chatMessage.medias!.first.url,
-            messageType: MessageType.Image,
+            messageType: MessageType.image,
             sentAt: Timestamp.fromDate(chatMessage.createdAt),
           );
           await _databaseService.sendGroupChatMessage(
@@ -207,7 +204,7 @@ class _GroupChatPageState extends State<GroupChatPage> {
         Message message = Message(
           senderID: currentUser!.id,
           content: chatMessage.text.trim(),
-          messageType: MessageType.Text,
+          messageType: MessageType.text,
           sentAt: Timestamp.fromDate(chatMessage.createdAt),
         );
         await _databaseService.sendGroupChatMessage(
@@ -216,7 +213,9 @@ class _GroupChatPageState extends State<GroupChatPage> {
         );
       }
     } catch (e) {
-      print('Error sending message: $e');
+      if (kDebugMode) {
+        print('Error sending message: $e');
+      }
     }
   }
 
@@ -234,7 +233,7 @@ class _GroupChatPageState extends State<GroupChatPage> {
         firstName: usernames[senderIndex],
       );
 
-      if (m.messageType == MessageType.Image) {
+      if (m.messageType == MessageType.image) {
         return ChatMessage(
           user: m.senderID == currentUser!.id ? currentUser! : otherChatter,
           createdAt: m.sentAt!.toDate(),
@@ -305,7 +304,9 @@ class _GroupChatPageState extends State<GroupChatPage> {
       );
       sendMessage(chatMessage);
     } catch (e) {
-      print('Error uploading media: $e');
+      if (kDebugMode) {
+        print('Error uploading media: $e');
+      }
     }
   }
 }

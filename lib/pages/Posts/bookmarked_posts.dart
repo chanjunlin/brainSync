@@ -13,10 +13,10 @@ class BookmarkedPosts extends StatefulWidget {
   });
 
   @override
-  _BookmarkedPostsState createState() => _BookmarkedPostsState();
+  BookmarkedPostsState createState() => BookmarkedPostsState();
 }
 
-class _BookmarkedPostsState extends State<BookmarkedPosts> {
+class BookmarkedPostsState extends State<BookmarkedPosts> {
   final GetIt _getIt = GetIt.instance;
   final Map<String, bool> _bookmarks = {};
 

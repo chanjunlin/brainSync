@@ -68,6 +68,13 @@ dependencies:
   path: any
   uuid: ^4.4.2
   palette_generator: ^0.3.3+4
+  flutter_launcher_icons: ^0.13.1
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon/brainsync.png"
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

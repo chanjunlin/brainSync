@@ -13,9 +13,9 @@ import '../services/alert_service.dart';
 import '../services/auth_service.dart';
 
 class HomePostCard extends StatefulWidget {
-  String? postId;
+  final String? postId;
 
-  HomePostCard({
+  const HomePostCard({
     super.key,
     required this.postId,
   });

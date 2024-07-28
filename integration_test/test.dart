@@ -12,6 +12,7 @@ import 'package:mockito/mockito.dart';
 import '../test/login_test.dart';
 
 class MockNavigationService extends Mock implements NavigationService {
+  @override
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
   @override
@@ -69,8 +70,7 @@ void main() {
       ),
     );
 
-    // Verify the presence of the "Sign Up" text
-    expect(find.text("Don\'t have an account? "), findsOneWidget);
+    expect(find.text("Don't have an account? "), findsOneWidget);
     expect(find.text("Sign Up"), findsOneWidget);
 
     // Find the TextButton

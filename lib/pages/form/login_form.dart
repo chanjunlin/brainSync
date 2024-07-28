@@ -170,7 +170,6 @@ class _LoginFormState extends State<LoginForm> {
                   onTap: () async {
                     widget.setLoading(true);
                     try {
-                      print("pressed google button");
                       bool result =
                           await _authService.signInWithGoogle(context);
                       if (result) {

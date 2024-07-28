@@ -19,10 +19,10 @@ class PostsPageTest extends StatefulWidget {
   const PostsPageTest({super.key});
 
   @override
-  _PostsPageState createState() => _PostsPageState();
+  PostsPageState createState() => PostsPageState();
 }
 
-class _PostsPageState extends State<PostsPageTest> {
+class PostsPageState extends State<PostsPageTest> {
   String? userProfilePfp, name;
   final TextEditingController titleController = TextEditingController();
   final TextEditingController contentController = TextEditingController();

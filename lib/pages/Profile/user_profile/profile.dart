@@ -13,7 +13,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
-import '../../../common_widgets/bottomBar.dart';
+import '../../../common_widgets/bottom_bar.dart';
 import '../../../main.dart';
 
 class Profile extends StatefulWidget {
@@ -21,10 +21,10 @@ class Profile extends StatefulWidget {
   final ImageProvider? coverImageProvider;
 
   const Profile({
-    Key? key,
+    super.key,
     this.profileImageProvider,
     this.coverImageProvider,
-  }) : super(key: key);
+  });
 
   @override
   State<Profile> createState() => _ProfileState();
@@ -99,9 +99,9 @@ class _ProfileState extends State<Profile> with RouteAware {
           bio = profile['bio'] ?? 'No bio available';
           firstName = profile['firstName'] ?? 'First';
           lastName = profile['lastName'] ?? 'Last';
-          pfpURL = profile['pfpURL'] ?? PLACEHOLDER_PFP;
+          pfpURL = profile['pfpURL'] ?? placeholderPFP;
           profileCoverURL =
-              profile['profileCoverURL'] ?? PLACEHOLDER_PROFILE_COVER;
+              profile['profileCoverURL'] ?? placeholderProfileCover;
           uid = profile['uid'];
           year = profile["year"];
           completedModules =
@@ -197,7 +197,7 @@ class _ProfileState extends State<Profile> with RouteAware {
       color: Colors.brown.shade100,
       child: Image(
         image: widget.coverImageProvider ??
-            NetworkImage(profileCoverURL ?? PLACEHOLDER_PROFILE_COVER),
+            NetworkImage(profileCoverURL ?? placeholderProfileCover),
         fit: BoxFit.cover,
       ),
     );
@@ -210,7 +210,7 @@ class _ProfileState extends State<Profile> with RouteAware {
       backgroundImage: selectedImage != null
           ? FileImage(selectedImage!)
           : (widget.profileImageProvider ??
-              NetworkImage(pfpURL ?? PLACEHOLDER_PFP)),
+              NetworkImage(pfpURL ?? placeholderPFP)),
     );
   }
 

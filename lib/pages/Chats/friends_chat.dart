@@ -7,9 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
 
-import '../../common_widgets/bottomBar.dart';
+import '../../common_widgets/bottom_bar.dart';
 import '../../const.dart';
-import '../../services/auth_service.dart';
 import '../../services/database_service.dart';
 import '../../services/navigation_service.dart';
 
@@ -28,7 +27,6 @@ class FriendsChats extends StatefulWidget {
 class FriendsChatsState extends State<FriendsChats> {
   final GetIt _getIt = GetIt.instance;
 
-  late AuthService _authService;
   late DatabaseService _databaseService;
   late NavigationService _navigationService;
 
@@ -45,7 +43,6 @@ class FriendsChatsState extends State<FriendsChats> {
   @override
   void initState() {
     super.initState();
-    _authService = _getIt.get<AuthService>();
     _databaseService = _getIt.get<DatabaseService>();
     _navigationService = _getIt.get<NavigationService>();
     loadedProfile = loadProfile();
@@ -64,7 +61,7 @@ class FriendsChatsState extends State<FriendsChats> {
       DocumentSnapshot? userProfile = await _databaseService.fetchCurrentUser();
       if (userProfile != null && userProfile.exists) {
         setState(() {
-          userProfilePfp = userProfile.get('pfpURL') ?? PLACEHOLDER_PFP;
+          userProfilePfp = userProfile.get('pfpURL') ?? placeholderPFP;
           firstName = userProfile.get('firstName') ?? 'Name';
           lastName = userProfile.get('lastName') ?? 'Name';
           chats = List<String>.from(userProfile.get("chats") ?? []);
@@ -76,7 +73,7 @@ class FriendsChatsState extends State<FriendsChats> {
             userProfile.reference.snapshots().listen((updatedSnapshot) {
           if (updatedSnapshot.exists) {
             setState(() {
-              userProfilePfp = updatedSnapshot.get('pfpURL') ?? PLACEHOLDER_PFP;
+              userProfilePfp = updatedSnapshot.get('pfpURL') ?? placeholderPFP;
               firstName = updatedSnapshot.get('firstName') ?? 'Name';
               lastName = updatedSnapshot.get('lastName') ?? 'Name';
               chats = List<String>.from(updatedSnapshot.get("chats") ?? []);
@@ -85,7 +82,9 @@ class FriendsChatsState extends State<FriendsChats> {
           }
         });
       } else {}
-    } catch (e) {}
+    } catch (e) {
+      rethrow;
+    }
   }
 
   void sortChatsByLatestMessage() {

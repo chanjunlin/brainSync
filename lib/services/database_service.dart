@@ -6,6 +6,7 @@ import 'package:brainsync/model/user_profile.dart';
 import 'package:brainsync/services/alert_service.dart';
 import 'package:brainsync/utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 
 import '../const.dart';
@@ -104,7 +105,9 @@ class DatabaseService {
         throw Exception("Error");
       }
     } catch (e) {
-      print("Error fetching user profile: $e");
+      if (kDebugMode) {
+        print("Error fetching user profile: $e");
+      }
       throw Exception("Error");
     }
   }
@@ -152,10 +155,8 @@ class DatabaseService {
   Future<void> createNewGroup(
       String groupID, String groupName, List<UserProfile?> members) async {
     final userId = _authService.currentUser!.uid;
-    final DocumentSnapshot? userRef = await fetchCurrentUser();
     final groupDocRef = _groupChatCollection?.doc(groupID);
 
-    var userProfile = userRef?.data() as Map<String, dynamic>;
     var participantsID = members.map((member) => member?.uid ?? '').toList();
 
     participantsID.add(userId);
@@ -167,7 +168,7 @@ class DatabaseService {
       groupID: groupID,
       groupDescription: "No description",
       groupName: groupName,
-      groupPicture: PLACEHOLDER_PFP,
+      groupPicture: placeholderPFP,
       participantsID: participantsID,
       messages: [],
     );
@@ -240,9 +241,6 @@ class DatabaseService {
             .doc(uid2)
             .get();
         DocumentSnapshot chatSnapshot = await transaction.get(docRef);
-        DocumentSnapshot docSnapshot = await docRef.get();
-        Map<String, dynamic> chatData =
-            docSnapshot.data() as Map<String, dynamic>;
         List<dynamic> user1Chats = user1Snapshot.get('chats') ?? [];
         List<dynamic> user2Chats = user2Snapshot.get('chats') ?? [];
 
@@ -280,7 +278,9 @@ class DatabaseService {
         }
       });
     } catch (e) {
-      print('Transaction failed: $e');
+      if (kDebugMode) {
+        print('Transaction failed: $e');
+      }
       rethrow;
     }
   }
@@ -304,7 +304,9 @@ class DatabaseService {
         transaction.update(docRef, chatModel.toJson());
       });
     } catch (e) {
-      print('Transaction failed: $e');
+      if (kDebugMode) {
+        print('Transaction failed: $e');
+      }
       rethrow;
     }
   }
@@ -327,7 +329,6 @@ class DatabaseService {
     var participantsID = members.map((member) => member?.uid ?? '').toList();
     final groupChatRef = _groupChatCollection!.doc(groupID);
     await _firebaseFirestore.runTransaction((transaction) async {
-      DocumentSnapshot groupChatSnapshot = await transaction.get(groupChatRef);
       for (var participant in participantsID) {
         final userRef = _usersCollection!.doc(participant);
         transaction.update(userRef, {
@@ -443,7 +444,6 @@ class DatabaseService {
     } else {
       _alertService.showToast(text: "User profile doesn't exists.");
     }
-    print(commonFriends);
     return commonFriends;
   }
 
@@ -470,7 +470,9 @@ class DatabaseService {
         await receiverDoc.reference.update({'friendList': friendList});
       }
     } catch (e) {
-      print(e);
+      if (kDebugMode) {
+        print(e);
+      }
     }
   }
 
@@ -505,7 +507,9 @@ class DatabaseService {
           List<String>.from(userData['completedModules'] ?? []);
       return computedModules.contains(moduleCode);
     } catch (error) {
-      print("Error checking current module: $error");
+      if (kDebugMode) {
+        print("Error checking current module: $error");
+      }
       return false;
     }
   }
@@ -520,7 +524,9 @@ class DatabaseService {
           List<String>.from(userData['currentModules'] ?? []);
       return currentModules.contains(moduleCode);
     } catch (error) {
-      print("Error checking current module: $error");
+      if (kDebugMode) {
+        print("Error checking current module: $error");
+      }
       return false;
     }
   }
@@ -540,7 +546,9 @@ class DatabaseService {
         });
       }
     } catch (e) {
-      print(e);
+      if (kDebugMode) {
+        print(e);
+      }
     }
   }
 
@@ -562,7 +570,9 @@ class DatabaseService {
         });
       }
     } catch (e) {
-      print(e);
+      if (kDebugMode) {
+        print(e);
+      }
     }
   }
 
@@ -587,7 +597,9 @@ class DatabaseService {
       await userRef.update({
         'myPosts': FieldValue.arrayUnion([postRef.id])
       });
-    } catch (e) {}
+    } catch (e) {
+      rethrow;
+    }
   }
 
   // Fetching all posts
@@ -641,7 +653,9 @@ class DatabaseService {
           .get();
       return postSnapshot;
     } catch (e) {
-      print('Error fetching posts: $e');
+      if (kDebugMode) {
+        print('Error fetching posts: $e');
+      }
       rethrow;
     }
   }
@@ -655,7 +669,9 @@ class DatabaseService {
         'bookmarks': FieldValue.arrayUnion([postId])
       });
     } catch (e) {
-      print(e);
+      if (kDebugMode) {
+        print(e);
+      }
     }
   }
 
@@ -668,7 +684,9 @@ class DatabaseService {
         'bookmarks': FieldValue.arrayRemove([postId])
       });
     } catch (e) {
-      print(e);
+      if (kDebugMode) {
+        print(e);
+      }
     }
   }
 
@@ -685,7 +703,9 @@ class DatabaseService {
         'myLikedPosts': FieldValue.arrayUnion([postID]),
       });
     } catch (e) {
-      print(e);
+      if (kDebugMode) {
+        print(e);
+      }
     }
   }
 
@@ -702,7 +722,9 @@ class DatabaseService {
         'myLikedPosts': FieldValue.arrayRemove([postID]),
       });
     } catch (e) {
-      print(e);
+      if (kDebugMode) {
+        print(e);
+      }
     }
   }
 
@@ -710,12 +732,10 @@ class DatabaseService {
   Future<void> addNewcomment(String postID, Comment comment) async {
     try {
       final postRef = _postCollection!.doc(postID);
-      final userID = _authService.currentUser!.uid;
 
       await _firebaseFirestore.runTransaction((transaction) async {
         DocumentSnapshot postSnapshot = await transaction.get(postRef);
         if (!postSnapshot.exists) {
-          print("Post does not exist!");
         }
         transaction.update(postRef, {
           "commentCount": FieldValue.increment(1),
@@ -723,7 +743,9 @@ class DatabaseService {
         await postRef.collection('comments').add(comment.toJson());
       });
     } catch (e) {
-      print(e);
+      if (kDebugMode) {
+        print(e);
+      }
     }
   }
 
@@ -741,7 +763,9 @@ class DatabaseService {
         'myLikedComments': FieldValue.arrayUnion([combinedRef]),
       });
     } catch (e) {
-      print("Error liking comment");
+      if (kDebugMode) {
+        print("Error liking comment");
+      }
     }
   }
 
@@ -755,7 +779,9 @@ class DatabaseService {
         'likes': FieldValue.arrayRemove([userId])
       });
     } catch (e) {
-      print("Error liking comment");
+      if (kDebugMode) {
+        print("Error liking comment");
+      }
     }
   }
 }

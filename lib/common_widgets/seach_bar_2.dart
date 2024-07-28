@@ -17,10 +17,10 @@ class CustomSearchBar extends StatefulWidget {
   });
 
   @override
-  _CustomSearchBarState createState() => _CustomSearchBarState();
+  CustomSearchBarState createState() => CustomSearchBarState();
 }
 
-class _CustomSearchBarState extends State<CustomSearchBar> {
+class CustomSearchBarState extends State<CustomSearchBar> {
   bool showSuggestions = false;
   late FocusNode _focusNode;
 

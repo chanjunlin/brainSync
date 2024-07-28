@@ -1,17 +1,17 @@
 import 'package:flutter/cupertino.dart';
 
-final RegExp EMAIL_VALIDATION_REGEX =
+final RegExp emailValidationRegex =
     RegExp(r'^([a-zA-Z0-9._%+-]+@gmail\.com)|([a-zA-Z0-9._%+-]+@u\.nus\.edu)$');
 
-final RegExp PASSWORD_VALIDATION_REGEX =
+final RegExp passwordValidationRegex =
     RegExp(r"^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$");
 
-final RegExp NAME_VALIDATION_REGEX = RegExp(r'^[a-zA-Z\s]+$');
+final RegExp nameValidationRegex = RegExp(r'^[a-zA-Z\s]+$');
 
-const String PLACEHOLDER_PFP =
+const String placeholderPFP =
     "https://t3.ftcdn.net/jpg/05/16/27/58/360_F_516275801_f3Fsp17x6HQK0xQgDQEELoTuERO4SsWV.jpg";
 
-const String PLACEHOLDER_PROFILE_COVER =
+const String placeholderProfileCover =
     'https://firebasestorage.googleapis.com/v0/b/brainsync6325.appspot.com/o/brainsync.png?alt=media&token=6f290b30-f675-4aae-a1c9-75084c49840f';
 
 String? validateFirstName(String? value) {
@@ -19,7 +19,7 @@ String? validateFirstName(String? value) {
     return 'First name is required';
   }
 
-  if (!NAME_VALIDATION_REGEX.hasMatch(value)) {
+  if (!nameValidationRegex.hasMatch(value)) {
     return 'First name can only contain letters & space';
   }
 
@@ -35,7 +35,7 @@ String? validateLastName(String? value) {
     return 'Last name is required';
   }
 
-  if (!NAME_VALIDATION_REGEX.hasMatch(value)) {
+  if (!nameValidationRegex.hasMatch(value)) {
     return 'Last name can only contain letters & space';
   }
 
@@ -51,7 +51,7 @@ String? validateEmail(String? value) {
     return 'Email is required';
   }
 
-  if (!EMAIL_VALIDATION_REGEX.hasMatch(value)) {
+  if (!emailValidationRegex.hasMatch(value)) {
     return 'Enter a valid email address (Gmail or @u.nus.edu only)';
   }
 
@@ -67,7 +67,7 @@ String? validatePassword(String? value) {
     return 'Password must be at least 8 characters long';
   }
 
-  if (!PASSWORD_VALIDATION_REGEX.hasMatch(value)) {
+  if (!passwordValidationRegex.hasMatch(value)) {
     return 'Password must include Uppercase and lowercase letters, numbers and special characters';
   }
 

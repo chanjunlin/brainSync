@@ -23,7 +23,6 @@ void main() {
     late MockAlertService alertService;
     late MockDatabaseService databaseService;
     late MockNavigationService navigationService;
-    late Widget registerPage;
 
     setUp(() {
       authService = MockAuthService();

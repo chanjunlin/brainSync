@@ -6,10 +6,9 @@ import '../pages/Profile/visiting_profile/visiting_profile.dart';
 import '../services/alert_service.dart';
 import '../services/auth_service.dart';
 import '../services/database_service.dart';
-import '../services/navigation_service.dart';
 
 class FriendRequestCard extends StatefulWidget {
-  final userData;
+  final dynamic userData;
 
   const FriendRequestCard({
     super.key,
@@ -26,9 +25,8 @@ class _FriendRequestCardState extends State<FriendRequestCard> {
   late AlertService _alertService;
   late AuthService _authService;
   late DatabaseService _databaseService;
-  late NavigationService _navigationService;
 
-  late var userData;
+  late dynamic userData;
 
   late List<dynamic> friendReqList;
 
@@ -41,7 +39,6 @@ class _FriendRequestCardState extends State<FriendRequestCard> {
     _alertService = _getIt.get<AlertService>();
     _authService = _getIt.get<AuthService>();
     _databaseService = _getIt.get<DatabaseService>();
-    _navigationService = _getIt.get<NavigationService>();
     loadedProfile = loadProfile();
   }
 

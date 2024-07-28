@@ -110,7 +110,7 @@ class _EditGroupChatDetailsState extends State<EditGroupChatDetails>
             createdBy = groupChatDetails['createdBy'] ?? 'Null User';
             groupID = groupChatDetails["id"] ?? widget.groupID;
             groupName = groupChatDetails["groupName"] ?? "Null Group";
-            groupPicture = groupChatDetails["groupPicture"] ?? PLACEHOLDER_PFP;
+            groupPicture = groupChatDetails["groupPicture"] ?? placeholderPFP;
             createdAt = groupChatDetails["createdAt"];
             adminIDs = List<String>.from(groupChatDetails["admins"] ?? []);
             memberIDs =
@@ -234,7 +234,7 @@ class _EditGroupChatDetailsState extends State<EditGroupChatDetails>
           backgroundColor: Colors.brown[300],
           backgroundImage: selectedGroupPicture != null
               ? FileImage(selectedGroupPicture!)
-              : NetworkImage(groupPicture ?? PLACEHOLDER_PFP) as ImageProvider,
+              : NetworkImage(groupPicture ?? placeholderPFP) as ImageProvider,
         ),
       ),
     );
@@ -308,7 +308,7 @@ class _EditGroupChatDetailsState extends State<EditGroupChatDetails>
                   child: CustomChatTile(
                     leading: CircleAvatar(
                       backgroundImage: NetworkImage(
-                          member['profilePictureUrl'] ?? PLACEHOLDER_PFP),
+                          member['profilePictureUrl'] ?? placeholderPFP),
                     ),
                     title: displayName,
                     subtitle: member["bio"] ?? 'No bio available',
@@ -398,7 +398,7 @@ class _EditGroupChatDetailsState extends State<EditGroupChatDetails>
                   child: CustomChatTile(
                     leading: CircleAvatar(
                       backgroundImage: NetworkImage(
-                          member['profilePictureUrl'] ?? PLACEHOLDER_PFP),
+                          member['profilePictureUrl'] ?? placeholderPFP),
                     ),
                     title: displayName,
                     subtitle: member["bio"] ?? 'No bio available',

@@ -30,7 +30,7 @@ class _ShowMyPostsState extends State<ShowMyPosts> {
   Widget build(BuildContext context) {
     final Size screenSize = MediaQuery.of(context).size;
 
-    Widget _buildNoPostsContent() {
+    Widget buildNoPostsContent() {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -54,7 +54,7 @@ class _ShowMyPostsState extends State<ShowMyPosts> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: widget.myPosts == null || widget.myPosts!.isEmpty
-          ? _buildNoPostsContent()
+          ? buildNoPostsContent()
           : FutureBuilder<QuerySnapshot>(
         future: _databaseService.fetchUserPosts(widget.myPosts!.whereType<String>().toList()),
         builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
@@ -67,7 +67,7 @@ class _ShowMyPostsState extends State<ShowMyPosts> {
           }
 
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return _buildNoPostsContent();
+            return buildNoPostsContent();
           }
 
           List<DocumentSnapshot> posts = snapshot.data!.docs;

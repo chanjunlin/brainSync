@@ -75,9 +75,9 @@ class _VisitProfileState extends State<VisitProfile> {
             bio = profile['bio'] ?? 'No bio available';
             firstName = profile['firstName'] ?? 'First';
             lastName = profile['lastName'] ?? 'Last';
-            pfpURL = profile['pfpURL'] ?? PLACEHOLDER_PFP;
+            pfpURL = profile['pfpURL'] ?? placeholderPFP;
             profileCoverURL =
-                profile['profileCoverURL'] ?? PLACEHOLDER_PROFILE_COVER;
+                profile['profileCoverURL'] ?? placeholderProfileCover;
             uid = profile['uid'];
             year = profile["year"];
 
@@ -158,7 +158,7 @@ class _VisitProfileState extends State<VisitProfile> {
       width: double.infinity,
       color: Colors.grey,
       child: Image.network(
-        profileCoverURL ?? PLACEHOLDER_PROFILE_COVER,
+        profileCoverURL ?? placeholderProfileCover,
         fit: BoxFit.cover,
       ),
     );
@@ -168,7 +168,7 @@ class _VisitProfileState extends State<VisitProfile> {
     return CircleAvatar(
       radius: 72,
       backgroundColor: Colors.grey,
-      backgroundImage: NetworkImage(pfpURL ?? PLACEHOLDER_PFP),
+      backgroundImage: NetworkImage(pfpURL ?? placeholderPFP),
     );
   }
 

@@ -51,7 +51,7 @@ class _NavBarState extends State<NavBar> {
                   radius: 40,
                   backgroundImage: userProfilePfp != null
                       ? NetworkImage(userProfilePfp!)
-                      : const NetworkImage(PLACEHOLDER_PFP),
+                      : const NetworkImage(placeholderPFP),
                 ),
                 const SizedBox(height: 10),
                 Text(
@@ -83,9 +83,9 @@ class _NavBarState extends State<NavBar> {
       DocumentSnapshot? userProfile = await _databaseService.fetchCurrentUser();
       if (userProfile != null && userProfile.exists) {
         setState(() {
-          userProfilePfp = userProfile.get('pfpURL') ?? PLACEHOLDER_PFP;
+          userProfilePfp = userProfile.get('pfpURL') ?? placeholderPFP;
           userProfileCover =
-              userProfile.get('profileCoverURL') ?? PLACEHOLDER_PROFILE_COVER;
+              userProfile.get('profileCoverURL') ?? placeholderProfileCover;
           firstName = userProfile.get('firstName') ?? 'Name';
           lastName = userProfile.get('lastName') ?? 'Name';
           friendReqList = userProfile.get("friendReqList") ?? [];

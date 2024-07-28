@@ -8,6 +8,7 @@ import 'package:brainsync/services/storage_service.dart';
 import 'package:brainsync/utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dash_chat_2/dash_chat_2.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
@@ -167,7 +168,7 @@ class _ChatPageState extends State<ChatPage> {
           Message message = Message(
             senderID: chatMessage.user.id,
             content: chatMessage.medias!.first.url,
-            messageType: MessageType.Image,
+            messageType: MessageType.image,
             sentAt: Timestamp.fromDate(chatMessage.createdAt),
           );
           await _databaseService.sendChatMessage(
@@ -180,7 +181,7 @@ class _ChatPageState extends State<ChatPage> {
         Message message = Message(
           senderID: currentUser!.id,
           content: chatMessage.text.trim(),
-          messageType: MessageType.Text,
+          messageType: MessageType.text,
           sentAt: Timestamp.fromDate(chatMessage.createdAt),
         );
         await _databaseService.sendChatMessage(
@@ -190,13 +191,15 @@ class _ChatPageState extends State<ChatPage> {
         );
       }
     } catch (e) {
-      print('Error sending message: $e');
+      if (kDebugMode) {
+        print('Error sending message: $e');
+      }
     }
   }
 
   List<ChatMessage> generateChatMessagesList(List<Message> messages) {
     List<ChatMessage> chatMessages = messages.map((m) {
-      if (m.messageType == MessageType.Image) {
+      if (m.messageType == MessageType.image) {
         return ChatMessage(
           user: m.senderID == currentUser!.id ? currentUser! : otherChatUser!,
           createdAt: m.sentAt!.toDate(),
@@ -260,7 +263,9 @@ class _ChatPageState extends State<ChatPage> {
         await sendMessage(chatMessage);
       }
     } catch (e) {
-      print('Error uploading media: $e');
+      if (kDebugMode) {
+        print('Error uploading media: $e');
+      }
     }
   }
 }

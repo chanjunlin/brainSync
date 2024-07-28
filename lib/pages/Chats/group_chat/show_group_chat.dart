@@ -7,7 +7,6 @@ import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
 
 import '../../../const.dart';
-import '../../../services/auth_service.dart';
 import '../../../services/database_service.dart';
 import '../../../services/navigation_service.dart';
 
@@ -21,7 +20,6 @@ class ShowGroupChat extends StatefulWidget {
 class _ShowGroupChatState extends State<ShowGroupChat> {
   final GetIt _getIt = GetIt.instance;
 
-  late AuthService _authService;
   late DatabaseService _databaseService;
   late NavigationService _navigationService;
 
@@ -38,7 +36,6 @@ class _ShowGroupChatState extends State<ShowGroupChat> {
   @override
   void initState() {
     super.initState();
-    _authService = _getIt.get<AuthService>();
     _databaseService = _getIt.get<DatabaseService>();
     _navigationService = _getIt.get<NavigationService>();
     loadedProfile = loadProfile();
@@ -89,7 +86,7 @@ class _ShowGroupChatState extends State<ShowGroupChat> {
                           String groupName = chatDetails.get("groupName");
                           String groupPicture =
                               chatDetails.get("groupPicture") ??
-                                  PLACEHOLDER_PFP;
+                                  placeholderPFP;
                           return ListTile(
                             leading: CircleAvatar(
                               radius: 20,
