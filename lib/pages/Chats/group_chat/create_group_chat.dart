@@ -77,7 +77,11 @@ class GroupChatCreationState extends State<GroupChatCreation> {
       _navigationService.push(
         MaterialPageRoute(
           builder: (context) {
-            return GroupChatPage(groupID: groupId, groupName: groupName);
+            return GroupChatPage(
+              groupID: groupId,
+              groupName: groupName,
+              groupPicture: PLACEHOLDER_PFP,
+            );
           },
         ),
       );

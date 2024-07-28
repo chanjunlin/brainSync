@@ -11,6 +11,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
+import '../../../const.dart';
 import '../../../model/group_chat.dart';
 import '../../../services/auth_service.dart';
 import '../../../services/media_service.dart';
@@ -20,11 +21,13 @@ import 'group_chat_details.dart';
 class GroupChatPage extends StatefulWidget {
   final String groupID;
   final String groupName;
+  final String groupPicture;
 
   const GroupChatPage({
     super.key,
     required this.groupID,
     required this.groupName,
+    required this.groupPicture,
   });
 
   @override
@@ -160,6 +163,10 @@ class _GroupChatPageState extends State<GroupChatPage> {
       padding: const EdgeInsets.only(right: 8.0, top: 4.0, bottom: 4.0),
       child: Row(
         children: [
+          CircleAvatar(
+            radius: 24,
+            backgroundImage: NetworkImage(widget.groupPicture ?? PLACEHOLDER_PFP),
+          ),
           const SizedBox(width: 16),
           Expanded(
             child: Column(

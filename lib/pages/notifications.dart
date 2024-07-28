@@ -55,6 +55,7 @@ class _NotificationsState extends State<Notifications> {
         backgroundColor: Colors.brown[300],
         foregroundColor: Colors.white,
         title: const Text('Notifications'),
+        centerTitle: true,
       ),
       body: buildNotifications(),
       bottomNavigationBar: const CustomBottomNavBar(initialIndex: 3),

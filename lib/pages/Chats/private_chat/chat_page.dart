@@ -44,7 +44,6 @@ class _ChatPageState extends State<ChatPage> {
   @override
   void initState() {
     super.initState();
-    print(widget.chatUser.uid);
     _initializeServices();
     _initializeUsers();
   }
@@ -81,7 +80,7 @@ class _ChatPageState extends State<ChatPage> {
 
   Widget header() {
     return Padding(
-      padding: const EdgeInsets.only(right: 8.0, top: 4.0, bottom: 4.0),
+      padding: const EdgeInsets.only(right: 5.0, top: 4.0, bottom: 10.0),
       child: GestureDetector(
           onTap: () {
             _navigationService.push(MaterialPageRoute(builder: (context) {
@@ -117,11 +116,6 @@ class _ChatPageState extends State<ChatPage> {
                     ),
                 ],
               ),
-            ),
-            IconButton(
-              icon: const Icon(Icons.more_vert, color: Colors.white),
-              onPressed: () {
-              },
             ),
           ],
         ),
@@ -183,7 +177,6 @@ class _ChatPageState extends State<ChatPage> {
           );
         }
       } else {
-        print('${currentUser!.id} ${otherUser.uid!}');
         Message message = Message(
           senderID: currentUser!.id,
           content: chatMessage.text.trim(),

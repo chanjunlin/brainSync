@@ -126,6 +126,7 @@ class _ShowGroupChatState extends State<ShowGroupChat> {
                                     return GroupChatPage(
                                       groupID: groupId,
                                       groupName: groupName,
+                                      groupPicture: groupPicture,
                                     );
                                   },
                                 ),

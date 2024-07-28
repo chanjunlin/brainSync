@@ -30,8 +30,8 @@ class NavigationService {
     "/nusMods": (context) => const ModuleListPage(),
     "/saved": (context) => const BookmarkedPosts(),
     "/splashScreen": (context) => const SplashScreen(),
-    "/privateChat": (context) => PrivateChat(),
-    "/groupChat": (context) => GroupChatCreation(),
+    "/privateChat": (context) => const PrivateChat(),
+    "/groupChat": (context) => const GroupChatCreation(),
   };
 
   Map<String, Widget Function(BuildContext)> get routes {

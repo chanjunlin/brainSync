@@ -147,6 +147,7 @@ class _GroupChatDetailsState extends State<GroupChatDetails> {
                   return GroupChatPage(
                     groupID: groupID!,
                     groupName: groupName!,
+                    groupPicture: groupPicture!,
                   );
                 },
               ),
@@ -272,6 +273,7 @@ class _GroupChatDetailsState extends State<GroupChatDetails> {
         buildSectionHeader("Members"),
         if (members.isEmpty) ...[
           const Text("No members found"),
+          const SizedBox(height: 10),
           Center(
             child: TextButton.icon(
               onPressed: addPeople,
@@ -310,17 +312,21 @@ class _GroupChatDetailsState extends State<GroupChatDetails> {
                   ),
                   title: displayName,
                   subtitle: member["bio"] ?? 'No bio available',
-                  onTap: () {
-                    _navigationService.push(
-                      MaterialPageRoute(
-                        builder: (context) {
-                          return VisitProfile(
-                            userId: member['uid'] as String,
+                  onTap: displayName == "Me"
+                      ? () {
+                          _navigationService.pushName("/profile");
+                        }
+                      : () {
+                          _navigationService.push(
+                            MaterialPageRoute(
+                              builder: (context) {
+                                return VisitProfile(
+                                  userId: member['uid'] as String,
+                                );
+                              },
+                            ),
                           );
                         },
-                      ),
-                    );
-                  },
                 );
               },
             ),
@@ -381,17 +387,21 @@ class _GroupChatDetailsState extends State<GroupChatDetails> {
                   ),
                   title: displayName,
                   subtitle: admin["bio"] ?? 'No bio available',
-                  onTap: () {
-                    _navigationService.push(
-                      MaterialPageRoute(
-                        builder: (context) {
-                          return VisitProfile(
-                            userId: admin['uid'] as String,
+                  onTap: displayName == "Me"
+                      ? () {
+                          _navigationService.pushName("/profile");
+                        }
+                      : () {
+                          _navigationService.push(
+                            MaterialPageRoute(
+                              builder: (context) {
+                                return VisitProfile(
+                                  userId: admin['uid'] as String,
+                                );
+                              },
+                            ),
                           );
                         },
-                      ),
-                    );
-                  },
                 ),
                 if (admin["uid"] == createdBy)
                   Positioned(
