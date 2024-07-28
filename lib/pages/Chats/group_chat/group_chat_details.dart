@@ -303,7 +303,7 @@ class _GroupChatDetailsState extends State<GroupChatDetails> {
               itemBuilder: (context, index) {
                 var member = members[index];
                 String fullName =
-                    (member["firstName"] ?? '') + (member["lastName"] ?? '');
+                    (member["firstName"] ?? '') + " " + (member["lastName"] ?? '');
                 String displayName =
                     member["uid"] == _authService.currentUser!.uid
                         ? "Me"

@@ -148,8 +148,9 @@ class _EditGroupChatDetailsState extends State<EditGroupChatDetails>
         DocumentSnapshot? ownerProfile =
             await _databaseService.fetchUser(createdBy!);
         setState(() {
-          owner =
-              ownerProfile?.get("firstName") + ownerProfile?.get("lastName");
+          owner = ownerProfile?.get("firstName") +
+              " " +
+              ownerProfile?.get("lastName");
         });
       } else {
         _alertService.showToast(
@@ -271,8 +272,8 @@ class _EditGroupChatDetailsState extends State<EditGroupChatDetails>
 
   Widget buildMemberList() {
     members.sort((a, b) {
-      String fullNameA = (a["firstName"] ?? '') + (a["lastName"] ?? '');
-      String fullNameB = (b["firstName"] ?? '') + (b["lastName"] ?? '');
+      String fullNameA = (a["firstName"] ?? '') + " " + (a["lastName"] ?? '');
+      String fullNameB = (b["firstName"] ?? '') + " " + (b["lastName"] ?? '');
       return fullNameA.compareTo(fullNameB);
     });
 
@@ -297,7 +298,7 @@ class _EditGroupChatDetailsState extends State<EditGroupChatDetails>
           itemBuilder: (context, index) {
             var member = members[index];
             String fullName =
-                (member["firstName"] ?? '') + (member["lastName"] ?? '');
+                (member["firstName"] ?? '') + " " + (member["lastName"] ?? '');
             bool isAdmin = adminIDs.contains(member["uid"]);
             String displayName = member["uid"] == _authService.currentUser!.uid
                 ? "Me"
@@ -352,8 +353,8 @@ class _EditGroupChatDetailsState extends State<EditGroupChatDetails>
 
   Widget buildAdminList() {
     admins.sort((a, b) {
-      String fullNameA = (a["firstName"] ?? '') + (a["lastName"] ?? '');
-      String fullNameB = (b["firstName"] ?? '') + (b["lastName"] ?? '');
+      String fullNameA = (a["firstName"] ?? '') + " " + (a["lastName"] ?? '');
+      String fullNameB = (b["firstName"] ?? '') + " " + (b["lastName"] ?? '');
       return fullNameA.compareTo(fullNameB);
     });
 
@@ -385,7 +386,7 @@ class _EditGroupChatDetailsState extends State<EditGroupChatDetails>
           itemBuilder: (context, index) {
             var member = admins[index];
             String fullName =
-                (member["firstName"] ?? '') + (member["lastName"] ?? '');
+                (member["firstName"] ?? '') + " " + (member["lastName"] ?? '');
             bool isAdmin = adminIDs.contains(member["uid"]);
             bool isCreator = member["uid"] == createdBy;
             String displayName = member["uid"] == _authService.currentUser!.uid
