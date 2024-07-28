@@ -107,7 +107,7 @@ class ModuleListPageState extends State<ModuleListPage> {
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(80.0),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 15,),
             child: TextField(
               controller: searchController,
               onChanged: filterModules,
@@ -146,6 +146,7 @@ class ModuleListPageState extends State<ModuleListPage> {
       body: Column(
         children: [
           const Divider(height: 1, color: Colors.grey),
+          const SizedBox(height: 10),
           Expanded(
             child: Scrollbar(
               child: FutureBuilder<List<Module>>(

@@ -45,7 +45,8 @@ class _HomeState extends State<Home> with RouteAware {
   }
 
   Future<QuerySnapshot> fetchPosts() async {
-    final postsSnapshot = await FirebaseFirestore.instance.collection('posts').get();
+    final postsSnapshot =
+        await FirebaseFirestore.instance.collection('posts').get();
     setState(() {
       allPosts = postsSnapshot.docs;
       filteredPosts = allPosts;
@@ -58,8 +59,9 @@ class _HomeState extends State<Home> with RouteAware {
     setState(() {
       filteredPosts = allPosts.where((post) {
         final title = post['title'].toString().toLowerCase();
-        return title.contains(query);
+        return query.isEmpty || title.startsWith(query);
       }).toList();
+      print(filteredPosts);
     });
   }
 
@@ -115,12 +117,13 @@ class _HomeState extends State<Home> with RouteAware {
                 prefixIcon: Icon(Icons.search, color: Colors.brown[300]),
                 suffixIcon: searchQuery.text.isNotEmpty
                     ? IconButton(
-                  icon: Icon(Icons.clear, color: Colors.brown[300]),
-                  onPressed: clearSearch,
-                )
+                        icon: Icon(Icons.clear, color: Colors.brown[300]),
+                        onPressed: clearSearch,
+                      )
                     : null,
                 contentPadding: EdgeInsets.symmetric(
-                    vertical: screenHeight * 0.02, horizontal: screenWidth * 0.04),
+                    vertical: screenHeight * 0.02,
+                    horizontal: screenWidth * 0.04),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(screenWidth * 0.05),
                   borderSide: const BorderSide(color: Colors.grey, width: 1.0),
@@ -131,7 +134,8 @@ class _HomeState extends State<Home> with RouteAware {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(screenWidth * 0.05),
-                  borderSide: BorderSide(color: Colors.brown.shade300, width: 2.0),
+                  borderSide:
+                      BorderSide(color: Colors.brown.shade300, width: 2.0),
                 ),
               ),
             ),
@@ -156,52 +160,50 @@ class _HomeState extends State<Home> with RouteAware {
               return timestampB.compareTo(timestampA);
             });
           }
-
           return AnimatedSwitcher(
             duration: const Duration(milliseconds: 500),
             transitionBuilder: (Widget child, Animation<double> animation) {
-              return FadeTransition(
-                opacity: animation,
-                child: SlideTransition(
-                  position: Tween<Offset>(
-                    begin: const Offset(1, 0),
-                    end: Offset.zero,
-                  ).animate(animation),
-                  child: child,
-                ),
+              final slideTransition = SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(0, 1),
+                  end: Offset.zero,
+                ).animate(animation),
+                child: child,
               );
+              return slideTransition;
             },
             child: filteredPosts.isEmpty
                 ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Image.asset(
-                    "assets/img/magnifying_glass_brain.png",
-                    width: screenWidth * 0.5,
-                    height: screenHeight * 0.3,
-                  ),
-                  Text(
-                    'No posts found',
-                    style: TextStyle(
-                      fontSize: screenWidth * 0.05,
-                      color: Colors.brown[700],
+                    key: const ValueKey('empty'),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Image.asset(
+                          "assets/img/magnifying_glass_brain.png",
+                          width: screenWidth * 0.5,
+                          height: screenHeight * 0.3,
+                        ),
+                        Text(
+                          'No posts found',
+                          style: TextStyle(
+                            fontSize: screenWidth * 0.05,
+                            color: Colors.brown[700],
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                ],
-              ),
-            )
+                  )
                 : ListView.builder(
-              key: ValueKey(filteredPosts.length),
-              itemCount: filteredPosts.length,
-              itemBuilder: (context, index) {
-                DocumentSnapshot post = filteredPosts[index];
-                return HomePostCard(
-                  postId: post.id,
-                );
-              },
-            ),
+                    key: ValueKey(filteredPosts.length),
+                    itemCount: filteredPosts.length,
+                    itemBuilder: (context, index) {
+                      DocumentSnapshot post = filteredPosts[index];
+                      return HomePostCard(
+                        postId: post.id,
+                      );
+                    },
+                  ),
           );
         },
       ),
