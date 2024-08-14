@@ -284,20 +284,6 @@ class PostDetailPageState extends State<PostDetailPage> {
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.end,
                                     children: [
-                                      TextButton.icon(
-                                        icon: Icon(
-                                          Icons.reply,
-                                          color: Colors.brown[300],
-                                        ),
-                                        label: Text(
-                                          'Reply',
-                                          style: TextStyle(
-                                            color: Colors.black,
-                                            fontSize: isLargeScreen ? 16 : 14,
-                                          ),
-                                        ),
-                                        onPressed: () {},
-                                      ),
                                       IconButton(
                                         icon: Icon(
                                           isLiked

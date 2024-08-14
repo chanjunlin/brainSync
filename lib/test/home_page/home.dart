@@ -56,7 +56,7 @@ void main() {
         initialRoute: '/',
         routes: {
           '/': (context) => const Scaffold(body: Home()),
-          '/post': (context) => const PostsPage(), // Ensure ChatPage is your chat screen
+          '/post': (context) => const PostsPage(),
         },
       ));
 

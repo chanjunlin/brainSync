@@ -60,7 +60,6 @@ class MockDatabaseService extends Mock implements DatabaseService {
   }
 }
 
-// ignore: subtype_of_sealed_class
 class MockDocumentSnapshot extends Mock implements DocumentSnapshot {
   final Map<String, dynamic> _data;
 

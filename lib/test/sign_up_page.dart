@@ -14,7 +14,7 @@ class MockAlertService extends Mock implements AlertService {}
 class MockAuthService extends Mock implements AuthService {
   @override
   Future<String> register(String name, String password, String email) async {
-    return "true"; // Example of a mocked successful registration
+    return "true";
   }
 }
 

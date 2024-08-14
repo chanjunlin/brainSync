@@ -71,7 +71,7 @@ void main() {
       expect(googlebutton, findsOneWidget);
 
       when(authService.login('wuchenfeng0214@gmail.com', 'Palkia123!'))
-          .thenAnswer((_) async => true); //using this account as an example
+          .thenAnswer((_) async => true);
 
       await tester.enterText(emailField, 'wuchenfeng0214@gmail.com');
       await tester.enterText(passwordField, 'Palkia123!');
